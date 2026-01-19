@@ -295,7 +295,7 @@
     },
     "system_info": {
       "type": "local",
-      "command": ["uv", "run", "script/system-info-mcp.py"]
+      "command": ["uv", "run", "https://github.com/Chikage0o0/opencode/raw/refs/heads/main/script/system-info-mcp.py"]
     }
   },
   "permission": {
