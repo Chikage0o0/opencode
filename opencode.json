@@ -35,23 +35,7 @@
           "options": {
             "temperature": 0.1,
             "thinking": {
-              "type": "disabled"
-            }
-          },
-          "variants": {
-            "thinking": {
-              "thinking": {
-                "type": "enabled"
-              }
-            },
-            "low": {
-              "disabled": true
-            },
-            "medium": {
-              "disabled": true
-            },
-            "high": {
-              "disabled": true
+              "type": "enabled"
             }
           }
         }
