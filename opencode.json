@@ -1,0 +1,367 @@
+{
+  "theme": "one-dark",
+  "plugin": [
+    "opencode-google-antigravity-auth"
+  ],
+  "autoupdate": true,
+  "enabled_providers": [
+    "google",
+    "zhipuai-coding-plan",
+    "xiaomi",
+    "volcengine"
+  ],
+  "agent": {
+    "title": {
+      "prompt": "你是一个专门负责总结对话标题的助手。请根据提供的对话内容，生成一个简短、准确且具有描述性的中文标题。要求：1. 不超过10个字；2. 避免使用“关于”、“总结”等废话；3. 直接输出标题内容。",
+      "options": {},
+      "permission": {}
+    }
+  },
+  "provider": {
+    "volcengine": {
+      "name": "火山引擎模型",
+      "npm": "@ai-sdk/openai-compatible",
+      "models": {
+        "ark-code-latest": {
+          "id": "ark-code-latest",
+          "name": "Ark Code",
+          "reasoning": true,
+          "limit": {
+            "context": 262144,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "options": {
+            "temperature": 0.1,
+            "thinking": {
+              "type": "disabled"
+            }
+          },
+          "variants": {
+            "thinking": {
+              "thinking": {
+                "type": "enabled"
+              }
+            },
+            "low": {
+              "disabled": true
+            },
+            "medium": {
+              "disabled": true
+            },
+            "high": {
+              "disabled": true
+            }
+          }
+        }
+      },
+      "options": {
+        "baseURL": "https://ark.cn-beijing.volces.com/api/coding/v3"
+      }
+    },
+    "xiaomi": {
+      "name": "小米模型",
+      "npm": "@ai-sdk/openai-compatible",
+      "models": {
+        "mimo-v2-flash": {
+          "id": "mimo-v2-flash",
+          "name": "Mimo V2 Flash",
+          "reasoning": false,
+          "cost": {
+            "input": 0.1,
+            "output": 0.3,
+            "cache_read": 0.01
+          },
+          "limit": {
+            "context": 262144,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "options": {
+            "temperature": 0.1
+          }
+        }
+      },
+      "whitelist": [
+        "mimo-v2-flash"
+      ],
+      "options": {
+        "baseURL": "https://api.xiaomimimo.com/v1"
+      }
+    },
+    "google": {
+      "npm": "@ai-sdk/google",
+      "models": {
+        "gemini-3-pro-preview": {
+          "id": "gemini-3-pro-preview",
+          "name": "Gemini 3 Pro",
+          "release_date": "2025-11-18",
+          "reasoning": true,
+          "cost": {
+            "input": 2,
+            "output": 12,
+            "cache_read": 0.2
+          },
+          "limit": {
+            "context": 1000000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "video",
+              "audio",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "variants": {
+            "low": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingLevel": "low",
+                  "includeThoughts": true
+                }
+              }
+            },
+            "medium": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingLevel": "medium",
+                  "includeThoughts": true
+                }
+              }
+            },
+            "high": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingLevel": "high",
+                  "includeThoughts": true
+                }
+              }
+            }
+          }
+        },
+        "gemini-3-flash": {
+          "id": "gemini-3-flash",
+          "name": "Gemini 3 Flash",
+          "release_date": "2025-12-17",
+          "reasoning": true,
+          "cost": {
+            "input": 0.5,
+            "output": 3,
+            "cache_read": 0.05
+          },
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "video",
+              "audio",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "variants": {
+            "minimal": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingLevel": "minimal",
+                  "includeThoughts": true
+                }
+              }
+            },
+            "low": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingLevel": "low",
+                  "includeThoughts": true
+                }
+              }
+            },
+            "medium": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingLevel": "medium",
+                  "includeThoughts": true
+                }
+              }
+            },
+            "high": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingLevel": "high",
+                  "includeThoughts": true
+                }
+              }
+            }
+          }
+        },
+        "gemini-claude-sonnet-4-5-thinking": {
+          "id": "gemini-claude-sonnet-4-5-thinking",
+          "name": "Claude Sonnet 4.5",
+          "reasoning": true,
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "variants": {
+            "none": {
+              "reasoning": false,
+              "options": {
+                "thinkingConfig": {
+                  "includeThoughts": false
+                }
+              }
+            },
+            "low": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingBudget": 4000,
+                  "includeThoughts": true
+                }
+              }
+            },
+            "medium": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingBudget": 16000,
+                  "includeThoughts": true
+                }
+              }
+            },
+            "high": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingBudget": 32000,
+                  "includeThoughts": true
+                }
+              }
+            }
+          }
+        },
+        "gemini-claude-opus-4-5-thinking": {
+          "id": "gemini-claude-opus-4-5-thinking",
+          "name": "Claude Opus 4.5",
+          "release_date": "2025-11-24",
+          "reasoning": true,
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "variants": {
+            "low": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingBudget": 4000,
+                  "includeThoughts": true
+                }
+              }
+            },
+            "medium": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingBudget": 16000,
+                  "includeThoughts": true
+                }
+              }
+            },
+            "high": {
+              "options": {
+                "thinkingConfig": {
+                  "thinkingBudget": 32000,
+                  "includeThoughts": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "whitelist": [
+        "gemini-3-pro-preview",
+        "gemini-3-flash",
+        "gemini-claude-sonnet-4-5-thinking",
+        "gemini-claude-opus-4-5-thinking"
+      ]
+    }
+  },
+  "mcp": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp"
+    }
+  },
+  "permission": {
+    "bash": {
+      "*": "ask",
+      "git status*": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "npm *": "allow",
+      "rm *": "ask",
+      "ls": "allow",
+      "dir": "allow",
+      "type *": "allow",
+      "whoami": "allow",
+      "pwd": "allow"
+    },
+    "read": {
+      ".env": "deny",
+      ".env.*": "deny",
+      ".envrc": "deny",
+      "secrets/**": "deny",
+      "config/credentials.json": "deny",
+      "mise.local.toml": "deny",
+      ".direnv/**": "deny",
+      "devenv.local.nix": "deny",
+      "build": "deny"
+    },
+    "edit": {
+      "*": "ask"
+    }
+  },
+  "$schema": "https://opencode.ai/config.json"
+}
