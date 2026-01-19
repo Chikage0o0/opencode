@@ -1,4 +1,7 @@
 {
+  "keybinds": {
+    "command_list": "<leader>p"
+  },
   "theme": "one-dark",
   "plugin": ["opencode-google-antigravity-auth"],
   "autoupdate": true,
@@ -25,8 +28,8 @@
           "name": "Ark Code",
           "reasoning": true,
           "limit": {
-            "context": 262144,
-            "output": 65536
+            "context": 204800,
+            "output": 128000
           },
           "modalities": {
             "input": ["text"],
