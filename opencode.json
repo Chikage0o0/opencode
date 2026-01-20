@@ -3,7 +3,9 @@
     "command_list": "<leader>p"
   },
   "theme": "one-dark",
-  "plugin": ["opencode-google-antigravity-auth"],
+  "plugin": [
+    "opencode-google-antigravity-auth"
+  ],
   "autoupdate": true,
   "enabled_providers": [
     "google",
@@ -32,15 +34,20 @@
             "output": 128000
           },
           "modalities": {
-            "input": ["text"],
-            "output": ["text"]
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "options": {
             "temperature": 0.1,
             "thinking": {
               "type": "enabled"
             }
-          }
+          },
+          "interleaved": true
         }
       },
       "options": {
@@ -54,7 +61,7 @@
         "mimo-v2-flash": {
           "id": "mimo-v2-flash",
           "name": "Mimo V2 Flash",
-          "reasoning": false,
+          "reasoning": true,
           "cost": {
             "input": 0.1,
             "output": 0.3,
@@ -65,15 +72,27 @@
             "output": 65536
           },
           "modalities": {
-            "input": ["text"],
-            "output": ["text"]
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "options": {
-            "temperature": 0.1
+            "temperature": 0.3,
+            "thinking": {
+              "type": "enabled"
+            }
+          },
+          "interleaved": {
+            "field": "reasoning_content"
           }
         }
       },
-      "whitelist": ["mimo-v2-flash"],
+      "whitelist": [
+        "mimo-v2-flash"
+      ],
       "options": {
         "baseURL": "https://api.xiaomimimo.com/v1"
       }
@@ -96,8 +115,16 @@
             "output": 64000
           },
           "modalities": {
-            "input": ["text", "image", "video", "audio", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "video",
+              "audio",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "low": {
@@ -141,8 +168,16 @@
             "output": 65536
           },
           "modalities": {
-            "input": ["text", "image", "video", "audio", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "video",
+              "audio",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "minimal": {
@@ -188,8 +223,14 @@
             "output": 64000
           },
           "modalities": {
-            "input": ["text", "image", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "none": {
@@ -236,8 +277,14 @@
             "output": 64000
           },
           "modalities": {
-            "input": ["text", "image", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "low": {
@@ -282,7 +329,11 @@
     },
     "system_info": {
       "type": "local",
-      "command": ["uv", "run", "https://github.com/Chikage0o0/opencode/raw/refs/heads/main/script/system-info-mcp.py"]
+      "command": [
+        "uv",
+        "run",
+        "https://github.com/Chikage0o0/opencode/raw/refs/heads/main/script/system-info-mcp.py"
+      ]
     }
   },
   "permission": {
