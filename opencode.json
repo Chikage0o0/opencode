@@ -21,13 +21,13 @@
     }
   },
   "provider": {
-    "volcengine": {
-      "name": "火山引擎模型",
+    "zhipuai-coding-plan": {
+      "name": "智谱编程计划",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "ark-code-latest": {
-          "id": "ark-code-latest",
-          "name": "Ark Code",
+        "glm-4.7": {
+          "id": "glm-4.7",
+          "name": "GLM 4.7",
           "reasoning": true,
           "limit": {
             "context": 204800,
@@ -45,13 +45,16 @@
             "temperature": 0.1,
             "thinking": {
               "type": "enabled"
-            }
+            },
+            "top_p": 0.8
           },
-          "interleaved": true
+          "interleaved": {
+            "field": "reasoning_content"
+          }
         }
       },
       "options": {
-        "baseURL": "https://ark.cn-beijing.volces.com/api/coding/v3"
+        "baseURL": "https://open.bigmodel.cn/api/coding/paas/v4"
       }
     },
     "xiaomi": {
@@ -80,10 +83,11 @@
             ]
           },
           "options": {
-            "temperature": 0.3,
+            "temperature": 0.1,
             "thinking": {
               "type": "enabled"
-            }
+            },
+            "top_p": 0.8
           },
           "interleaved": {
             "field": "reasoning_content"

@@ -19,7 +19,6 @@ def get_system_info() -> str:
     """获取当前系统的详细信息，包括 OS 类型、内核版本和发行版。"""
     system = platform.system()
     release = platform.release()
-    python_version = sys.version.split()[0]
 
     distro = "Unknown"
     if system == "Linux":
@@ -39,7 +38,7 @@ def get_system_info() -> str:
         except Exception:
             pass
 
-    return f"操作系统: {system}\n内核版本: {release}\nPython 版本: {python_version}"
+    return f"操作系统: {system}\n内核版本: {release}\n"
 
 
 if __name__ == "__main__":
