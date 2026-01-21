@@ -11,7 +11,7 @@
     "google",
     "zhipuai-coding-plan",
     "xiaomi",
-    "volcengine"
+    "nvidia",
   ],
   "agent": {
     "title": {
@@ -53,8 +53,74 @@
           }
         }
       },
+      "whitelist": [
+        "glm-4.7"
+      ],
       "options": {
         "baseURL": "https://open.bigmodel.cn/api/coding/paas/v4"
+      }
+    },
+    "nvidia": {
+      "name": "NVIDIA",
+      "npm": "@ai-sdk/openai-compatible",
+      "models": {
+        "z-ai/glm4.7": {
+          "id": "z-ai/glm4.7",
+          "name": "GLM 4.7",
+          "reasoning": true,
+          "limit": {
+            "context": 204800,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "options": {
+            "temperature": 0.1,
+            "reasoning_effort": "medium",
+            "top_p": 0.8
+          },
+          "interleaved": {
+            "field": "reasoning_content"
+          }
+        },
+        "minimaxai/minimax-m2.1":{
+          "id":"minimaxai/minimax-m2.1",
+          "name": "Minimax M2.1",
+          "reasoning": true,
+          "limit": {
+            "context": 204800,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "options": {
+            "temperature": 0.1,
+            "reasoning_effort": "medium",
+            "top_p": 0.8
+          },
+          "interleaved": {
+            "field": "reasoning_content"
+          }
+        }
+      },
+      "whitelist": [
+        "z-ai/glm4.7",
+        "minimaxai/minimax-m2.1"
+      ],
+      "options": {
+        "baseURL": "https://integrate.api.nvidia.com/v1"
       }
     },
     "xiaomi": {
