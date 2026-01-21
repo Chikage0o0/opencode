@@ -412,6 +412,7 @@
       "*": "ask",
       "grep *": "allow",
       "find *": "allow",
+      "ls *": "allow",
       "git status*": "allow",
       "git diff*": "allow",
       "git log*": "allow",
