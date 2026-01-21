@@ -42,11 +42,11 @@
             ]
           },
           "options": {
-            "temperature": 0.1,
+            "temperature": 1.0,
             "thinking": {
               "type": "enabled"
             },
-            "top_p": 0.8
+            "top_p": 0.95
           },
           "interleaved": {
             "field": "reasoning_content"
@@ -81,16 +81,16 @@
             ]
           },
           "options": {
-            "temperature": 0.1,
+            "temperature": 1.0,
             "reasoning_effort": "medium",
-            "top_p": 0.8
+            "top_p": 0.95
           },
           "interleaved": {
             "field": "reasoning_content"
           }
         },
-        "minimaxai/minimax-m2.1":{
-          "id":"minimaxai/minimax-m2.1",
+        "minimaxai/minimax-m2.1": {
+          "id": "minimaxai/minimax-m2.1",
           "name": "Minimax M2.1",
           "reasoning": true,
           "limit": {
@@ -106,9 +106,10 @@
             ]
           },
           "options": {
-            "temperature": 0.1,
+            "temperature": 1.0,
             "reasoning_effort": "medium",
-            "top_p": 0.8
+            "top_p": 0.95,
+            "top_k": 40
           },
           "interleaved": {
             "field": "reasoning_content"
@@ -149,11 +150,11 @@
             ]
           },
           "options": {
-            "temperature": 0.1,
+            "temperature": 0.3,
             "thinking": {
               "type": "enabled"
             },
-            "top_p": 0.8
+            "top_p": 0.95
           },
           "interleaved": {
             "field": "reasoning_content"
@@ -409,6 +410,8 @@
   "permission": {
     "bash": {
       "*": "ask",
+      "grep *": "allow",
+      "find *": "allow",
       "git status*": "allow",
       "git diff*": "allow",
       "git log*": "allow",
