@@ -7,7 +7,6 @@
 
 from mcp.server.fastmcp import FastMCP
 import platform
-import sys
 import os
 
 # 创建 MCP 实例

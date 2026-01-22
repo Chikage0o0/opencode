@@ -11,7 +11,8 @@
     "google",
     "zhipuai-coding-plan",
     "xiaomi",
-    "nvidia"
+    "nvidia",
+    "minimaxai"
   ],
   "agent": {
     "title": {
@@ -58,6 +59,41 @@
       ],
       "options": {
         "baseURL": "https://open.bigmodel.cn/api/coding/paas/v4"
+      }
+    },
+    "minimaxai": {
+      "name": "Minimax",
+      "npm": "@ai-sdk/anthropic",
+      "models": {
+        "MiniMax-M2.1": {
+          "id": "MiniMax-M2.1",
+          "name": "Minimax M2.1",
+          "reasoning": true,
+          "limit": {
+            "context": 204800,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
+          },
+          "options": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "top_k": 40,
+          },
+          "interleaved": true
+        }
+      },
+      "whitelist": [
+        "MiniMax-M2.1"
+      ],
+      "options": {
+        "baseURL": "https://api.minimaxi.com/anthropic/v1"
       }
     },
     "nvidia": {
