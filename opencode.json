@@ -454,6 +454,8 @@
       "git log*": "allow",
       "npm *": "allow",
       "rm *": "ask",
+      "rm commit.msg": "allow",
+      "del commit.msg": "allow",
       "ls": "allow",
       "dir": "allow",
       "type *": "allow",
@@ -472,7 +474,8 @@
       "build": "deny"
     },
     "edit": {
-      "*": "ask"
+      "*": "ask",
+      "commit.msg": "allow"
     }
   },
   "$schema": "https://opencode.ai/config.json"
