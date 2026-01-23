@@ -456,6 +456,7 @@
       "rm *": "ask",
       "rm commit.msg": "allow",
       "del commit.msg": "allow",
+      "cargo check*": "allow",
       "ls": "allow",
       "dir": "allow",
       "type *": "allow",
