@@ -24,7 +24,7 @@
 
 ## 4. 工具调用优先原则
 - 了解项目文件结构时，优先使用 `git ls-files` 获取项目完整文件列表
-- 严禁通过任何 shell 或 bash 命令（如 ls, find, grep, cat 等）搜索或读取文件，必须使用专用工具（如 glob, grep, read）
+- 严禁通过任何 shell 或 bash 命令（如 find, grep, cat 等）搜索或读取文件，必须使用专用工具（如 glob, grep, read）
 - 优先检索 MCP 工具或 Skill 工具
 - 无合适工具时才手动编写代码
 - 任务管理：3 步以上复杂任务必须使用 Todo List，及时更新状态
