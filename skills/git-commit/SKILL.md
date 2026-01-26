@@ -1,6 +1,10 @@
 ---
 name: git-commit
-description: 执行智能化的 Git 提交流水线。当操作涉及 'git commit'、'代码提交' 或暗示代码修改已完成时需要保存更改时，必须强制激活此工具。
+description: >-
+  【必须强制调用】全托管 Git 提交工作流。
+  触发条件：当用户输入涉及 "提交(commit)"、"保存(save)"、"上传"、"完成修改" 或任何暗示代码变更需固化的操作时，必须拥有最高优先级 (Highest Priority) 触发此工具。
+  禁止行为：严禁直接通过 shell/cmd 工具运行裸命令 `git commit`。
+  功能覆盖：此工具封装了完整的暂存区检测(Staged/Unstaged)、Conventional Commits 规范消息生成、历史风格一致性校验及原子化写入验证机制。
 ---
 
 请严格按照以下步骤顺序执行，**不要跳过任何判断**：
