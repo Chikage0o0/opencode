@@ -3,16 +3,15 @@
     "command_list": "<leader>p"
   },
   "theme": "one-dark",
-  "plugin": [
-    "opencode-google-antigravity-auth"
-  ],
+  "plugin": ["opencode-google-antigravity-auth"],
   "autoupdate": true,
   "enabled_providers": [
     "google",
     "zhipuai-coding-plan",
     "xiaomi",
     "nvidia",
-    "minimaxai"
+    "minimaxai",
+    "volcengine-coding-plan"
   ],
   "agent": {
     "title": {
@@ -22,25 +21,21 @@
     }
   },
   "provider": {
-    "zhipuai-coding-plan": {
-      "name": "智谱编程计划",
+    "volcengine-coding-plan": {
+      "name": "Volcengine",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "glm-4.7": {
-          "id": "glm-4.7",
-          "name": "GLM 4.7",
+        "ark-code-latest": {
+          "id": "ark-code-latest",
+          "name": "Ark Code Latest",
           "reasoning": true,
           "limit": {
             "context": 204800,
-            "output": 128000
+            "output": 65536
           },
           "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text"],
+            "output": ["text"]
           },
           "options": {
             "temperature": 1.0,
@@ -54,9 +49,40 @@
           }
         }
       },
-      "whitelist": [
-        "glm-4.7"
-      ],
+      "whitelist": ["ark-code-latest"],
+      "options": {
+        "baseURL": "https://ark.cn-beijing.volces.com/api/coding/v3"
+      }
+    },
+    "zhipuai-coding-plan": {
+      "name": "智谱编程计划",
+      "npm": "@ai-sdk/openai-compatible",
+      "models": {
+        "glm-4.7": {
+          "id": "glm-4.7",
+          "name": "GLM 4.7",
+          "reasoning": true,
+          "limit": {
+            "context": 204800,
+            "output": 128000
+          },
+          "modalities": {
+            "input": ["text"],
+            "output": ["text"]
+          },
+          "options": {
+            "temperature": 1.0,
+            "thinking": {
+              "type": "enabled"
+            },
+            "top_p": 0.95
+          },
+          "interleaved": {
+            "field": "reasoning_content"
+          }
+        }
+      },
+      "whitelist": ["glm-4.7"],
       "options": {
         "baseURL": "https://open.bigmodel.cn/api/coding/paas/v4"
       }
@@ -74,12 +100,8 @@
             "output": 65536
           },
           "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text"],
+            "output": ["text"]
           },
           "options": {
             "temperature": 1.0,
@@ -89,9 +111,7 @@
           "interleaved": true
         }
       },
-      "whitelist": [
-        "MiniMax-M2.1"
-      ],
+      "whitelist": ["MiniMax-M2.1"],
       "options": {
         "baseURL": "https://api.minimaxi.com/anthropic/v1"
       }
@@ -109,12 +129,8 @@
             "output": 65536
           },
           "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text"],
+            "output": ["text"]
           },
           "options": {
             "temperature": 1.0,
@@ -134,12 +150,8 @@
             "output": 65536
           },
           "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text"],
+            "output": ["text"]
           },
           "options": {
             "temperature": 1.0,
@@ -152,10 +164,7 @@
           }
         }
       },
-      "whitelist": [
-        "z-ai/glm4.7",
-        "minimaxai/minimax-m2.1"
-      ],
+      "whitelist": ["z-ai/glm4.7", "minimaxai/minimax-m2.1"],
       "options": {
         "baseURL": "https://integrate.api.nvidia.com/v1"
       }
@@ -178,12 +187,8 @@
             "output": 65536
           },
           "modalities": {
-            "input": [
-              "text"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text"],
+            "output": ["text"]
           },
           "options": {
             "temperature": 1.0,
@@ -197,9 +202,7 @@
           }
         }
       },
-      "whitelist": [
-        "mimo-v2-flash"
-      ],
+      "whitelist": ["mimo-v2-flash"],
       "options": {
         "baseURL": "https://api.xiaomimimo.com/v1"
       }
@@ -222,16 +225,8 @@
             "output": 64000
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "video",
-              "audio",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image", "video", "audio", "pdf"],
+            "output": ["text"]
           },
           "variants": {
             "low": {
@@ -275,16 +270,8 @@
             "output": 65536
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "video",
-              "audio",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image", "video", "audio", "pdf"],
+            "output": ["text"]
           },
           "variants": {
             "minimal": {
@@ -330,14 +317,8 @@
             "output": 64000
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image", "pdf"],
+            "output": ["text"]
           },
           "variants": {
             "none": {
@@ -384,14 +365,8 @@
             "output": 64000
           },
           "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
+            "input": ["text", "image", "pdf"],
+            "output": ["text"]
           },
           "variants": {
             "low": {
