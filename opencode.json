@@ -3,7 +3,7 @@
     "command_list": "<leader>p"
   },
   "theme": "one-dark",
-  "plugin": ["opencode-google-antigravity-auth"],
+  "plugin": ["opencode-google-antigravity-auth", "opencode-pty","@tarquinen/opencode-dcp@latest"],
   "autoupdate": true,
   "enabled_providers": [
     "google",

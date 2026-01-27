@@ -1,0 +1,65 @@
+{
+    "$schema": "https://raw.githubusercontent.com/Opencode-DCP/opencode-dynamic-context-pruning/master/dcp.schema.json",
+    // 启用或禁用插件
+    "enabled": true,
+    // 启用调试日志输出到 ~/.config/opencode/logs/dcp/
+    "debug": false,
+    // 通知显示："off"、"minimal" 或 "detailed"
+    "pruneNotification": "detailed",
+    // 斜杠命令配置
+    "commands": {
+        "enabled": true,
+        // 通过命令（如 /dcp sweep）保护不被剪裁的额外工具
+        "protectedTools": []
+    },
+    // 保护 <turns> 个消息回合不被剪裁
+    "turnProtection": {
+        "enabled": true,
+        "turns": 4
+    },
+    // 通过 glob 模式保护文件操作不被剪裁
+    // 模式匹配工具参数 filePath（例如 read/write/edit）
+    "protectedFilePatterns": [],
+    // LLM 驱动的上下文剪裁工具
+    "tools": {
+        // 所有剪裁工具的共享设置
+        "settings": {
+            // 提示 LLM 使用剪裁工具（每 <nudgeFrequency> 个工具结果）
+            "nudgeEnabled": true,
+            "nudgeFrequency": 10,
+            // 保护不被剪裁的额外工具
+            "protectedTools": []
+        },
+        // 从上下文中移除工具内容而不保留（用于已完成任务或噪音）
+        "discard": {
+            "enabled": true
+        },
+        // 在移除原始内容之前将关键发现提炼为保留知识
+        "extract": {
+            "enabled": true,
+            // 将提炼内容显示为被忽略的消息通知
+            "showDistillation": false
+        }
+    },
+    // 自动剪裁策略
+    "strategies": {
+        // 移除重复的工具调用（相同工具和参数）
+        "deduplication": {
+            "enabled": true,
+            // 保护不被剪裁的额外工具
+            "protectedTools": []
+        },
+        // 如果文件随后被读取，则剪裁写入工具的输入
+        "supersedeWrites": {
+            "enabled": true
+        },
+        // 在 X 个回合后剪裁出错工具的输入
+        "purgeErrors": {
+            "enabled": true,
+            // 出错工具输入被剪裁前的回合数
+            "turns": 4,
+            // 保护不被剪裁的额外工具
+            "protectedTools": []
+        }
+    }
+}
