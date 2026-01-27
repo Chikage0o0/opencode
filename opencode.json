@@ -191,7 +191,7 @@
             "output": ["text"]
           },
           "options": {
-            "temperature": 0.3,
+            "temperature": 1.0,
             "thinking": {
               "type": "enabled"
             },
