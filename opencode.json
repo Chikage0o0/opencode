@@ -27,11 +27,11 @@
       "models": {
         "ark-code-latest": {
           "id": "ark-code-latest",
-          "name": "Ark Code Latest",
+          "name": "DeepSeek v3.2",
           "reasoning": true,
           "limit": {
-            "context": 204800,
-            "output": 65536
+            "context": 128000,
+            "output": 32000
           },
           "modalities": {
             "input": ["text"],
