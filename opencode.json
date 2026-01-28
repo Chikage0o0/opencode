@@ -171,7 +171,7 @@
     },
     "xiaomi": {
       "name": "小米模型",
-      "npm": "@ai-sdk/openai-compatible",
+      "npm": "@ai-sdk/anthropic",
       "models": {
         "mimo-v2-flash": {
           "id": "mimo-v2-flash",
@@ -191,20 +191,19 @@
             "output": ["text"]
           },
           "options": {
-            "temperature": 1.0,
+            "temperature": 0.3,
             "thinking": {
-              "type": "enabled"
+              "type": "disabled",
+              "budgetTokens": 1000
             },
             "top_p": 0.95
           },
-          "interleaved": {
-            "field": "reasoning_content"
-          }
+          "interleaved": true
         }
       },
       "whitelist": ["mimo-v2-flash"],
       "options": {
-        "baseURL": "https://api.xiaomimimo.com/v1"
+        "baseURL": "https://api.xiaomimimo.com/anthropic/v1"
       }
     },
     "google": {
