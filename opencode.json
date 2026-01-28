@@ -3,7 +3,7 @@
     "command_list": "<leader>p"
   },
   "theme": "one-dark",
-  "plugin": ["opencode-google-antigravity-auth", "opencode-pty","@tarquinen/opencode-dcp@latest"],
+  "plugin": ["opencode-google-antigravity-auth","@tarquinen/opencode-dcp@latest"],
   "autoupdate": true,
   "enabled_providers": [
     "google",
@@ -428,6 +428,7 @@
       "git log*": "allow",
       "npm *": "allow",
       "rm *": "ask",
+      "git ls-files*": "allow",
       "rm commit.msg": "allow",
       "del commit.msg": "allow",
       "cargo check*": "allow",
