@@ -3,10 +3,7 @@
     "command_list": "<leader>p"
   },
   "theme": "one-dark",
-  "plugin": [
-    "opencode-google-antigravity-auth",
-    "@tarquinen/opencode-dcp"
-  ],
+  "plugin": ["opencode-google-antigravity-auth", "@tarquinen/opencode-dcp"],
   "small_model": "xiaomi/mimo-v2-flash",
   "autoupdate": true,
   "enabled_providers": [
@@ -60,6 +57,101 @@
       }
     },
     "anthropic": {
+      "name": "Anthropic",
+      "npm": "@ai-sdk/anthropic",
+      "models": {
+        "claude-opus-4-5-20251101": {
+          "id": "claude-opus-4-5-20251101",
+          "name": "Claude 4.5 Opus",
+          "reasoning": true,
+          "cost": {
+            "input": 7,
+            "output": 35,
+            "cache_write": 8.75,
+            "cache_read": 0.7
+          },
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": ["text", "image", "pdf"],
+            "output": ["text"]
+          },
+          "variants": {
+            "low": {
+              "options": {
+                "thinking": {
+                  "type": "enabled",
+                  "budgetTokens": 4000
+                }
+              }
+            },
+            "medium": {
+              "options": {
+                "thinking": {
+                  "type": "enabled",
+                  "budgetTokens": 16000
+                }
+              }
+            },
+            "high": {
+              "options": {
+                "thinking": {
+                  "type": "enabled",
+                  "budgetTokens": 32000
+                }
+              }
+            }
+          }
+        },
+        "claude-sonnet-4-5-20250929": {
+          "id": "claude-sonnet-4-5-20250929",
+          "name": "Claude 4.5 Sonnet",
+          "reasoning": true,
+          "cost": {
+            "input": 4.2,
+            "output": 21,
+            "cache_write": 5.25,
+            "cache_read": 0.42
+          },
+          "limit": {
+            "context": 200000,
+            "output": 64000
+          },
+          "modalities": {
+            "input": ["text", "image", "pdf"],
+            "output": ["text"]
+          },
+          "variants": {
+            "low": {
+              "options": {
+                "thinking": {
+                  "type": "enabled",
+                  "budgetTokens": 4000
+                }
+              }
+            },
+            "medium": {
+              "options": {
+                "thinking": {
+                  "type": "enabled",
+                  "budgetTokens": 16000
+                }
+              }
+            },
+            "high": {
+              "options": {
+                "thinking": {
+                  "type": "enabled",
+                  "budgetTokens": 32000
+                }
+              }
+            }
+          }
+        }
+      },
+      "whitelist": ["claude-opus-4-5-20251101", "claude-sonnet-4-5-20250929"],
       "options": {
         "baseURL": "https://api.aicodemirror.com/api/claudecode/v1"
       }
@@ -222,7 +314,7 @@
             "cache_read": 0.035
           },
           "limit": {
-            "context": 1048576,
+            "context": 1000000,
             "output": 65536
           },
           "modalities": {
@@ -485,6 +577,7 @@
     "bash": {
       "*": "ask",
       "grep *": "allow",
+      "rg *": "allow",
       "find *": "allow",
       "ls *": "allow",
       "git status*": "allow",
