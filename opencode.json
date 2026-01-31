@@ -3,7 +3,9 @@
     "command_list": "<leader>p"
   },
   "theme": "one-dark",
-  "plugin": ["opencode-antigravity-auth@beta", "@tarquinen/opencode-dcp@1.2.8"],
+  "plugin": [
+    "opencode-antigravity-auth@beta"
+  ],
   "small_model": "xiaomi/mimo-v2-flash",
   "autoupdate": true,
   "enabled_providers": [
@@ -36,8 +38,12 @@
             "output": 32000
           },
           "modalities": {
-            "input": ["text"],
-            "output": ["text"]
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "options": {
             "temperature": 1.0,
@@ -51,7 +57,9 @@
           }
         }
       },
-      "whitelist": ["ark-code-latest"],
+      "whitelist": [
+        "ark-code-latest"
+      ],
       "options": {
         "baseURL": "https://ark.cn-beijing.volces.com/api/coding/v3"
       }
@@ -75,8 +83,14 @@
             "output": 64000
           },
           "modalities": {
-            "input": ["text", "image", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "low": {
@@ -120,8 +134,14 @@
             "output": 64000
           },
           "modalities": {
-            "input": ["text", "image", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "low": {
@@ -151,7 +171,10 @@
           }
         }
       },
-      "whitelist": ["claude-opus-4-5-20251101", "claude-sonnet-4-5-20250929"],
+      "whitelist": [
+        "claude-opus-4-5-20251101",
+        "claude-sonnet-4-5-20250929"
+      ],
       "options": {
         "baseURL": "https://api.aicodemirror.com/api/claudecode/v1"
       }
@@ -169,8 +192,12 @@
             "output": 128000
           },
           "modalities": {
-            "input": ["text"],
-            "output": ["text"]
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "options": {
             "temperature": 1.0,
@@ -184,7 +211,9 @@
           }
         }
       },
-      "whitelist": ["glm-4.7"],
+      "whitelist": [
+        "glm-4.7"
+      ],
       "options": {
         "baseURL": "https://open.bigmodel.cn/api/coding/paas/v4"
       }
@@ -202,8 +231,12 @@
             "output": 65536
           },
           "modalities": {
-            "input": ["text"],
-            "output": ["text"]
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "options": {
             "temperature": 1.0,
@@ -213,7 +246,9 @@
           "interleaved": true
         }
       },
-      "whitelist": ["MiniMax-M2.1"],
+      "whitelist": [
+        "MiniMax-M2.1"
+      ],
       "options": {
         "baseURL": "https://api.minimaxi.com/anthropic/v1"
       }
@@ -236,8 +271,12 @@
             "output": 65536
           },
           "modalities": {
-            "input": ["text"],
-            "output": ["text"]
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "options": {
             "temperature": 0.3,
@@ -250,7 +289,9 @@
           "interleaved": true
         }
       },
-      "whitelist": ["mimo-v2-flash"],
+      "whitelist": [
+        "mimo-v2-flash"
+      ],
       "options": {
         "baseURL": "https://api.xiaomimimo.com/anthropic/v1"
       }
@@ -274,8 +315,16 @@
             "output": 64000
           },
           "modalities": {
-            "input": ["text", "image", "video", "audio", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "video",
+              "audio",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "low": {
@@ -318,8 +367,16 @@
             "output": 65536
           },
           "modalities": {
-            "input": ["text", "image", "video", "audio", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "video",
+              "audio",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "minimal": {
@@ -357,7 +414,10 @@
           }
         }
       },
-      "whitelist": ["gemini-3-pro-preview", "gemini-3-flash-preview"],
+      "whitelist": [
+        "gemini-3-pro-preview",
+        "gemini-3-flash-preview"
+      ],
       "options": {
         "baseURL": "https://api.aicodemirror.com/api/gemini"
       }
@@ -373,8 +433,16 @@
           },
           "reasoning": true,
           "modalities": {
-            "input": ["text", "image", "video", "audio", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "video",
+              "audio",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "low": {
@@ -417,8 +485,16 @@
           },
           "reasoning": true,
           "modalities": {
-            "input": ["text", "image", "video", "audio", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "video",
+              "audio",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "low": {
@@ -460,8 +536,14 @@
             "output": 64000
           },
           "modalities": {
-            "input": ["text", "image", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "low": {
@@ -506,8 +588,14 @@
             "output": 64000
           },
           "modalities": {
-            "input": ["text", "image", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "low": {
@@ -553,8 +641,16 @@
           },
           "reasoning": true,
           "modalities": {
-            "input": ["text", "image", "video", "audio", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "video",
+              "audio",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "low": {
@@ -597,8 +693,16 @@
           },
           "reasoning": true,
           "modalities": {
-            "input": ["text", "image", "video", "audio", "pdf"],
-            "output": ["text"]
+            "input": [
+              "text",
+              "image",
+              "video",
+              "audio",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
           },
           "variants": {
             "low": {
