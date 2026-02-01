@@ -31,10 +31,10 @@
       "models": {
         "ark-code-latest": {
           "id": "ark-code-latest",
-          "name": "DeepSeek v3.2",
+          "name": "Kimi-K2.5",
           "reasoning": true,
           "limit": {
-            "context": 128000,
+            "context": 256000,
             "output": 32000
           },
           "modalities": {
@@ -62,121 +62,6 @@
       ],
       "options": {
         "baseURL": "https://ark.cn-beijing.volces.com/api/coding/v3"
-      }
-    },
-    "anthropic": {
-      "name": "Anthropic",
-      "npm": "@ai-sdk/anthropic",
-      "models": {
-        "claude-opus-4-5-20251101": {
-          "id": "claude-opus-4-5-20251101",
-          "name": "Claude 4.5 Opus",
-          "reasoning": true,
-          "cost": {
-            "input": 7,
-            "output": 35,
-            "cache_write": 8.75,
-            "cache_read": 0.7
-          },
-          "limit": {
-            "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          },
-          "variants": {
-            "low": {
-              "options": {
-                "thinking": {
-                  "type": "enabled",
-                  "budgetTokens": 4000
-                }
-              }
-            },
-            "medium": {
-              "options": {
-                "thinking": {
-                  "type": "enabled",
-                  "budgetTokens": 16000
-                }
-              }
-            },
-            "high": {
-              "options": {
-                "thinking": {
-                  "type": "enabled",
-                  "budgetTokens": 32000
-                }
-              }
-            }
-          }
-        },
-        "claude-sonnet-4-5-20250929": {
-          "id": "claude-sonnet-4-5-20250929",
-          "name": "Claude 4.5 Sonnet",
-          "reasoning": true,
-          "cost": {
-            "input": 4.2,
-            "output": 21,
-            "cache_write": 5.25,
-            "cache_read": 0.42
-          },
-          "limit": {
-            "context": 200000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          },
-          "variants": {
-            "low": {
-              "options": {
-                "thinking": {
-                  "type": "enabled",
-                  "budgetTokens": 4000
-                }
-              }
-            },
-            "medium": {
-              "options": {
-                "thinking": {
-                  "type": "enabled",
-                  "budgetTokens": 16000
-                }
-              }
-            },
-            "high": {
-              "options": {
-                "thinking": {
-                  "type": "enabled",
-                  "budgetTokens": 32000
-                }
-              }
-            }
-          }
-        }
-      },
-      "whitelist": [
-        "claude-opus-4-5-20251101",
-        "claude-sonnet-4-5-20250929"
-      ],
-      "options": {
-        "baseURL": "https://api.aicodemirror.com/api/claudecode/v1"
       }
     },
     "zhipuai-coding-plan": {
@@ -630,110 +515,6 @@
           "options": {
             "thinkingConfig": {
               "includeThoughts": false
-            }
-          }
-        },
-        "gemini-3-flash-preview": {
-          "name": "Gemini 3 Flash Preview (Gemini CLI)",
-          "limit": {
-            "context": 1048576,
-            "output": 65536
-          },
-          "reasoning": true,
-          "modalities": {
-            "input": [
-              "text",
-              "image",
-              "video",
-              "audio",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          },
-          "variants": {
-            "low": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "low",
-                  "includeThoughts": true
-                }
-              }
-            },
-            "medium": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "medium",
-                  "includeThoughts": true
-                }
-              }
-            },
-            "high": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "high",
-                  "includeThoughts": true
-                }
-              }
-            }
-          },
-          "options": {
-            "thinkingConfig": {
-              "thinkingLevel": "minimal",
-              "includeThoughts": true
-            }
-          }
-        },
-        "gemini-3-pro-preview": {
-          "name": "Gemini 3 Pro Preview (Gemini CLI)",
-          "limit": {
-            "context": 1048576,
-            "output": 65535
-          },
-          "reasoning": true,
-          "modalities": {
-            "input": [
-              "text",
-              "image",
-              "video",
-              "audio",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          },
-          "variants": {
-            "low": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "low",
-                  "includeThoughts": true
-                }
-              }
-            },
-            "medium": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "medium",
-                  "includeThoughts": true
-                }
-              }
-            },
-            "high": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "high",
-                  "includeThoughts": true
-                }
-              }
-            }
-          },
-          "options": {
-            "thinkingConfig": {
-              "thinkingLevel": "medium",
-              "includeThoughts": true
             }
           }
         }
