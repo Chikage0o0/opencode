@@ -10,7 +10,6 @@
     "google",
     "zhipuai-coding-plan",
     "xiaomi",
-    "aiCodeMirrorGoogle",
     "anthropic",
     "minimaxai",
     "volcengine-coding-plan",
@@ -25,13 +24,6 @@
   },
 
   "provider": {
-    "openai": {
-      "whitelist": ["gpt-5.2"],
-      "options": {
-        "baseURL": "https://ai-relay.orthok.cn/v1",
-        "setCacheKey": true
-      }
-    },
     "volcengine-coding-plan": {
       "name": "Volcengine",
       "npm": "@ai-sdk/openai-compatible",
@@ -162,113 +154,6 @@
       "whitelist": ["mimo-v2-flash"],
       "options": {
         "baseURL": "https://api.xiaomimimo.com/anthropic/v1"
-      }
-    },
-    "aiCodeMirrorGoogle": {
-      "name": "AiCodeMirror-Google",
-      "npm": "@ai-sdk/google",
-      "models": {
-        "gemini-3-pro-preview": {
-          "id": "gemini-3-pro-preview",
-          "name": "Gemini 3 Pro",
-          "release_date": "2025-11-18",
-          "reasoning": true,
-          "cost": {
-            "input": 1.4,
-            "output": 8.4,
-            "cache_read": 0.14
-          },
-          "limit": {
-            "context": 1000000,
-            "output": 64000
-          },
-          "modalities": {
-            "input": ["text", "image", "video", "audio", "pdf"],
-            "output": ["text"]
-          },
-          "variants": {
-            "low": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "low",
-                  "includeThoughts": true
-                }
-              }
-            },
-            "medium": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "medium",
-                  "includeThoughts": true
-                }
-              }
-            },
-            "high": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "high",
-                  "includeThoughts": true
-                }
-              }
-            }
-          }
-        },
-        "gemini-3-flash-preview": {
-          "id": "gemini-3-flash-preview",
-          "name": "Gemini 3 Flash",
-          "reasoning": true,
-          "cost": {
-            "input": 0.35,
-            "output": 2.1,
-            "cache_read": 0.035
-          },
-          "limit": {
-            "context": 1000000,
-            "output": 65536
-          },
-          "modalities": {
-            "input": ["text", "image", "video", "audio", "pdf"],
-            "output": ["text"]
-          },
-          "variants": {
-            "minimal": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "minimal",
-                  "includeThoughts": true
-                }
-              }
-            },
-            "low": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "low",
-                  "includeThoughts": true
-                }
-              }
-            },
-            "medium": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "medium",
-                  "includeThoughts": true
-                }
-              }
-            },
-            "high": {
-              "options": {
-                "thinkingConfig": {
-                  "thinkingLevel": "high",
-                  "includeThoughts": true
-                }
-              }
-            }
-          }
-        }
-      },
-      "whitelist": ["gemini-3-pro-preview", "gemini-3-flash-preview"],
-      "options": {
-        "baseURL": "https://api.aicodemirror.com/api/gemini"
       }
     },
     "google": {
