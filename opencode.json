@@ -3,7 +3,7 @@
     "command_list": "<leader>p"
   },
   "theme": "one-dark",
-  "plugin": ["opencode-antigravity-auth@beta"],
+  "plugin": ["opencode-antigravity-auth@v1.4.6"],
   "small_model": "xiaomi/mimo-v2-flash",
   "autoupdate": true,
   "enabled_providers": [
@@ -293,8 +293,8 @@
             }
           }
         },
-        "antigravity-claude-opus-4-5-thinking": {
-          "name": "Claude Opus 4.5 Thinking (Antigravity)",
+        "antigravity-claude-opus-4-6-thinking": {
+          "name": "Claude Opus 4.6 Thinking (Antigravity)",
           "limit": {
             "context": 200000,
             "output": 64000
@@ -345,7 +345,7 @@
         "antigravity-gemini-3-flash",
         "antigravity-claude-sonnet-4-5",
         "antigravity-claude-sonnet-4-5-thinking",
-        "antigravity-claude-opus-4-5-thinking",
+        "antigravity-claude-opus-4-6-thinking",
         "gemini-3-flash-preview",
         "gemini-3-pro-preview"
       ]
