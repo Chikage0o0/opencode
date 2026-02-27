@@ -2,17 +2,8 @@
   "plugin": [
     "@tarquinen/opencode-dcp@latest"
   ],
-  "small_model": "xiaomi/mimo-v2-flash",
+  "small_model": "stepfun/step-3.5-flash",
   "autoupdate": true,
-  "enabled_providers": [
-    "google",
-    "zhipuai-coding-plan",
-    "xiaomi",
-    "anthropic",
-    "minimaxai",
-    "volcengine-coding-plan",
-    "openai"
-  ],
   "agent": {
     "title": {
       "prompt": "你是一个专门负责总结对话标题的助手。请根据提供的对话内容，生成一个简短、准确且具有描述性的中文标题。\n\n要求：\n1. 使用中文，长度不超过10个字\n2. 直接表达核心内容，避免使用“关于”、“总结”、“讨论”等冗余词汇\n3. 突出对话的主题或主要任务，如“代码审查”、“问题排查”、“功能实现”等\n4. 如果无法判断用户意图或对话内容不明确，返回“未命名对话”\n\n输出格式：直接输出标题内容，不要添加任何额外说明或标记。",
@@ -20,110 +11,14 @@
       "permission": {}
     }
   },
-
   "provider": {
-    "volcengine-coding-plan": {
-      "name": "Volcengine",
+    "stepfun": {
+      "name": "阶跃模型",
       "npm": "@ai-sdk/openai-compatible",
       "models": {
-        "ark-code-latest": {
-          "id": "ark-code-latest",
-          "name": "Kimi-K2.5",
-          "reasoning": true,
-          "limit": {
-            "context": 256000,
-            "output": 32000
-          },
-          "modalities": {
-            "input": ["text"],
-            "output": ["text"]
-          },
-          "options": {
-            "temperature": 1.0,
-            "thinking": {
-              "type": "enabled"
-            },
-            "top_p": 0.95
-          },
-          "interleaved": {
-            "field": "reasoning_content"
-          }
-        }
-      },
-      "whitelist": ["ark-code-latest"],
-      "options": {
-        "baseURL": "https://ark.cn-beijing.volces.com/api/coding/v3"
-      }
-    },
-    "zhipuai-coding-plan": {
-      "name": "智谱编程计划",
-      "npm": "@ai-sdk/openai-compatible",
-      "models": {
-        "glm-4.7": {
-          "id": "glm-4.7",
-          "name": "GLM 4.7",
-          "reasoning": true,
-          "limit": {
-            "context": 204800,
-            "output": 128000
-          },
-          "modalities": {
-            "input": ["text"],
-            "output": ["text"]
-          },
-          "options": {
-            "temperature": 1.0,
-            "thinking": {
-              "type": "enabled"
-            },
-            "top_p": 0.95
-          },
-          "interleaved": {
-            "field": "reasoning_content"
-          }
-        }
-      },
-      "whitelist": ["glm-4.7"],
-      "options": {
-        "baseURL": "https://open.bigmodel.cn/api/coding/paas/v4"
-      }
-    },
-    "minimaxai": {
-      "name": "Minimax",
-      "npm": "@ai-sdk/anthropic",
-      "models": {
-        "MiniMax-M2.1": {
-          "id": "MiniMax-M2.1",
-          "name": "Minimax M2.1",
-          "reasoning": true,
-          "limit": {
-            "context": 204800,
-            "output": 65536
-          },
-          "modalities": {
-            "input": ["text"],
-            "output": ["text"]
-          },
-          "options": {
-            "temperature": 1.0,
-            "top_p": 0.95,
-            "top_k": 40
-          },
-          "interleaved": true
-        }
-      },
-      "whitelist": ["MiniMax-M2.1"],
-      "options": {
-        "baseURL": "https://api.minimaxi.com/anthropic/v1"
-      }
-    },
-    "xiaomi": {
-      "name": "小米模型",
-      "npm": "@ai-sdk/anthropic",
-      "models": {
-        "mimo-v2-flash": {
-          "id": "mimo-v2-flash",
-          "name": "Mimo V2 Flash",
+        "step-3.5-flash": {
+          "id": "step-3.5-flash",
+          "name": "Step 3.5 Flash",
           "reasoning": true,
           "cost": {
             "input": 0.1,
@@ -131,27 +26,24 @@
             "cache_read": 0.01
           },
           "limit": {
-            "context": 262144,
+            "context": 256000,
             "output": 65536
           },
           "modalities": {
-            "input": ["text"],
-            "output": ["text"]
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
           },
-          "options": {
-            "temperature": 0.3,
-            "thinking": {
-              "type": "disabled",
-              "budgetTokens": 1000
-            },
-            "top_p": 0.95
-          },
-          "interleaved": true
+          "interleaved": {
+            "field": "reasoning_content"
+          }
         }
       },
-      "whitelist": ["mimo-v2-flash"],
       "options": {
-        "baseURL": "https://api.xiaomimimo.com/anthropic/v1"
+        "baseURL": "https://api.stepfun.com/v1"
       }
     }
   },
