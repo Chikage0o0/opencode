@@ -1,9 +1,7 @@
 {
-  "keybinds": {
-    "command_list": "<leader>p"
-  },
-  "theme": "one-dark",
-  "plugin": ["@tarquinen/opencode-dcp@latest"],
+  "plugin": [
+    "@tarquinen/opencode-dcp@latest"
+  ],
   "small_model": "xiaomi/mimo-v2-flash",
   "autoupdate": true,
   "enabled_providers": [
