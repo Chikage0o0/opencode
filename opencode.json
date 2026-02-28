@@ -2,7 +2,6 @@
   "plugin": [
     "@tarquinen/opencode-dcp@latest"
   ],
-  "small_model": "stepfun/step-3.5-flash",
   "autoupdate": true,
   "agent": {
     "title": {
@@ -57,7 +56,7 @@
       "command": [
         "uv",
         "run",
-        "https://github.com/Chikage0o0/opencode/raw/refs/heads/main/script/system-info-mcp.py"
+        "https://raw.githubusercontent.com/Chikage0o0/opencode/refs/heads/main/script/system-info-mcp.py"
       ]
     }
   },
