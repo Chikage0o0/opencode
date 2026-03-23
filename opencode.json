@@ -6,8 +6,7 @@
     }
   },
   "plugin": [
-    "opencode-direnv",
-    "openslimedit@latest"
+    "@tarquinen/opencode-dcp@latest"
   ],
   "mcp": {
     "context7": {
@@ -27,6 +26,7 @@
       "git log*": "allow",
       "npm *": "allow",
       "rm *": "ask",
+      "git rev-parse*": "allow",
       "git ls-files*": "allow",
       "rm commit.msg": "allow",
       "del commit.msg": "allow",

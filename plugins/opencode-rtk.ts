@@ -24,6 +24,7 @@ export const RtkOpenCodePlugin: Plugin = async ({ $ }) => {
 
       const command = (args as Record<string, unknown>).command
       if (typeof command !== "string" || !command) return
+      if (/^\s*rg(?:\s|$)/.test(command)) return
 
       try {
         const result = await $`rtk rewrite ${command}`.quiet().nothrow()
