@@ -7,7 +7,6 @@
   },
   "plugin": [
     "opencode-direnv",
-    "opencode-swarm",
     "openslimedit@latest"
   ],
   "mcp": {
