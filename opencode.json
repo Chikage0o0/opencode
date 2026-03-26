@@ -1,5 +1,6 @@
 {
   "autoupdate": false,
+  "share": "disabled",
   "agent": {
     "title": {
       "prompt": "你是一个专门负责总结对话标题的助手。请根据提供的对话内容，生成一个简短、准确且具有描述性的中文标题。\n\n要求：\n1. 使用中文，长度不超过10个字\n2. 直接表达核心内容，避免使用“关于”、“总结”、“讨论”等冗余词汇\n3. 突出对话的主题或主要任务，如“代码审查”、“问题排查”、“功能实现”等\n4. 如果无法判断用户意图或对话内容不明确，返回“未命名对话”\n\n输出格式：直接输出标题内容，不要添加任何额外说明或标记。"
@@ -16,42 +17,73 @@
   },
   "permission": {
     "bash": {
-      "*": "ask",
-      "grep *": "allow",
-      "rg *": "allow",
-      "find *": "allow",
-      "ls *": "allow",
-      "git status*": "allow",
-      "git diff*": "allow",
-      "git log*": "allow",
-      "npm *": "allow",
+      "*": "allow",
+
       "rm *": "ask",
-      "git rev-parse*": "allow",
-      "git ls-files*": "allow",
-      "rm commit.msg": "allow",
-      "del commit.msg": "allow",
-      "cargo check*": "allow",
-      "ls": "allow",
-      "dir": "allow",
-      "type *": "allow",
-      "whoami": "allow",
-      "pwd": "allow",
-      "rtk *": "allow"
+      "mv *": "ask",
+      "cp *": "ask",
+      "chmod -R *": "ask",
+      "chown *": "deny",
+      "dd *": "deny",
+      "mkfs*": "deny",
+      "fdisk*": "deny",
+      "parted*": "deny",
+      "shutdown *": "deny",
+      "reboot *": "deny",
+
+      "git reset --hard*": "ask",
+      "git clean *": "ask",
+      "git push*": "ask",
+
+      "docker push*": "ask",
+      "docker system prune*": "ask",
+      "kubectl apply *": "ask",
+      "kubectl delete *": "ask",
+      "terraform apply*": "ask",
+
+      "ssh *": "ask",
+      "scp *": "ask",
+      "rsync *": "ask"
     },
     "read": {
+      "*": "allow",
+
+      ".env.example": "allow",
       ".env": "deny",
       ".env.*": "deny",
+      "**/.env": "deny",
+      "**/.env.*": "deny",
       ".envrc": "deny",
-      "secrets/**": "deny",
-      "config/credentials.json": "deny",
-      "mise.local.toml": "deny",
       ".direnv/**": "deny",
       "devenv.local.nix": "deny",
-      "build": "deny"
+      "mise.local.toml": "deny",
+
+      "secrets/**": "deny",
+      "**/secrets/**": "deny",
+
+      "**/.ssh/**": "deny",
+      "**/.gnupg/**": "deny",
+      "**/.aws/**": "deny",
+      "**/.config/gcloud/**": "deny",
+      "**/.kube/**": "deny",
+      "**/.docker/**": "deny",
+      "**/.npmrc": "deny",
+      "**/.netrc": "deny",
+
+      "**/*.pem": "deny",
+      "**/*.key": "deny",
+      "**/*.p12": "deny",
+      "**/*.pfx": "deny",
+
+      "**/auth.json": "deny",
+      "**/mcp-auth.json": "deny",
+      "**/credentials*.json": "deny",
+      "**/service-account*.json": "deny",
+      "**/terraform.tfstate*": "deny",
+      "**/.terraform/**": "deny"
     },
     "edit": {
-      "*": "ask",
-      "commit.msg": "allow"
+      "*": "allow"
     }
   },
   "$schema": "https://opencode.ai/config.json"
