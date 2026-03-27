@@ -138,7 +138,17 @@ git commit -F <tempfile>
 
 * 不显式添加 `-S`
 * 不默认添加 `--no-verify`
+* 优先使用 `trap 'rm -f "$tmp"' EXIT` 清理临时文件
+* 若必须保存退出码后再清理，使用 `rc`、`exit_code` 等普通变量名，禁止使用 `status`，因为它在 `zsh` 中是只读特殊变量
 * 若 hook 失败，停止并报告
+
+推荐包装示例：
+
+```bash
+tmp=$(mktemp) || exit 1
+trap 'rm -f "$tmp"' EXIT
+git commit -F "$tmp"
+```
 
 ### 7. 提交后验证
 
