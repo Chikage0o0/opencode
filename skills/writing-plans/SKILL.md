@@ -18,6 +18,9 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 **Save plans to:** `docs/plans/active/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
 Keep the plan in `docs/plans/active/` until the entire work item is complete, then move it to `docs/plans/completed/`.
+- Default to Chinese for the plan document, including the title, section headings, task titles, step descriptions, list items, fixed prompts, and expected-result prose.
+- If the user explicitly requests English or another language for the plan, follow the user's instruction instead of the default.
+- Do not translate code blocks, shell commands, file paths, skill names, or identifiers unless the user explicitly asks for it.
 
 ## Scope Check
 
@@ -48,15 +51,15 @@ This structure informs the task decomposition. Each task should produce self-con
 **Every plan MUST start with this header:**
 
 ```markdown
-# [Feature Name] Implementation Plan
+# [功能名称] 实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `subagent-driven-development` (recommended) or `executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **给代理执行者：** REQUIRED SUB-SKILL: 使用 `subagent-driven-development`（推荐）或 `executing-plans` 逐任务执行本计划。步骤使用复选框 `- [ ]` 语法追踪。
 
-**Goal:** [One sentence describing what this builds]
+**目标：** [一句话说明这份计划要完成什么]
 
-**Architecture:** [2-3 sentences about approach]
+**架构：** [2-3 句话说明实现思路]
 
-**Tech Stack:** [Key technologies/libraries]
+**技术栈：** [关键技术与库]
 
 ---
 ```
@@ -64,14 +67,14 @@ This structure informs the task decomposition. Each task should produce self-con
 ## Task Structure
 
 ````markdown
-### Task N: [Component Name]
+### 任务 N：[组件名称]
 
-**Files:**
-- Create: `exact/path/to/file.py`
-- Modify: `exact/path/to/existing.py:123-145`
-- Test: `tests/exact/path/to/test.py`
+**文件：**
+- 新增：`exact/path/to/file.py`
+- 修改：`exact/path/to/existing.py:123-145`
+- 测试：`tests/exact/path/to/test.py`
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **步骤 1：先写失败测试**
 
 ```python
 def test_specific_behavior():
@@ -79,24 +82,24 @@ def test_specific_behavior():
     assert result == expected
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [ ] **步骤 2：运行测试并确认失败**
 
-Run: `pytest tests/path/test.py::test_name -v`
-Expected: FAIL with "function not defined"
+运行：`pytest tests/path/test.py::test_name -v`
+预期：FAIL，并看到 `function not defined`
 
-- [ ] **Step 3: Write minimal implementation**
+- [ ] **步骤 3：编写最小实现**
 
 ```python
 def function(input):
     return expected
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [ ] **步骤 4：运行测试并确认通过**
 
-Run: `pytest tests/path/test.py::test_name -v`
-Expected: PASS
+运行：`pytest tests/path/test.py::test_name -v`
+预期：PASS
 
-- [ ] **Step 5: Commit**
+- [ ] **步骤 5：提交**
 
 ```bash
 git add tests/path/test.py src/path/file.py
@@ -137,7 +140,7 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 After saving the plan, before offering any execution choice or starting implementation, ask with the OpenCode `question` tool:
 
-**"Plan complete and saved to `docs/plans/active/<filename>.md`. Before we start implementation, do you want me to commit the current plan/spec documents first?"**
+**"Plan 已保存到 `docs/plans/active/<filename>.md`。在开始实施前，你要我先提交当前的 plan/spec 文档吗？"**
 
 - This question is mandatory even if the user says to start coding immediately or already states a preferred execution mode.
 - Do not combine this with the execution-mode question. Resolve the document-commit decision first.
@@ -153,13 +156,13 @@ After saving the plan, before offering any execution choice or starting implemen
 
 After the document-commit question is resolved, offer execution choice with the OpenCode `question` tool:
 
-**"Two execution options:**
+**"有两种执行方式：**
 
-**1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
+**1. Subagent-Driven（推荐）** - 我为每个任务派发一个新的 subagent，在任务之间做评审，迭代更快
 
-**2. Inline Execution** - Execute tasks in this session using executing-plans, batch execution with checkpoints
+**2. Inline Execution** - 在当前会话中使用 `executing-plans` 执行任务，按检查点分批推进
 
-**Which approach?"**
+**你希望采用哪一种？"**
 
 **If Subagent-Driven chosen:**
 - **REQUIRED SUB-SKILL:** Use `subagent-driven-development`

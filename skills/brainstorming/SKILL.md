@@ -111,6 +111,9 @@ digraph brainstorming {
 - Write the validated design (spec) to `docs/specs/active/YYYY-MM-DD-<topic>-design.md`
 - Keep the spec in `docs/specs/active/` until the entire work item is complete, then move it to `docs/specs/completed/`
   - (User preferences for spec location override this default)
+- Default to Chinese for the spec document, including the title, headings, body text, lists, and fixed prompt language.
+- If the user explicitly requests English or another language for the spec, follow the user's instruction instead of the default.
+- Do not translate code blocks, shell commands, file paths, skill names, or identifiers unless the user explicitly asks for it.
 - Use elements-of-style:writing-clearly-and-concisely skill if available
 - Commit the design document to git
 
@@ -127,7 +130,7 @@ Fix any issues inline. No need to re-review — just fix and move on.
 **User Review Gate:**
 After the spec review loop passes, ask the user to review the written spec before proceeding:
 
-> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
+> "Spec 已写入并提交到 `<path>`。请先审阅；如果你希望调整，请在开始编写实施计划之前告诉我。"
 
 Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
 
