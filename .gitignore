@@ -7,3 +7,4 @@ antigravity-accounts.json.*.tmp
 antigravity-signature-cache.json
 antigravity-logs/
 .swarm/
+.worktrees/
