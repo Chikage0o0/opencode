@@ -13,7 +13,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** This should be run in a dedicated worktree (created by brainstorming skill).
+**Context:** This should run in the current git branch context. External tooling may prepare or switch branches before execution, but this skill must not require or create a separate workspace directory.
 
 **Save plans to:** `docs/plans/active/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)

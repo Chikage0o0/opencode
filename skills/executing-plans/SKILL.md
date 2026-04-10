@@ -15,6 +15,13 @@ Load plan, review critically, execute all tasks, report when complete.
 
 ## The Process
 
+### Step 0: Check Current Branch
+1. Run `git branch --show-current`
+2. If the branch name is empty: stop and ask the user how to proceed
+3. If the branch is `main` or `master`: ask the user for explicit permission before implementation
+4. If the user does not approve direct development on `main/master`: stop immediately
+5. Otherwise continue to Step 1
+
 ### Step 1: Load and Review Plan
 1. Read plan file
 2. Review critically - identify any questions or concerns about the plan
@@ -66,6 +73,5 @@ After all tasks complete and verified:
 ## Integration
 
 **Required workflow skills:**
-- **`using-git-worktrees`** - REQUIRED: Set up isolated workspace before starting
 - **`writing-plans`** - Creates the plan this skill executes
 - **`finishing-a-development-branch`** - Complete development after all tasks

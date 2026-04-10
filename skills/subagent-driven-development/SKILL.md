@@ -37,6 +37,16 @@ digraph when_to_use {
 - Two-stage review after each task: spec compliance first, then code quality
 - Faster iteration (no human-in-loop between tasks)
 
+## Branch Gate Before Dispatch
+
+Before reading tasks or dispatching any implementation subagent:
+
+1. Run `git branch --show-current`
+2. If the branch name is empty, stop and ask the user how to proceed
+3. If the branch is `main` or `master`, ask the user for explicit permission before implementation
+4. If the user does not approve direct development on `main/master`, stop immediately
+5. Otherwise continue into the normal process
+
 ## The Process
 
 ```dot
@@ -59,11 +69,26 @@ digraph process {
         "Mark task complete in TodoWrite" [shape=box];
     }
 
+    "Run git branch --show-current" [shape=box];
+    "Branch name empty?" [shape=diamond];
+    "Branch is main/master?" [shape=diamond];
+    "Ask user for explicit permission before implementation" [shape=box];
+    "Permission granted?" [shape=diamond];
+    "Stop and ask user how to proceed" [shape=box];
+    "Stop immediately" [shape=box];
     "Read plan, extract all tasks with full text, note context, create TodoWrite" [shape=box];
     "More tasks remain?" [shape=diamond];
     "Dispatch final code reviewer subagent for entire implementation" [shape=box];
     "Use finishing-a-development-branch" [shape=box style=filled fillcolor=lightgreen];
 
+    "Run git branch --show-current" -> "Branch name empty?";
+    "Branch name empty?" -> "Stop and ask user how to proceed" [label="yes"];
+    "Branch name empty?" -> "Branch is main/master?" [label="no"];
+    "Branch is main/master?" -> "Ask user for explicit permission before implementation" [label="yes"];
+    "Branch is main/master?" -> "Read plan, extract all tasks with full text, note context, create TodoWrite" [label="no"];
+    "Ask user for explicit permission before implementation" -> "Permission granted?";
+    "Permission granted?" -> "Stop immediately" [label="no"];
+    "Permission granted?" -> "Read plan, extract all tasks with full text, note context, create TodoWrite" [label="yes"];
     "Read plan, extract all tasks with full text, note context, create TodoWrite" -> "Dispatch implementer subagent (./implementer-prompt.md)";
     "Dispatch implementer subagent (./implementer-prompt.md)" -> "Implementer returns NEEDS_CONTEXT/BLOCKED?";
     "Implementer returns NEEDS_CONTEXT/BLOCKED?" -> "Controller answers directly or asks user via question" [label="needs context"];
@@ -287,7 +312,6 @@ Done!
 ## Integration
 
 **Required workflow skills:**
-- **`using-git-worktrees`** - REQUIRED: Set up isolated workspace before starting
 - **`writing-plans`** - Creates the plan this skill executes
 - **`finishing-a-development-branch`** - Complete development after all tasks
 
