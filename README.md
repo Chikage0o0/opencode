@@ -6,7 +6,7 @@
 - 默认面向 NixOS / Nix 工作流的行为约束
 - OpenCode 权限、插件与 TUI 配置
 - 受控 Git 提交流程技能
-- 一个基于 `rtk rewrite` 的命令改写插件示例
+
 
 ## 当前仓库结构
 
