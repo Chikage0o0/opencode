@@ -11,12 +11,15 @@ OpenCode `task` tool:
   prompt: |
     review_goal: Review the current task before commit for correctness, regression risk, unsafe assumptions, and test gaps.
 
-    full_context: |
-      [Paste the FULL task text, the implementer summary, relevant architectural context,
-      and prior spec-review findings if this is a re-review.]
+    spec_doc_path: [Path to spec document, or "none" if not applicable]
 
-    requirements_context: |
-      [Paste the relevant spec or plan excerpts that define the expected behavior for this task.]
+    task_scope: |
+      [List the specific requirements from the spec that this task covers.
+      Include acceptance criteria and expected behaviors.]
+
+    plan_file: [Path to plan file]
+
+    plan_line_range: [Start line - End line for this task in the plan file]
 
     diff_base: [BASE_SHA]
 
@@ -39,6 +42,8 @@ OpenCode `task` tool:
       Summary: short secondary summary after findings
 
     Additional instructions:
+    - Read the plan file at the specified line range to get full task details
+    - Use spec_doc_path to understand the broader context and requirements
     - Findings first, summary second.
     - Do not block on pure preference or speculative future refactors.
     - If there are no findings, say `Findings: none`.

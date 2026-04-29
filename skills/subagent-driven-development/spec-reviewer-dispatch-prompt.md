@@ -11,14 +11,15 @@ OpenCode `task` tool:
   prompt: |
     review_target: [Task N title and short scope]
 
-    full_requirement_details: |
-      [Paste the complete requirement detail for this task.
-      Include the FULL task text from the plan plus any relevant spec excerpts.
-      Do not summarize away acceptance criteria.]
+    spec_doc_path: [Path to spec document, or "none" if not applicable]
 
-    implemented_scope: |
-      [Summarize what files and behaviors the implementer claims changed,
-      plus the working-tree or commit scope that should contain the task.]
+    task_scope: |
+      [List the specific requirements from the spec that this task covers.
+      Include acceptance criteria and expected behaviors.]
+
+    plan_file: [Path to plan file]
+
+    plan_line_range: [Start line - End line for this task in the plan file]
 
     base_reference: [BASE_SHA or other exact review reference]
 
@@ -47,6 +48,8 @@ OpenCode `task` tool:
       review_summary: one short paragraph
 
     Additional instructions:
+    - Read the plan file at the specified line range to get full task details
+    - Use spec_doc_path to understand the broader context and requirements
     - Inspect the actual code and diff. Do not trust the implementer report.
     - Use file:line references for every material finding.
 ```

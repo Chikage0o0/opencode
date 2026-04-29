@@ -13,22 +13,17 @@ OpenCode `task` tool:
 
     task_goal: [One-sentence task goal]
 
-    full_task_details: |
-      [Paste the FULL TEXT of the current task from the plan.
-      Include every checklist item, code block, command, expected result,
-      and acceptance note. Do not summarize.]
+    spec_doc_path: [Path to spec document, or "none" if not applicable]
+
+    task_scope: |
+      [List the specific requirements from the spec that this task covers.
+      Include acceptance criteria and expected behaviors.]
+
+    plan_file: [Path to plan file]
+
+    plan_line_range: [Start line - End line for this task in the plan file]
 
     repo_path: [Absolute repository path]
-
-    relevant_context: |
-      [Explain where this task fits in the plan.
-      Include relevant spec excerpts, architectural context, existing file patterns,
-      prior reviewer findings for same-task re-dispatches, and any assumptions
-      already confirmed by the user.]
-
-    allowed_edit_scope: |
-      [List the exact files or directories the implementer may edit.
-      Also list any touched-but-out-of-scope files that must not be changed.]
 
     constraints: |
       [Task-specific constraints, including:
@@ -51,7 +46,7 @@ OpenCode `task` tool:
       Context needed: if more context is required
 
     Additional instructions:
-    - This dispatch is for exactly one plan task.
-    - Use `full_task_details` as the source of truth for scope.
-    - If key context is missing, return `NEEDS_CONTEXT` instead of guessing.
+    - Read the plan file at the specified line range to get full task details
+    - Use spec_doc_path to understand the broader context and requirements
+    - If key context is missing, return `NEEDS_CONTEXT` instead of guessing
 ```

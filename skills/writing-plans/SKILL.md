@@ -13,6 +13,8 @@ description: "将规格分解为零上下文可执行的详尽实现计划，定
 
 **开始时声明：**"我正在使用 writing-plans 技能来创建实施计划。"
 
+**注意：** 如果 brainstorming 阶段判断为小型任务（< 3 个文件），则跳过本技能，直接进入开发阶段。
+
 **上下文：**本技能应在当前 git 分支上下文中运行。外部工具可能在执行前准备或切换分支，但本技能不得要求或创建单独的工作空间目录。
 
 **保存计划至：**`docs/plans/active/YYYY-MM-DD-<feature-name>.md`
@@ -140,22 +142,6 @@ git commit -m "feat: add specific feature"
 
 保存计划后，在提供任何执行选项或开始实施之前，使用 OpenCode `question` 工具询问：
 
-**"Plan 已保存到 `docs/plans/active/<filename>.md`。在开始实施前，你要我先提交当前的 plan/spec 文档吗？"**
-
-- 即使用户要求立即开始编码或已声明首选执行模式，此问题也是强制性的。
-- 不要将此问题与执行模式问题合并。先解决文档提交决策。
-
-**如果用户希望提交文档：**
-- **必需子技能：** 使用 `git-commit`
-- 提交当前计划文档以及作为实施交接一部分的任何相关规格编辑。
-- 提交成功后，提供下方的执行选项。
-
-**如果用户暂时不希望提交文档：**
-- 不要提交文档。
-- 提供下方的执行选项。
-
-文档提交问题解决后，使用 OpenCode `question` 工具提供执行选项：
-
 **"有两种执行方式：**
 
 **1. Subagent-Driven（推荐）** - 我为每个任务派发一个新的 subagent，在任务之间做评审，迭代更快
@@ -167,6 +153,11 @@ git commit -m "feat: add specific feature"
 **如果选择 Subagent-Driven：**
 - **必需子技能：** 使用 `subagent-driven-development`
 - 控制器应按任务派遣真正的 `implementer`、`spec-reviewer` 和 `code-reviewer` 子代理类型
+- 传入给子代理的上下文应包含：
+  - 规格文档路径（如果存在）
+  - 本轮任务需要完成的规格范围
+  - 计划文档的行号范围（任务开始行到结束行）
+  - 子代理自行读取计划文档获取详细信息
 
 **如果选择 Inline Execution：**
 - **必需子技能：** 使用 `executing-plans`

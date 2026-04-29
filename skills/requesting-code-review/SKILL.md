@@ -84,7 +84,7 @@ You: [Fix progress indicators]
 **Subagent-Driven Development：**
 - 首先完成任务规格合规性审查
 - 然后审查未提交任务与 `BASE_SHA` 的差异
-- 使用 `skills/subagent-driven-development/code-reviewer-dispatch-prompt.md`，而非 `requesting-code-review/code-reviewer-dispatch-prompt.md`
+- 使用 `skills/subagent-driven-development/code-reviewer-dispatch-prompt.md`（单个未提交任务审查），而非 `skills/requesting-code-review/code-reviewer-dispatch-prompt.md`（已提交范围审查）
 
 **Executing Plans：**
 - 每批（3 个任务）结束后进行审查
@@ -107,4 +107,4 @@ You: [Fix progress indicators]
 - 展示证明其有效的代码/测试
 - 请求澄清
 
-查看模板：`requesting-code-review/code-reviewer-dispatch-prompt.md`
+查看模板：`./code-reviewer-dispatch-prompt.md`

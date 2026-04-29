@@ -142,9 +142,16 @@ You: I'm using Subagent-Driven Development to execute this plan.
 
 Task 1: Hook installation script
 
-[Get Task 1 text and context (already extracted)]
-[Dispatch implementation subagent with full task text + context]
+[Get Task 1 line range from plan file: lines 15-45]
+[Dispatch implementation subagent with:
+  - spec_doc_path: docs/specs/active/feature-design.md (if exists)
+  - task_scope: Task 1 requirements from spec
+  - plan_file: docs/plans/active/feature-plan.md
+  - plan_line_range: 15-45
+  - repo_path: /path/to/repo
+]
 
+Implementer: [Reads plan file lines 15-45, implements task]
 Implementer: `Status: NEEDS_CONTEXT` - should the hook be installed at user or system level?
 
 You: [Use OpenCode `question` if needed, or answer directly]
@@ -155,7 +162,14 @@ You: [Use OpenCode `question` if needed, or answer directly]
   - Added tests, 5/5 passing
   - Self-review: Found I missed --force flag, added it
 
-[Dispatch spec compliance reviewer]
+[Dispatch spec compliance reviewer with:
+  - spec_doc_path: docs/specs/active/feature-design.md
+  - task_scope: Task 1 requirements
+  - plan_file: docs/plans/active/feature-plan.md
+  - plan_line_range: 15-45
+  - diff_base: BASE_SHA
+]
+
 Spec reviewer: ✅ Spec compliant - all requirements met, nothing extra
 
 [Dispatch code reviewer against Task 1 base commit + current working tree diff]
@@ -166,9 +180,15 @@ Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
 
 Task 2: Recovery modes
 
-[Get Task 2 text and context (already extracted)]
+[Get Task 2 line range from plan file: lines 47-92]
 [Create NEW implementer subagent session for Task 2 (do not reuse Task 1 `task_id`)]
-[Dispatch implementation subagent with full task text + context]
+[Dispatch implementation subagent with:
+  - spec_doc_path: docs/specs/active/feature-design.md
+  - task_scope: Task 2 requirements from spec
+  - plan_file: docs/plans/active/feature-plan.md
+  - plan_line_range: 47-92
+  - repo_path: /path/to/repo
+]
 
 Implementer: [No extra context needed, proceeds]
 Implementer:
@@ -226,6 +246,13 @@ Done!
 - 控制器精确策划所需的上下文
 - 子代理预先获得完整信息
 - 问题在工作开始前就暴露出来（而不是之后）
+
+**新的上下文传递方式：**
+- 只传递规格文档路径、任务范围和计划文档行号范围
+- 子代理自行读取计划文档获取详细信息
+- 减少控制器的准备工作
+- 子代理可以按需获取完整上下文
+- 保持上下文隔离的同时提供必要的导航信息
 
 **质量关卡：**
 - 自检在交接前发现问题
