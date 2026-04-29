@@ -1,10 +1,10 @@
-# Spec Document Reviewer Prompt Template
+# 规格文档审阅者提示模板
 
-Use this template when dispatching a spec document reviewer subagent.
+派遣规格文档审阅子代理时使用此模板。
 
-**Purpose:** Verify the spec is complete, consistent, and ready for implementation planning.
+**目的：** 验证规格是否完整、一致，并准备好进行实现规划。
 
-**Dispatch after:** Spec document is written to docs/specs/active/
+**派遣时机：** 规格文档已写入 docs/specs/active/ 后
 
 ```
 OpenCode `task` tool:
@@ -47,4 +47,4 @@ OpenCode `task` tool:
     - [suggestions for improvement]
 ```
 
-**Reviewer returns:** Status, Issues (if any), Recommendations
+**审阅者返回：** 状态、问题（如有）、建议

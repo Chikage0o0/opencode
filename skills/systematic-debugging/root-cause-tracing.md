@@ -8,19 +8,12 @@ Bugs often manifest deep in the call stack (git init in wrong directory, file cr
 
 ## When to Use
 
-```dot
-digraph when_to_use {
-    "Bug appears deep in stack?" [shape=diamond];
-    "Can trace backwards?" [shape=diamond];
-    "Fix at symptom point" [shape=box];
-    "Trace to original trigger" [shape=box];
-    "BETTER: Also add defense-in-depth" [shape=box];
-
-    "Bug appears deep in stack?" -> "Can trace backwards?" [label="yes"];
-    "Can trace backwards?" -> "Trace to original trigger" [label="yes"];
-    "Can trace backwards?" -> "Fix at symptom point" [label="no - dead end"];
-    "Trace to original trigger" -> "BETTER: Also add defense-in-depth";
-}
+```mermaid
+flowchart TD
+    A{Bug深层出现?} -->|是| B{可追溯?}
+    B -->|是| C[追溯到原始触发点]
+    B -->|否-死胡同| D[在症状点修复]
+    C --> E[更好:同时添加纵深防御]
 ```
 
 **Use when:**
@@ -129,26 +122,16 @@ Runs tests one-by-one, stops at first polluter. See script for usage.
 
 ## Key Principle
 
-```dot
-digraph principle {
-    "Found immediate cause" [shape=ellipse];
-    "Can trace one level up?" [shape=diamond];
-    "Trace backwards" [shape=box];
-    "Is this the source?" [shape=diamond];
-    "Fix at source" [shape=box];
-    "Add validation at each layer" [shape=box];
-    "Bug impossible" [shape=doublecircle];
-    "NEVER fix just the symptom" [shape=octagon, style=filled, fillcolor=red, fontcolor=white];
-
-    "Found immediate cause" -> "Can trace one level up?";
-    "Can trace one level up?" -> "Trace backwards" [label="yes"];
-    "Can trace one level up?" -> "NEVER fix just the symptom" [label="no"];
-    "Trace backwards" -> "Is this the source?";
-    "Is this the source?" -> "Trace backwards" [label="no - keeps going"];
-    "Is this the source?" -> "Fix at source" [label="yes"];
-    "Fix at source" -> "Add validation at each layer";
-    "Add validation at each layer" -> "Bug impossible";
-}
+```mermaid
+flowchart TD
+    A((发现直接原因)) --> B{可向上追溯一层?}
+    B -->|是| C[向上追溯]
+    B -->|否| D{{绝不只修复症状}}
+    C --> E{是源头?}
+    E -->|否-继续| C
+    E -->|是| F[在源头修复]
+    F --> G[在每层添加验证]
+    G --> H((Bug不可能发生))
 ```
 
 **NEVER fix just where the error appears.** Trace back to find the original trigger.

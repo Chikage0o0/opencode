@@ -1,8 +1,8 @@
-# Implementer Dispatch Prompt Template
+# 实现者分派提示词模板
 
-Use this template when dispatching the real `implementer` subagent for exactly one plan task.
+在向真正的 implementer 子代理分派单个计划任务时，使用此模板。
 
-**Session boundary rule:** If the controller moves from Task N to Task N+1, start a fresh subagent session. Reuse a `task_id` only for the same task's clarification or fix loop.
+**会话边界规则：** 当控制器从任务 N 移动到任务 N+1 时，启动一个新的子代理会话。仅在同一任务的澄清或修复循环中复用 `task_id`。
 
 ```text
 OpenCode `task` tool:

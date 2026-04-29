@@ -1,8 +1,8 @@
-# Code Reviewer Dispatch Prompt Template
+# Code Reviewer 调度提示模板
 
-Use this template when dispatching the real `code-reviewer` subagent for one uncommitted plan task review.
+使用此模板在调度真正的 `code-reviewer` 子代理，对单个未提交的 plan 任务进行代码审查。
 
-**Session boundary rule:** Reuse the same reviewer session only for the same task's fix-and-review loop. Start a fresh session for a different plan task.
+**会话边界规则：** 仅在同一任务的修复-审查循环中复用同一个审查者会话。针对不同的 plan 任务，请开启新会话。
 
 ```text
 OpenCode `task` tool:

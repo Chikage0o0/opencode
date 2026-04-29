@@ -3,55 +3,55 @@ name: requesting-code-review
 description: "派遣审查子代理对代码进行独立评审，及早发现问题。强制触发：完成重大功能后、合并到 main 前。可选触发：卡住时需要新鲜视角、重构前需要基线检查、修复复杂 bug 后。subagent-driven-development 场景中使用专用 reviewer 而非本技能的标准流程。"
 ---
 
-# Requesting Code Review
+# 请求代码审查
 
-Dispatch an OpenCode reviewer subagent with the `task` tool to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation - never your session's history. This keeps the reviewer focused on the work product, not your thought process, and preserves your own context for continued work.
+使用 `task` 工具派遣 OpenCode 审查子代理，在问题扩散之前捕获它们。审查者获得精心构建的评估上下文 —— 绝不包含你的会话历史。这让审查者专注于工作产出，而非你的思考过程，同时保留你自己的上下文以便继续工作。
 
-**Core principle:** Review early, review often.
+**核心原则：** 及早审查，频繁审查。
 
-## When to Request Review
+## 何时请求审查
 
-**Mandatory:**
-- After completing major feature
-- Before merge to main
+**强制要求：**
+- 完成重大功能后
+- 合并到 main 前
 
-**Optional but valuable:**
-- When stuck (fresh perspective)
-- Before refactoring (baseline check)
-- After fixing complex bug
+**可选但很有价值：**
+- 卡住时（需要新视角）
+- 重构前（基线检查）
+- 修复复杂 bug 后
 
-## How to Request
+## 如何请求
 
-**Subagent-driven-development exception:**
+**subagent-driven-development 例外：**
 
-Do not use the committed-range flow below for pre-commit task reviews. In that workflow, the controller should wait until spec compliance passes, then dispatch the task-specific prompt at `skills/subagent-driven-development/code-reviewer-dispatch-prompt.md` to review the current working tree diff against `BASE_SHA`.
+对于提交前任务审查，请勿使用下方的已提交范围流程。在该工作流中，控制器应等待规格合规性通过后，再派遣任务特定的提示词，提示词位于 `skills/subagent-driven-development/code-reviewer-dispatch-prompt.md`，用于审查当前工作树与 `BASE_SHA` 的差异。
 
-Use the steps below when reviewing an already-committed range, such as a major feature before merge.
+审查已提交的范围（例如合并前的重大功能）时，请使用以下步骤。
 
-**1. Get git SHAs:**
+**1. 获取 git SHA：**
 ```bash
 BASE_SHA=$(git rev-parse HEAD~1)  # or origin/main
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
-**2. Dispatch reviewer subagent:**
+**2. 派遣审查子代理：**
 
-Use the OpenCode `task` tool with `subagent_type: "code-reviewer"`, and fill the prompt template at `code-reviewer-dispatch-prompt.md`.
+使用 OpenCode 的 `task` 工具，并设置 `subagent_type: "code-reviewer"`，然后填写 `code-reviewer-dispatch-prompt.md` 中的提示词模板。
 
-**Fields to provide:**
-- `review_goal` - What decision the review should support
-- `full_context` - What you built and why it matters
-- `requirements_context` - Plan or requirements the code should satisfy
-- `diff_base` - Starting commit
-- `diff_target` - Ending commit for committed-range reviews
+**需提供的字段：**
+- `review_goal` —— 审查应支持什么决策
+- `full_context` —— 你构建了什么以及它的重要性
+- `requirements_context` —— 代码应满足的计划或需求
+- `diff_base` —— 起始提交
+- `diff_target` —— 已提交范围审查的结束提交
 
-**3. Act on feedback:**
-- Fix Critical issues immediately
-- Fix Important issues before proceeding
-- Note Minor issues for later
-- Push back if reviewer is wrong (with reasoning)
+**3. 根据反馈采取行动：**
+- 立即修复 Critical 级别的问题
+- 继续前先修复 Important 级别的问题
+- 记录 Minor 级别的问题稍后处理
+- 如果审查者错了，予以反驳（给出理由）
 
-## Example
+## 示例
 
 ```
 [Just completed a major feature and want review before merge]
@@ -79,32 +79,32 @@ You: [Fix progress indicators]
 [Continue to Task 3]
 ```
 
-## Integration with Workflows
+## 与工作流集成
 
-**Subagent-Driven Development:**
-- First complete spec compliance review for the task
-- Then review the uncommitted task diff against `BASE_SHA`
-- Use `skills/subagent-driven-development/code-reviewer-dispatch-prompt.md`, not `requesting-code-review/code-reviewer-dispatch-prompt.md`
+**Subagent-Driven Development：**
+- 首先完成任务规格合规性审查
+- 然后审查未提交任务与 `BASE_SHA` 的差异
+- 使用 `skills/subagent-driven-development/code-reviewer-dispatch-prompt.md`，而非 `requesting-code-review/code-reviewer-dispatch-prompt.md`
 
-**Executing Plans:**
-- Review after each batch (3 tasks)
-- Get feedback, apply, continue
+**Executing Plans：**
+- 每批（3 个任务）结束后进行审查
+- 获取反馈、应用、继续
 
-**Ad-Hoc Development:**
-- Review before merge
-- Review when stuck
+**Ad-Hoc Development：**
+- 合并前审查
+- 卡住时审查
 
-## Red Flags
+## 危险信号
 
-**Never:**
-- Skip review because "it's simple"
-- Ignore Critical issues
-- Proceed with unfixed Important issues
-- Argue with valid technical feedback
+**切勿：**
+- 因为"很简单"而跳过审查
+- 忽略 Critical 级别的问题
+- 在 Important 级别的问题未修复的情况下继续
+- 与有效的技术反馈争辩
 
-**If reviewer wrong:**
-- Push back with technical reasoning
-- Show code/tests that prove it works
-- Request clarification
+**如果审查者错了：**
+- 用技术理由反驳
+- 展示证明其有效的代码/测试
+- 请求澄清
 
-See template at: `requesting-code-review/code-reviewer-dispatch-prompt.md`
+查看模板：`requesting-code-review/code-reviewer-dispatch-prompt.md`

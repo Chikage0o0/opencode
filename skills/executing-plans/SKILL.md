@@ -3,75 +3,83 @@ name: executing-plans
 description: "在独立（并行）会话中按书面实现计划逐任务执行，各检查点审查。触发：已有实现计划且无法使用 task 子代理工具时。若能启动子代理，优先用 subagent-driven-development。不得在 main/master 分支直接执行。终态调用 finishing-a-development-branch。"
 ---
 
-# Executing Plans
+# 执行计划
 
-## Overview
+## 概述
 
-Load plan, review critically, execute all tasks, report when complete.
+加载计划，批判性审查，执行所有任务，完成后报告。
 
-**Announce at start:** "I'm using the executing-plans skill to implement this plan."
+**开始时声明：**"我正在使用 executing-plans 技能来实现此计划。"
 
-**Note:** In OpenCode, if you can launch subagents with the `task` tool, prefer `subagent-driven-development` instead of this skill. Use `executing-plans` when you need to stay in the current session without that per-task subagent workflow.
+**注意：**在 OpenCode 中，如果你可以使用 `task` 工具启动子代理，请优先使用 `subagent-driven-development` 而不是本技能。当你需要保持在当前会话中、不需要每个任务都使用子代理工作流时，才使用 `executing-plans`。
 
-## The Process
+## 执行流程
 
-### Step 0: Check Current Branch
-1. Run `git branch --show-current`
-2. If the branch name is empty: stop and ask the user how to proceed
-3. If the branch is `main` or `master`: ask the user for explicit permission before implementation
-4. If the user does not approve direct development on `main/master`: stop immediately
-5. Otherwise continue to Step 1
+### 步骤 0：检查当前分支
 
-### Step 1: Load and Review Plan
-1. Read plan file
-2. Review critically - identify any questions or concerns about the plan
-3. If concerns: Raise them with your human partner before starting
-4. If no concerns: Create TodoWrite and proceed
+1. 运行 `git branch --show-current`
+2. 如果分支名称为空：停止并询问用户如何继续
+3. 如果分支是 `main` 或 `master`：在实施前请求用户明确许可
+4. 如果用户不批准在 `main/master` 上直接开发：立即停止
+5. 否则继续执行步骤 1
 
-### Step 2: Execute Tasks
+### 步骤 1：加载并审查计划
 
-For each task:
-1. Mark as in_progress
-2. Follow each step exactly (plan has bite-sized steps)
-3. Run verifications as specified
-4. If the plan or invoked workflow for this task requires a task-level commit, use `git-commit`
-5. Mark as completed
+1. 读取计划文件
+2. 批判性审查——识别计划中任何问题或顾虑
+3. 如果有顾虑：在开始之前向你的合作伙伴提出
+4. 如果没有顾虑：创建 TodoWrite 并继续
 
-### Step 3: Complete Development
+### 步骤 2：执行任务
 
-After all tasks complete and verified:
-- Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use `finishing-a-development-branch`
-- Follow that skill to verify tests, present options, execute choice
+对于每个任务：
 
-## When to Stop and Ask for Help
+1. 标记为 in_progress
+2. 严格遵循每个步骤（计划中的步骤都是小而具体的）
+3. 按要求运行验证
+4. 如果计划或为此任务调用的工作流需要任务级提交，请使用 `git-commit`
+5. 标记为已完成
 
-**STOP executing immediately when:**
-- Hit a blocker (missing dependency, test fails, instruction unclear)
-- Plan has critical gaps preventing starting
-- You don't understand an instruction
-- Verification fails repeatedly
+### 步骤 3：完成开发
 
-**Ask for clarification rather than guessing.**
+所有任务完成并验证后：
 
-## When to Revisit Earlier Steps
+- 声明："我正在使用 finishing-a-development-branch 技能来完成此工作。"
+- **必需子技能：**使用 `finishing-a-development-branch`
+- 遵循该技能以验证测试、展示选项、执行选择
 
-**Return to Review (Step 1) when:**
-- Partner updates the plan based on your feedback
-- Fundamental approach needs rethinking
+## 何时停止并寻求帮助
 
-**Don't force through blockers** - stop and ask.
+**立即停止执行的情况：**
 
-## Remember
-- Review plan critically first
-- Follow plan steps exactly
-- Don't skip verifications
-- Reference skills when plan says to
-- Stop when blocked, don't guess
-- Never start implementation on main/master branch without explicit user consent
+- 遇到阻碍（缺少依赖、测试失败、指令不清晰）
+- 计划存在严重缺口，导致无法开始
+- 你不理解某个指令
+- 验证反复失败
 
-## Integration
+**应请求澄清，而非猜测。**
 
-**Required workflow skills:**
-- **`writing-plans`** - Creates the plan this skill executes
-- **`finishing-a-development-branch`** - Complete development after all tasks
+## 何时回顾之前的步骤
+
+**返回审查（步骤 1）的情况：**
+
+- 合作伙伴根据你的反馈更新了计划
+- 基本方法需要重新思考
+
+**不要强行突破阻碍**——停下来询问。
+
+## 请记住
+
+- 首先批判性审查计划
+- 严格遵循计划步骤
+- 不要跳过验证
+- 当计划要求时引用相关技能
+- 遇到阻碍时停止，不要猜测
+- 未经用户明确同意，绝不要在 main/master 分支上开始实施
+
+## 集成
+
+**必需的工作流技能：**
+
+- **`writing-plans`** - 创建本技能执行的计划
+- **`finishing-a-development-branch`** - 在所有任务完成后完成开发

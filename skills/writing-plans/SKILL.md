@@ -3,52 +3,52 @@ name: writing-plans
 description: "将规格分解为零上下文可执行的详尽实现计划，定义每个任务需触摸的文件、代码、测试与预期行为。触发：brainstorming 产生 spec 之后、多步骤任务、动手写代码之前。不允许 TBD/TODO/placeholder 占位。输出到 docs/plans/active/。终态提供两种执行选项：Subagent-Driven（推荐）或 Inline Execution。"
 ---
 
-# Writing Plans
+# 编写计划
 
-## Overview
+## 概述
 
-Write comprehensive implementation plans assuming the engineer has zero context for our codebase and questionable taste. Document everything they need to know: which files to touch for each task, code, testing, docs they might need to check, how to test it. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
+编写全面的实施计划，假设工程师对我们的代码库完全不了解，且品味存疑。记录他们需要知道的一切：每个任务要修改哪些文件、代码、测试、需要查阅的文档、如何测试。将整个计划拆分为细粒度的任务。遵循 DRY、YAGNI、TDD 原则，频繁提交。
 
-Assume they are a skilled developer, but know almost nothing about our toolset or problem domain. Assume they don't know good test design very well.
+假设他们是一名熟练的开发者，但几乎不了解我们的工具链或问题域。假设他们对良好的测试设计不太熟悉。
 
-**Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
+**开始时声明：**"我正在使用 writing-plans 技能来创建实施计划。"
 
-**Context:** This should run in the current git branch context. External tooling may prepare or switch branches before execution, but this skill must not require or create a separate workspace directory.
+**上下文：**本技能应在当前 git 分支上下文中运行。外部工具可能在执行前准备或切换分支，但本技能不得要求或创建单独的工作空间目录。
 
-**Save plans to:** `docs/plans/active/YYYY-MM-DD-<feature-name>.md`
-- (User preferences for plan location override this default)
-Keep the plan in `docs/plans/active/` until the entire work item is complete, then move it to `docs/plans/completed/`.
-- Default to Chinese for the plan document, including the title, section headings, task titles, step descriptions, list items, fixed prompts, and expected-result prose.
-- If the user explicitly requests English or another language for the plan, follow the user's instruction instead of the default.
-- Do not translate code blocks, shell commands, file paths, skill names, or identifiers unless the user explicitly asks for it.
+**保存计划至：**`docs/plans/active/YYYY-MM-DD-<feature-name>.md`
+- （用户对计划位置的偏好优先于此默认值）
+在整项工作完成前，将计划保留在 `docs/plans/active/` 中，完成后移至 `docs/plans/completed/`。
+- 计划文档默认使用中文，包括标题、章节标题、任务标题、步骤描述、列表项、固定提示词和预期结果文本。
+- 如果用户明确要求使用英文或其他语言编写计划，请遵循用户指令而非默认值。
+- 不要翻译代码块、shell 命令、文件路径、技能名称或标识符，除非用户明确要求。
 
-## Scope Check
+## 范围检查
 
-If the spec covers multiple independent subsystems, it should have been broken into sub-project specs during brainstorming. If it wasn't, suggest breaking this into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
+如果规格说明涵盖了多个独立的子系统，那么它应该在头脑风暴阶段就被拆分为子项目规格。如果没有，建议将其拆分为独立的计划——每个子系统一个计划。每个计划都应独立产出可运行、可测试的软件。
 
-## File Structure
+## 文件结构
 
-Before defining tasks, map out which files will be created or modified and what each one is responsible for. This is where decomposition decisions get locked in.
+在定义任务之前，先梳理出将要创建或修改哪些文件，以及每个文件的职责。这是分解决策被锁定的地方。
 
-- Design units with clear boundaries and well-defined interfaces. Each file should have one clear responsibility.
-- You reason best about code you can hold in context at once, and your edits are more reliable when files are focused. Prefer smaller, focused files over large ones that do too much.
-- Files that change together should live together. Split by responsibility, not by technical layer.
-- In existing codebases, follow established patterns. If the codebase uses large files, don't unilaterally restructure - but if a file you're modifying has grown unwieldy, including a split in the plan is reasonable.
+- 设计具有清晰边界和明确接口的单元。每个文件应有一个明确的职责。
+- 你能同时在上下文中理解的代码，推理效果最好；文件越聚焦，编辑越可靠。优先选择小而聚焦的文件，而非功能过多的大文件。
+- 一起变更的文件应该放在一起。按职责拆分，而不是按技术层级拆分。
+- 在现有代码库中，遵循既定模式。如果代码库使用大文件，不要单方面重构——但如果你正在修改的文件已经变得难以驾驭，在计划中包含拆分是合理的。
 
-This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.
+该结构指导任务分解。每个任务都应产生自包含的、独立有意义的变更。
 
-## Bite-Sized Task Granularity
+## 细粒度任务拆分
 
-**Each step is one action (2-5 minutes):**
-- "Write the failing test" - step
-- "Run it to make sure it fails" - step
-- "Implement the minimal code to make the test pass" - step
-- "Run the tests and make sure they pass" - step
-- "Commit" - step
+**每个步骤是一个动作（2-5 分钟）：**
+- "编写失败测试" - 步骤
+- "运行测试以确认失败" - 步骤
+- "编写最小实现使测试通过" - 步骤
+- "运行测试并确认通过" - 步骤
+- "提交" - 步骤
 
-## Plan Document Header
+## 计划文档头部
 
-**Every plan MUST start with this header:**
+**每个计划必须以以下头部开头：**
 
 ```markdown
 # [功能名称] 实施计划
@@ -64,7 +64,7 @@ This structure informs the task decomposition. Each task should produce self-con
 ---
 ```
 
-## Task Structure
+## 任务结构
 
 ````markdown
 ### 任务 N：[组件名称]
@@ -107,54 +107,54 @@ git commit -m "feat: add specific feature"
 ```
 ````
 
-## No Placeholders
+## 禁止占位符
 
-Every step must contain the actual content an engineer needs. These are **plan failures** — never write them:
-- "TBD", "TODO", "implement later", "fill in details"
-- "Add appropriate error handling" / "add validation" / "handle edge cases"
-- "Write tests for the above" (without actual test code)
-- "Similar to Task N" (repeat the code — the engineer may be reading tasks out of order)
-- Steps that describe what to do without showing how (code blocks required for code steps)
-- References to types, functions, or methods not defined in any task
+每个步骤必须包含工程师所需的实际内容。以下是**计划失败**的范例——绝不要写：
+- "TBD"、"TODO"、"稍后实现"、"补充细节"
+- "添加适当的错误处理" / "添加验证" / "处理边界情况"
+- "为上述内容编写测试"（没有实际测试代码）
+- "与任务 N 类似"（重复代码——工程师可能是按乱序阅读任务的）
+- 只描述做什么而不展示怎么做的步骤（代码步骤必须包含代码块）
+- 引用在任何任务中都没有定义的类型、函数或方法
 
-## Remember
-- Exact file paths always
-- Complete code in every step — if a step changes code, show the code
-- Exact commands with expected output
-- Reference relevant skills by exact skill name/path so the OpenCode controller can load them explicitly
-- DRY, YAGNI, TDD, frequent commits
+## 注意事项
+- 始终使用精确的文件路径
+- 每个步骤包含完整代码——如果步骤涉及代码变更，展示代码
+- 使用带预期输出的精确命令
+- 通过精确的 skill 名称/路径引用相关技能，以便 OpenCode 控制器显式加载它们
+- DRY、YAGNI、TDD、频繁提交
 
-## Self-Review
+## 自检审查
 
-After writing the complete plan, look at the spec with fresh eyes and check the plan against it. This is a checklist you run yourself — not a subagent dispatch.
+编写完完整计划后，以全新的视角审视规格说明并对照检查。这是你自己运行的检查清单——不是子代理派遣。
 
-**1. Spec coverage:** Skim each section/requirement in the spec. Can you point to a task that implements it? List any gaps.
+**1. 规格覆盖：** 浏览规格中的每个章节/需求。你能指出实现它的任务吗？列出任何缺口。
 
-**2. Placeholder scan:** Search your plan for red flags — any of the patterns from the "No Placeholders" section above. Fix them.
+**2. 占位符扫描：** 在计划中搜索危险信号——上面"禁止占位符"部分中的任何模式。修复它们。
 
-**3. Type consistency:** Do the types, method signatures, and property names you used in later tasks match what you defined in earlier tasks? A function called `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug.
+**3. 类型一致性：** 你在后续任务中使用的类型、方法签名和属性名称是否与早期任务中定义的一致？任务 3 中名为 `clearLayers()` 的函数，在任务 7 中却叫 `clearFullLayers()`，这就是一个 bug。
 
-If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
+如果发现问题，直接内联修复。无需重新审查——修复后继续。如果发现某个规格需求没有对应任务，请添加该任务。
 
-## Execution Handoff
+## 执行交接
 
-After saving the plan, before offering any execution choice or starting implementation, ask with the OpenCode `question` tool:
+保存计划后，在提供任何执行选项或开始实施之前，使用 OpenCode `question` 工具询问：
 
 **"Plan 已保存到 `docs/plans/active/<filename>.md`。在开始实施前，你要我先提交当前的 plan/spec 文档吗？"**
 
-- This question is mandatory even if the user says to start coding immediately or already states a preferred execution mode.
-- Do not combine this with the execution-mode question. Resolve the document-commit decision first.
+- 即使用户要求立即开始编码或已声明首选执行模式，此问题也是强制性的。
+- 不要将此问题与执行模式问题合并。先解决文档提交决策。
 
-**If the user wants the documents committed:**
-- **REQUIRED SUB-SKILL:** Use `git-commit`
-- Commit the current plan document plus any related spec edits that are part of the implementation handoff.
-- After the commit succeeds, offer the execution choice below.
+**如果用户希望提交文档：**
+- **必需子技能：** 使用 `git-commit`
+- 提交当前计划文档以及作为实施交接一部分的任何相关规格编辑。
+- 提交成功后，提供下方的执行选项。
 
-**If the user does not want a document commit yet:**
-- Do not commit the docs.
-- Offer the execution choice below.
+**如果用户暂时不希望提交文档：**
+- 不要提交文档。
+- 提供下方的执行选项。
 
-After the document-commit question is resolved, offer execution choice with the OpenCode `question` tool:
+文档提交问题解决后，使用 OpenCode `question` 工具提供执行选项：
 
 **"有两种执行方式：**
 
@@ -164,10 +164,10 @@ After the document-commit question is resolved, offer execution choice with the 
 
 **你希望采用哪一种？"**
 
-**If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use `subagent-driven-development`
-- The controller should dispatch the real `implementer`, `spec-reviewer`, and `code-reviewer` subagent types per task
+**如果选择 Subagent-Driven：**
+- **必需子技能：** 使用 `subagent-driven-development`
+- 控制器应按任务派遣真正的 `implementer`、`spec-reviewer` 和 `code-reviewer` 子代理类型
 
-**If Inline Execution chosen:**
-- **REQUIRED SUB-SKILL:** Use `executing-plans`
-- Batch execution with checkpoints for review
+**如果选择 Inline Execution：**
+- **必需子技能：** 使用 `executing-plans`
+- 批量执行，带检查点审查

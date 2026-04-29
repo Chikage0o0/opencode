@@ -1,6 +1,6 @@
-# Code Reviewer Dispatch Prompt Template
+# 代码审查者调度提示模板
 
-Use this template when dispatching the real `code-reviewer` subagent for a committed-range or branch-range review.
+使用此模板在调度真正的 code-reviewer 子代理进行已提交范围或分支范围审查时。
 
 ```text
 OpenCode `task` tool:

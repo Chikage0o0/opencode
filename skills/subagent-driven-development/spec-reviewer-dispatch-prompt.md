@@ -1,8 +1,8 @@
-# Spec Reviewer Dispatch Prompt Template
+# Spec Reviewer 调度提示模板
 
-Use this template when dispatching the real `spec-reviewer` subagent for exactly one plan task review cycle.
+请在调度真正的 `spec-reviewer` 子代理执行单个计划任务审查周期时使用此模板。
 
-**Session boundary rule:** Reuse the same reviewer session only for the same task's fix-and-review loop. Start a fresh session for a different plan task.
+**会话边界规则：** 仅针对同一任务的修复-审查循环复用同一个审查者会话。对于不同的计划任务，请开启一个新会话。
 
 ```text
 OpenCode `task` tool:
