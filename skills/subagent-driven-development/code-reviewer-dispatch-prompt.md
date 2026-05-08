@@ -2,7 +2,7 @@
 
 使用此模板在调度真正的 `code-reviewer` 子代理，对单个未提交的 plan 任务进行代码审查。
 
-**会话边界规则：** 仅在同一任务的修复-审查循环中复用同一个审查者会话。针对不同的 plan 任务，请开启新会话。
+**会话边界规则：** 同一任务内如果再次派遣 `code-reviewer`，必须传入该任务中上一次 `code-reviewer` 的 `task_id`。不同 plan 任务必须开启新的 `code-reviewer` 会话，不能复用其他任务的 `task_id`。
 
 ```text
 OpenCode `task` tool:

@@ -2,7 +2,7 @@
 
 在向真正的 implementer 子代理分派单个计划任务时，使用此模板。
 
-**会话边界规则：** 当控制器从任务 N 移动到任务 N+1 时，启动一个新的子代理会话。仅在同一任务的澄清或修复循环中复用 `task_id`。
+**会话边界规则：** 当控制器从任务 N 移动到任务 N+1 时，必须启动新的 `implementer` 子代理会话。若同一任务内再次派遣 `implementer`（澄清、`NEEDS_CONTEXT`、`BLOCKED` 后补充上下文、修复循环或提交步骤），必须传入该任务中上一次 `implementer` 的 `task_id`。
 
 ```text
 OpenCode `task` tool:

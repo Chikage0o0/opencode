@@ -2,7 +2,7 @@
 
 请在调度真正的 `spec-reviewer` 子代理执行单个计划任务审查周期时使用此模板。
 
-**会话边界规则：** 仅针对同一任务的修复-审查循环复用同一个审查者会话。对于不同的计划任务，请开启一个新会话。
+**会话边界规则：** 同一任务内如果再次派遣 `spec-reviewer`，必须传入该任务中上一次 `spec-reviewer` 的 `task_id`。不同计划任务必须开启新的 `spec-reviewer` 会话，不能复用其他任务的 `task_id`。
 
 ```text
 OpenCode `task` tool:
