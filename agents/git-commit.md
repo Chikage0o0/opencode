@@ -75,13 +75,17 @@ git diff --cached --name-only
 Run:
 
 ```bash
+git diff --cached --name-only
 git diff --cached --stat
 git diff --cached
 ```
 
 Requirements:
 - Determine whether the change is `feat`, `fix`, `docs`, `refactor`, `test`, `build`, `chore`, or another repository-appropriate type.
-- Understand the staged change beyond surface-level diff text.
+- Do not rely on `git diff` alone. Read the contents of the staged files whenever doing so is possible and relevant, so the commit message reflects the real intent, scope, and impact of the committed files.
+- For text files in the locked commit scope, inspect the current file contents in addition to the staged diff. For newly added files, read the full file content. For modified files, read enough surrounding file content to understand the role of the changed code or documentation. For renamed files, inspect the destination file. For deleted files, use the diff and path context because current contents are unavailable.
+- For binary or unreadable files, infer intent from path, file type, diff stat, and neighboring staged files; explicitly avoid overclaiming details that were not inspected.
+- Generate the commit message from the combined evidence of staged paths, staged diff, inspected file contents, and repository history style.
 - If the scope was already locked by staged files, only analyze the staged files.
 
 ### 4. Align with repository history
