@@ -2,7 +2,7 @@ import type { Plugin } from "@opencode-ai/plugin"
 import { dirname, join } from "node:path"
 
 const files = ["devenv.nix", "devenv.yaml", "devenv.yml"]
-const cache = new Map<string, Promise<string>>()
+const cache = new Map<string, Promise<Record<string, string>>>()
 
 function devenvEnv(baseEnv: Record<string, string>) {
   return {
@@ -92,6 +92,11 @@ function shellEnv(input: Record<string, string | undefined>) {
   )
 }
 
+function cacheKey(dir: string, baseEnv: Record<string, string>) {
+  const env = Object.entries(baseEnv).sort(([a], [b]) => a.localeCompare(b))
+  return JSON.stringify([dir, env])
+}
+
 async function resolveEnv(dir: string, exported: string, baseEnv: Record<string, string>) {
   const script = [
     "set -euo pipefail",
@@ -117,7 +122,13 @@ async function resolveEnv(dir: string, exported: string, baseEnv: Record<string,
     'old_path=${PATH:-}',
     'old_xdg_data_dirs=${XDG_DATA_DIRS:-}',
     "",
-    'eval "$DEVENV_EXPORT"',
+    'eval_stderr=$(mktemp)',
+    'if ! eval "$DEVENV_EXPORT" >/dev/null 2>"$eval_stderr"; then',
+    '  cat "$eval_stderr" >&2',
+    '  rm -f "$eval_stderr"',
+    '  exit 1',
+    'fi',
+    'rm -f "$eval_stderr"',
     'unset DEVENV_EXPORT',
     "",
     'current_nix_build_top=${NIX_BUILD_TOP-}',
@@ -171,6 +182,15 @@ async function resolveEnv(dir: string, exported: string, baseEnv: Record<string,
   return parseEnv(txt)
 }
 
+async function loadResolvedEnv(dir: string, baseEnv: Record<string, string>) {
+  try {
+    return await resolveEnv(dir, await load(dir, baseEnv), baseEnv)
+  } catch (err) {
+    if (!direnvExportUnavailable(err)) throw err
+    return await loadShellEnv(dir, baseEnv)
+  }
+}
+
 export const DevenvPlugin: Plugin = async () => {
   return {
     "shell.env": async (input, output) => {
@@ -179,23 +199,16 @@ export const DevenvPlugin: Plugin = async () => {
 
       const baseEnv = shellEnv({ ...process.env, ...output.env })
 
+      const key = cacheKey(dir, baseEnv)
       const env =
-        cache.get(dir) ??
-        load(dir, baseEnv).catch((err) => {
-          cache.delete(dir)
+        cache.get(key) ??
+        loadResolvedEnv(dir, baseEnv).catch((err) => {
+          cache.delete(key)
           throw err
         })
 
-      cache.set(dir, env)
-
-      let loaded: Record<string, string>
-      try {
-        loaded = await resolveEnv(dir, await env, baseEnv)
-      } catch (err) {
-        if (!direnvExportUnavailable(err)) throw err
-        cache.delete(dir)
-        loaded = await loadShellEnv(dir, baseEnv)
-      }
+      cache.set(key, env)
+      const loaded = await env
 
       for (const key of Object.keys(output.env)) {
         if (!(key in loaded)) delete output.env[key]

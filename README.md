@@ -93,7 +93,8 @@ TypeScript 插件，在 shell 环境初始化时集成 [devenv.sh](https://deven
 - 从项目目录向上查找 `devenv.nix`/`devenv.yaml`/`devenv.yml`
 - 调用 `devenv direnv-export` 获取环境变量
 - 通过 bash 脚本解析导出内容，合并到 OpenCode 的 shell 环境
-- 使用内存缓存避免重复加载
+- 成功解析时静默 devenv/direnv 的加载日志，失败时保留错误输出
+- 使用内存缓存复用同一项目、同一基础环境下的解析结果
 
 需宿主环境安装 `devenv` 方可生效。
 
