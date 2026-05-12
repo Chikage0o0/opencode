@@ -47,6 +47,43 @@ async function load(dir: string, baseEnv: Record<string, string>) {
   return txt
 }
 
+function direnvExportUnavailable(err: unknown) {
+  const message = err instanceof Error ? err.message : String(err)
+  return message.includes("unrecognized subcommand 'direnv-export'")
+}
+
+function parseEnv(txt: string) {
+  const keyPattern = /[A-Za-z_][A-Za-z0-9_]*=/
+
+  return Object.fromEntries(
+    txt
+      .split("\u0000")
+      .filter(Boolean)
+      .flatMap((entry) => {
+        const normalized = keyPattern.test(entry) ? entry.slice(entry.search(keyPattern)) : entry
+        const idx = normalized.indexOf("=")
+        return idx === -1 ? [] : [[normalized.slice(0, idx), normalized.slice(idx + 1)]]
+      }),
+  )
+}
+
+async function loadShellEnv(dir: string, baseEnv: Record<string, string>) {
+  const run = Bun.spawn(["devenv", "--quiet", "shell", "env", "-0"], {
+    cwd: dir,
+    env: devenvEnv(baseEnv),
+    stdout: "pipe",
+    stderr: "pipe",
+  })
+
+  const txt = await new Response(run.stdout).text()
+  const err = await new Response(run.stderr).text()
+  const code = await run.exited
+
+  if (code !== 0) throw new Error(err || `failed to load devenv shell environment in ${dir}`)
+
+  return parseEnv(txt)
+}
+
 function shellEnv(input: Record<string, string | undefined>) {
   return Object.fromEntries(
     Object.entries(input).flatMap(([key, value]) => {
@@ -131,15 +168,7 @@ async function resolveEnv(dir: string, exported: string, baseEnv: Record<string,
 
   if (code !== 0) throw new Error(err || `failed to resolve devenv environment in ${dir}`)
 
-  return Object.fromEntries(
-    txt
-      .split("\u0000")
-      .filter(Boolean)
-      .flatMap((entry) => {
-        const idx = entry.indexOf("=")
-        return idx === -1 ? [] : [[entry.slice(0, idx), entry.slice(idx + 1)]]
-      }),
-  )
+  return parseEnv(txt)
 }
 
 export const DevenvPlugin: Plugin = async () => {
@@ -159,7 +188,14 @@ export const DevenvPlugin: Plugin = async () => {
 
       cache.set(dir, env)
 
-      const loaded = await resolveEnv(dir, await env, baseEnv)
+      let loaded: Record<string, string>
+      try {
+        loaded = await resolveEnv(dir, await env, baseEnv)
+      } catch (err) {
+        if (!direnvExportUnavailable(err)) throw err
+        cache.delete(dir)
+        loaded = await loadShellEnv(dir, baseEnv)
+      }
 
       for (const key of Object.keys(output.env)) {
         if (!(key in loaded)) delete output.env[key]
