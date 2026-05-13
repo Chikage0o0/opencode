@@ -18,7 +18,9 @@ $character"""
 [directory]
 style = "bold cyan"
 truncation_length = 3
+truncate_to_repo = false
 truncation_symbol = ".../"
+home_symbol = "~"
 read_only = " [RO]"
 
 # --- Git 状态 (纯文本，避免解析错误与乱码) ---
