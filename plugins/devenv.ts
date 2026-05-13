@@ -13,16 +13,16 @@ function devenvEnv(baseEnv: Record<string, string>) {
   }
 }
 
-async function match(dir: string) {
+async function hasDevenvConfig(dir: string) {
   const hits = await Promise.all(files.map((x) => Bun.file(join(dir, x)).exists()))
   return hits.some(Boolean)
 }
 
-async function root(dir: string) {
+async function findDevenvRoot(dir: string) {
   let cur = dir
 
   while (true) {
-    if (await match(cur)) return cur
+    if (await hasDevenvConfig(cur)) return cur
 
     const up = dirname(cur)
     if (up === cur) return
@@ -30,7 +30,7 @@ async function root(dir: string) {
   }
 }
 
-async function load(dir: string, baseEnv: Record<string, string>) {
+async function loadDirenvExport(dir: string, baseEnv: Record<string, string>) {
   const run = Bun.spawn(["devenv", "direnv-export"], {
     cwd: dir,
     env: devenvEnv(baseEnv),
@@ -67,7 +67,7 @@ function parseEnv(txt: string) {
   )
 }
 
-async function loadShellEnv(dir: string, baseEnv: Record<string, string>) {
+async function loadQuietShellEnv(dir: string, baseEnv: Record<string, string>) {
   const run = Bun.spawn(["devenv", "--quiet", "shell", "env", "-0"], {
     cwd: dir,
     env: devenvEnv(baseEnv),
@@ -97,16 +97,16 @@ function cacheKey(dir: string, baseEnv: Record<string, string>) {
   return JSON.stringify([dir, env])
 }
 
-async function resolveEnv(dir: string, exported: string, baseEnv: Record<string, string>) {
-  const script = [
+function resolvedEnvScript() {
+  return [
     "set -euo pipefail",
     "",
-    "nix_export_or_unset() {",
-    '  local key=$1 value=$2',
-    '  if [[ "$value" == __UNSET__ ]]; then',
-    '    unset "$key"',
-    "  else",
+    "nix_restore_var() {",
+    '  local key=$1 was_set=$2 value=$3',
+    '  if [[ -n "$was_set" ]]; then',
     '    export "$key=$value"',
+    "  else",
+    '    unset "$key"',
     "  fi",
     "}",
     "",
@@ -114,11 +114,16 @@ async function resolveEnv(dir: string, exported: string, baseEnv: Record<string,
     '  export DIRENV_ACTIVE="$PWD:${DIRENV_ACTIVE-}"',
     "fi",
     "",
-    'old_nix_build_top=${NIX_BUILD_TOP:-__UNSET__}',
-    'old_tmp=${TMP:-__UNSET__}',
-    'old_tmpdir=${TMPDIR:-__UNSET__}',
-    'old_temp=${TEMP:-__UNSET__}',
-    'old_tempdir=${TEMPDIR:-__UNSET__}',
+    'old_nix_build_top_set=${NIX_BUILD_TOP+x}',
+    'old_tmp_set=${TMP+x}',
+    'old_tmpdir_set=${TMPDIR+x}',
+    'old_temp_set=${TEMP+x}',
+    'old_tempdir_set=${TEMPDIR+x}',
+    'old_nix_build_top=${NIX_BUILD_TOP-}',
+    'old_tmp=${TMP-}',
+    'old_tmpdir=${TMPDIR-}',
+    'old_temp=${TEMP-}',
+    'old_tempdir=${TEMPDIR-}',
     'old_path=${PATH:-}',
     'old_xdg_data_dirs=${XDG_DATA_DIRS:-}',
     "",
@@ -136,11 +141,11 @@ async function resolveEnv(dir: string, exported: string, baseEnv: Record<string,
     '  rm -rf "$current_nix_build_top"',
     "fi",
     "",
-    'nix_export_or_unset NIX_BUILD_TOP "$old_nix_build_top"',
-    'nix_export_or_unset TMP "$old_tmp"',
-    'nix_export_or_unset TMPDIR "$old_tmpdir"',
-    'nix_export_or_unset TEMP "$old_temp"',
-    'nix_export_or_unset TEMPDIR "$old_tempdir"',
+    'nix_restore_var NIX_BUILD_TOP "$old_nix_build_top_set" "$old_nix_build_top"',
+    'nix_restore_var TMP "$old_tmp_set" "$old_tmp"',
+    'nix_restore_var TMPDIR "$old_tmpdir_set" "$old_tmpdir"',
+    'nix_restore_var TEMP "$old_temp_set" "$old_temp"',
+    'nix_restore_var TEMPDIR "$old_tempdir_set" "$old_tempdir"',
     "",
     'new_path=${PATH:-}',
     'export PATH=',
@@ -165,8 +170,10 @@ async function resolveEnv(dir: string, exported: string, baseEnv: Record<string,
     "",
     'command -p env -0',
   ].join("\n")
+}
 
-  const run = Bun.spawn(["bash", "-c", script], {
+async function resolveEnv(dir: string, exported: string, baseEnv: Record<string, string>) {
+  const run = Bun.spawn(["bash", "-c", resolvedEnvScript()], {
     cwd: dir,
     env: { ...devenvEnv(baseEnv), DEVENV_EXPORT: exported },
     stdout: "pipe",
@@ -184,17 +191,25 @@ async function resolveEnv(dir: string, exported: string, baseEnv: Record<string,
 
 async function loadResolvedEnv(dir: string, baseEnv: Record<string, string>) {
   try {
-    return await resolveEnv(dir, await load(dir, baseEnv), baseEnv)
+    return await resolveEnv(dir, await loadDirenvExport(dir, baseEnv), baseEnv)
   } catch (err) {
     if (!direnvExportUnavailable(err)) throw err
-    return await loadShellEnv(dir, baseEnv)
+    return await loadQuietShellEnv(dir, baseEnv)
   }
+}
+
+function applyLoadedEnv(outputEnv: Record<string, string>, loaded: Record<string, string>) {
+  for (const key of Object.keys(outputEnv)) {
+    if (!(key in loaded)) delete outputEnv[key]
+  }
+
+  Object.assign(outputEnv, loaded)
 }
 
 export const DevenvPlugin: Plugin = async () => {
   return {
     "shell.env": async (input, output) => {
-      const dir = await root(input.cwd)
+      const dir = await findDevenvRoot(input.cwd)
       if (!dir) return
 
       const baseEnv = shellEnv({ ...process.env, ...output.env })
@@ -210,11 +225,7 @@ export const DevenvPlugin: Plugin = async () => {
       cache.set(key, env)
       const loaded = await env
 
-      for (const key of Object.keys(output.env)) {
-        if (!(key in loaded)) delete output.env[key]
-      }
-
-      Object.assign(output.env, loaded)
+      applyLoadedEnv(output.env, loaded)
     },
   }
 }

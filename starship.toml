@@ -1,0 +1,99 @@
+# --- 全局结构 (极致紧凑，高信息密度，AI友好) ---
+format = """
+$directory\
+$git_branch\
+$git_status\
+$nix_shell\
+$nodejs\
+$bun\
+$rust\
+$golang\
+$cmd_duration\
+$memory_usage\
+$status\
+$line_break\
+$character"""
+
+# --- 目录 ---
+[directory]
+style = "bold cyan"
+truncation_length = 3
+truncation_symbol = ".../"
+read_only = " [RO]"
+
+# --- Git 状态 (纯文本，避免解析错误与乱码) ---
+[git_branch]
+symbol = "git:"
+style = "bold purple"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+format = "[$all_status$ahead_behind]($style) "
+style = "bold red"
+conflicted = "="
+ahead = ">"
+behind = "<"
+diverged = "<>"
+untracked = "?"
+stashed = "*"
+modified = "!"
+staged = "+"
+renamed = "»"
+deleted = "x"
+
+# --- 编程语言与环境 (紧凑标签格式) ---
+[nodejs]
+symbol = "node:"
+style = "bold green"
+format = "[$symbol$version]($style) "
+detect_files = ["package.json", ".node-version"]
+
+[bun]
+symbol = "bun:"
+style = "bold blue"
+format = "[$symbol$version]($style) "
+
+[rust]
+symbol = "rust:"
+style = "bold 208"
+format = "[$symbol$version]($style) "
+
+[golang]
+symbol = "go:"
+style = "bold cyan"
+format = "[$symbol$version]($style) "
+
+[nix_shell]
+symbol = "nix:"
+style = "bold blue"
+format = "[$symbol$state]($style) "
+impure_msg = "impure"
+pure_msg = "pure"
+
+# --- AI 辅助决策信息 (性能与状态反馈) ---
+[cmd_duration]
+min_time = 2_000
+format = "took [$duration]($style) "
+style = "bold yellow"
+
+[memory_usage]
+symbol = "mem:"
+disabled = false
+threshold = 75
+format = "[$symbol$ram_pct]($style) "
+style = "bold dimmed white"
+
+[status]
+disabled = false
+format = "[ERR:$status]($style) "
+style = "bold red"
+
+# --- 交互符号 (带明确状态码) ---
+[character]
+success_symbol = "[>](bold green)"
+error_symbol = "[>](bold red)"
+vicmd_symbol = "[<](bold green)"
+
+# --- 兼容性补充 ---
+[package]
+disabled = true
