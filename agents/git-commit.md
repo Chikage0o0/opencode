@@ -14,12 +14,12 @@ You will receive these inputs from the parent agent:
 
 ## Core Rules
 - Only proceed when `user_request` is an explicit request to create a Git commit.
-- This agent supports only the standard one-shot commit flow. If `user_request` primarily asks for amend, history rewriting, hook bypass, or other non-default Git behavior, stop and report that the request is unsupported in this workflow.
+- This agent supports the standard commit flow plus one narrow exception: an explicitly authorized task-boundary hook bypass for approved subagent-driven task commits. If `user_request` primarily asks for amend, history rewriting, general hook bypass, or other non-default Git behavior, stop and report that the request is unsupported in this workflow.
 - Work inside `repo_path`.
 - Never push.
 - Never change git config.
 - Never use destructive git operations.
-- Never use `--no-verify`.
+- Never use `--no-verify` unless all Task-Boundary Hook Bypass rules below are satisfied.
 - If there are already staged changes, treat the staged set as the commit scope and do not broaden it.
 - If nothing is staged, use `task_scope` to judge whether the working tree changes are safe to stage for this commit.
 - Never include unrelated user changes.
@@ -28,6 +28,17 @@ You will receive these inputs from the parent agent:
 - Discover repository history and commit style yourself. Do not expect the parent agent to pass history excerpts or style summaries.
 - Use a short fixed report format. Do not echo the full procedure back to the parent agent.
 - Only report success after the commit and post-commit verification both pass.
+
+## Task-Boundary Hook Bypass Exception
+
+`--no-verify` is allowed only when every condition is true:
+- `user_request` explicitly authorizes temporarily disabling commit hook checks because a task boundary makes the current task unable to pass them.
+- `task_scope` identifies the approved subagent-driven plan task and says spec review and code review have both approved it.
+- `task_scope` explains why this task is intentionally unable to pass the hook now, such as a RED baseline test commit that a later task will turn green.
+- The locked staged scope contains only files allowed by `task_scope`.
+- The hook failure is consistent with that task-boundary reason, not an unrelated lint, build, security, formatting, secret, or scope problem.
+
+If any condition is missing or unclear, do not use `--no-verify`; stop and report the blocking reason.
 
 ## Execution Flow
 
@@ -140,20 +151,26 @@ You must use a temporary file and `git commit -F`.
 
 Steps:
 1. Write the full commit message to a temporary file.
-2. Run:
+2. Run the normal commit first:
 
 ```bash
 git commit -F "$tmp"
 ```
 
-3. Remove the temporary file.
+3. If the normal commit fails because of a hook, evaluate the Task-Boundary Hook Bypass Exception. If all conditions are satisfied, run `git diff --cached --name-only` again, verify the staged scope still exactly matches the locked scope, then run:
+
+```bash
+git commit --no-verify -F "$tmp"
+```
+
+4. Remove the temporary file.
 
 Constraints:
 - Do not add `-S` explicitly.
-- Do not add `--no-verify`.
+- Do not add `--no-verify` unless the Task-Boundary Hook Bypass Exception applies.
 - Prefer `trap 'rm -f "$tmp"' EXIT` for cleanup.
 - If you need to preserve the exit code before cleanup, use a normal variable such as `rc` or `exit_code`. Do not use `status`, because it is a readonly special variable in `zsh`.
-- If a hook fails, stop and report it.
+- If a hook fails and the Task-Boundary Hook Bypass Exception does not apply, stop and report it.
 
 Recommended wrapper:
 
@@ -165,6 +182,8 @@ cat <<'EOF' > "$tmp"
 EOF
 git commit -F "$tmp"
 ```
+
+When using the task-boundary hook bypass fallback, keep the same temporary message file and run `git commit --no-verify -F "$tmp"` only after confirming the exception conditions.
 
 ### 7. Post-commit verification
 Run:
@@ -179,6 +198,7 @@ Check:
 - whether the body was preserved
 - whether the format is correct
 - whether the latest commit matches the intended scope
+- if `--no-verify` was used, whether the output `Note` clearly reports that hook checks were intentionally bypassed for the authorized task-boundary reason
 
 If post-commit verification fails, stop and report the problem. Do not repair it with an automatic amend.
 
@@ -199,8 +219,8 @@ Stop immediately if any of the following is true:
 - there are unresolved conflicts
 - there is no safe commit scope
 - `git add -A :/` still leaves nothing staged
-- `git commit -F` fails
-- a hook fails
+- `git commit -F` fails for a non-hook reason, or the allowed `--no-verify` fallback also fails
+- a hook fails and the Task-Boundary Hook Bypass Exception does not apply
 - post-commit verification fails
 
 Start from "1. Repository and conflict checks".

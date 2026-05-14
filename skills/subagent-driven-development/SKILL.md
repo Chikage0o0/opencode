@@ -5,11 +5,11 @@ description: "Use when executing an existing implementation plan with independen
 
 # 子代理驱动开发
 
-在每个任务边界派遣一个全新的子代理来执行计划，每个任务之后进行两阶段审查：先进行规格合规审查，然后进行代码审查。只有两个审查都通过后，才提交任务。
+在每个任务边界派遣一个全新的子代理来执行计划，每个任务之后进行两阶段审查：先进行规格合规审查，然后进行代码审查。只有两个审查都通过后，控制器才通过 `git-commit` 技能提交任务。
 
 **为什么使用子代理：** 你将任务委派给具有隔离上下文的专门代理。通过精确设计它们的指令和上下文，你确保它们保持专注并成功完成任务。它们绝不应继承你的会话上下文或历史——你准确地构建它们所需的内容。这也为你自己的协调工作保留了上下文。
 
-**核心原则：** 每个任务边界使用全新子代理 + 任务内同类型子代理持续复用 + 两阶段审查（先规格后代码审查）+ 仅在批准后才提交 = 高质量、快速迭代
+**核心原则：** 每个任务边界使用全新子代理 + 任务内同类型子代理持续复用 + 两阶段审查（先规格后代码审查）+ 控制器仅在批准后用 `git-commit` 提交 = 高质量、快速迭代
 
 角色行为定义在 `agents/*.md` 中，而完整的任务特定上下文位于本技能的 `*-dispatch-prompt.md` 模板中。
 
@@ -58,7 +58,7 @@ flowchart TD
         H --> I{代码审查批准?}
         I -->|否| J[实现子代理修复代码审查问题]
         J --> H
-        I -->|是| K[实现子代理提交已批准的任务变更]
+        I -->|是| K[控制器使用 git-commit 提交已批准的任务变更]
         K --> L[标记任务完成]
     end
 
@@ -77,7 +77,22 @@ flowchart TD
     V --> W[使用 finishing-a-development-branch]
 ```
 
-每个任务的提交仅在规格合规审查和代码审查都批准该任务后才进行。审查者将任务未提交的差异与任务的基础提交进行比较；控制器在审查循环通过后才告诉实现者进行提交。
+每个任务的提交仅在规格合规审查和代码审查都批准该任务后才进行。审查者将任务未提交的差异与任务的基础提交进行比较；控制器在审查循环通过后必须使用 `git-commit` 技能提交，不能让实现者或任何通用子代理执行提交。
+
+## 提交关卡
+
+审查通过后的提交是控制器职责，不是实现者职责。
+
+1. 确认规格审查和代码审查都已批准当前任务。
+2. 确认提交范围只包含当前任务允许的变更；如果范围不清楚，停止并询问用户。
+3. 加载并遵循 `git-commit` 技能。
+4. 使用 `task` 调用专用 `git-commit` 子代理执行提交。
+5. 如果 `git-commit` 报告 hook 失败、验证失败或其他阻塞，停止并向用户报告；不要回退到裸 `git commit`、不要要求实现者提交。
+6. 若用户已明确授权“任务边界导致当前任务无法通过提交检查时可临时禁用 hook”，并且当前任务确实是已批准的 RED/中间态任务，控制器仍必须通过 `git-commit` 技能派遣专用子代理执行该例外提交；控制器不能自己运行 `git commit --no-verify`。
+
+**红旗：** 任何“让同一实现子代理提交”“只是运行一下 `git commit`”“我自己加个 `--no-verify` 更快”“这次只提交测试可以例外”的想法，都是绕过提交调度器。停止并改用 `git-commit` 技能。
+
+**任务边界 hook 例外：** 只用于计划任务拆分导致当前任务按设计无法通过仓库提交检查的情况，例如 RED 基线测试提交。必须同时满足：用户已授权、当前任务双审已批准、提交范围只包含当前任务、失败原因来自任务边界而不是普通质量问题。该例外不允许用于跳过真实 lint/build/security 问题，也不允许跳过后续任务把测试转绿的责任。
 
 ## 模型选择
 
@@ -185,7 +200,7 @@ Spec reviewer: ✅ Spec compliant - all requirements met, nothing extra
 [Dispatch code reviewer against Task 1 base commit + current working tree diff]
 Code reviewer: Strengths: Good test coverage, clean. Issues: None. Approved.
 
-[Implementer commits approved task changes]
+[Controller uses git-commit skill to commit approved Task 1 changes]
 [Mark Task 1 complete]
 
 Task 2: Recovery modes
@@ -226,7 +241,7 @@ Implementer: Extracted PROGRESS_INTERVAL constant
 [Code reviewer reviews again]
 Code reviewer: ✅ Approved
 
-[Implementer commits approved task changes]
+[Controller uses git-commit skill to commit approved Task 2 changes]
 [Mark Task 2 complete]
 
 ...
@@ -292,6 +307,9 @@ Done!
 - 让实现者的自检取代实际审查（两者都需要）
 - **在规格合规通过 ✅ 之前开始代码审查**（顺序错误）
 - **在规格合规和代码审查都通过 ✅ 之前提交任务更改**
+- **让实现者、审查者或任何通用子代理执行提交**（提交只能由控制器通过 `git-commit` 技能派遣专用子代理）
+- **直接运行 `git commit` 或把 `git-commit` 技能当成手动步骤照抄**（必须调用专用 `git-commit` 子代理）
+- **控制器自行运行 `git commit --no-verify`**（即使用户授权任务边界 hook 例外，也必须由专用 `git-commit` 子代理执行）
 - 在任一审查还有未解决问题时进入下一个任务
 - 在派遣任务 N+1 时复用任务 N 的任何 `task_id`（上下文污染）
 - 在同一任务内第二次或后续派遣 `implementer`、`spec-reviewer` 或 `code-reviewer` 时新开同类型子代理会话
@@ -318,6 +336,7 @@ Done!
 
 **必需的工作流技能：**
 - **`writing-plans`** - 创建本技能执行的计划
+- **`git-commit`** - 每个已批准任务的唯一提交入口
 - **`finishing-a-development-branch`** - 在所有任务完成后完成开发
 
 **子代理应使用：**

@@ -2,7 +2,7 @@
 
 在向真正的 implementer 子代理分派单个计划任务时，使用此模板。
 
-**会话边界规则：** 当控制器从任务 N 移动到任务 N+1 时，必须启动新的 `implementer` 子代理会话。若同一任务内再次派遣 `implementer`（澄清、`NEEDS_CONTEXT`、`BLOCKED` 后补充上下文、修复循环或提交步骤），必须传入该任务中上一次 `implementer` 的 `task_id`。
+**会话边界规则：** 当控制器从任务 N 移动到任务 N+1 时，必须启动新的 `implementer` 子代理会话。若同一任务内再次派遣 `implementer`（澄清、`NEEDS_CONTEXT`、`BLOCKED` 后补充上下文或修复循环），必须传入该任务中上一次 `implementer` 的 `task_id`。提交不是实现者派遣场景；任务提交只能由控制器通过 `git-commit` 技能处理。
 
 ```text
 OpenCode `task` tool:
@@ -28,7 +28,7 @@ OpenCode `task` tool:
     constraints: |
       [Task-specific constraints, including:
       - do not broaden scope
-      - do not commit unless this dispatch is explicitly the commit step
+      - never commit; approved task commits are handled only by the controller through the git-commit skill
       - no unrelated refactors
       - language, API, or compatibility constraints from the spec
       - any repo or branch restrictions that matter for this task]
@@ -49,4 +49,5 @@ OpenCode `task` tool:
     - Read the plan file at the specified line range to get full task details
     - Use spec_doc_path to understand the broader context and requirements
     - If key context is missing, return `NEEDS_CONTEXT` instead of guessing
+    - If asked to commit, return `BLOCKED` and state that the controller must use the `git-commit` skill
 ```
