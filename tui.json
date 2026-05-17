@@ -3,5 +3,8 @@
   "theme": "catppuccin",
   "keybinds": {
     "command_list": "<leader>p"
-  }
+  },
+  "plugin": [
+    "oh-my-opencode-slim@2.0.0-beta.4"
+  ]
 }
