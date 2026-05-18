@@ -19,6 +19,10 @@
 ├── opencode.json                     # OpenCode 主配置：插件、权限、MCP、默认 agent 禁用
 ├── tui.json                          # TUI 配置与 slim TUI 插件
 ├── oh-my-opencode-slim.json          # slim agent presets 与全局插件配置
+├── agent/
+│   └── git-commit.md                 # 专用 Git 提交 subagent
+├── commands/
+│   └── git-commit.md                 # /git-commit 命令，轻量调度到 subagent
 ├── plugins/
 │   └── devenv.ts                     # devenv.sh 环境集成插件
 ├── skills/                           # slim bundled skills
@@ -53,6 +57,14 @@
 - `hybrid` 用 OpenAI 承担最高风险决策与审查，用 opencode-go 承担高频探索、修复、设计、检索和观察。
 - `autoUpdate` 设置为 `false`，版本由 Nix 仓库显式控制。
 - `disabled_agents: []` 启用 Observer。
+
+### `/git-commit` command + subagent
+
+- `commands/git-commit.md` 定义 `/git-commit` 命令，默认走 `subtask`/`task` 调度，不让主 agent 直接执行 `git commit`。
+- `agent/git-commit.md` 是专用提交 subagent，自己读取 staged diff、必要文件内容和仓库历史，生成中文提交信息，并使用临时文件执行 `git commit -F`。
+- `/git-commit <范围说明>` 会把参数作为 `task_scope`；`/git-commit` 不带参数时，由主 agent 根据当前对话、短 `git status` 和 staged set 生成一两句最小范围说明。
+- command 不注入完整 diff、log 或历史样例，避免污染主 agent 上下文并降低提交成本。
+- subagent 默认不 push、不改 git config、不做 destructive git 操作；提交成功后只返回紧凑结果。
 
 ## 启动与验证
 
