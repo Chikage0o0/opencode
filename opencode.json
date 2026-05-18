@@ -3,7 +3,7 @@
   "share": "disabled",
   "plugin": [
     "@tarquinen/opencode-dcp@latest",
-    "oh-my-opencode-slim@2.0.0-beta.4"
+    "oh-my-opencode-slim@2.0.0-beta.7"
   ],
   "agent": {
     "title": {
