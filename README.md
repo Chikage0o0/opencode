@@ -6,7 +6,7 @@
 
 - Plugin package: `oh-my-opencode-slim@1.1.1`
 - Plugin config schema: `https://unpkg.com/oh-my-opencode-slim@1.1.1/oh-my-opencode-slim.schema.json`
-- Active preset: `opencode-go`
+- Active preset: `hybrid`
 - 版本策略：使用 npm `latest` dist-tag 对应的稳定 release，不使用 beta 预发布版本。
 
 `modules/home/opencode/default.nix` 会把本目录中的配置同步到 `~/.config/opencode/`。
@@ -46,10 +46,13 @@
 
 ### `oh-my-opencode-slim.json`
 
-- `preset` 默认为 `opencode-go`。
-- 同时保留 `openai` 与 `opencode-go` presets，便于在 OpenCode 内通过 `/preset` 切换。
+- `preset` 默认为 `hybrid`。
+- 同时保留 `openai`、`opencode-go` 与 `hybrid` 三套 presets，便于在 OpenCode 内通过 `/preset` 切换。
+- `openai` 用 GPT-5.5 承担 orchestrator/oracle，用 GPT-5.3-Codex 承担 council/designer/fixer，用 GPT-5.4-Mini 承担检索、探索与观察，控制缓存型请求成本。
+- `opencode-go` 优先使用 Qwen3.6 Plus、Kimi K2.6、DeepSeek V4 Pro/Flash 与 MiniMax M2.7，在保持较高智力的同时提升速度和额度效率。
+- `hybrid` 用 OpenAI 承担最高风险决策与审查，用 opencode-go 承担高频探索、修复、设计、检索和观察。
 - `autoUpdate` 设置为 `false`，版本由 Nix 仓库显式控制。
-- `disabled_agents: []` 启用 Observer；这对 `opencode-go` preset 很重要，因为 GLM orchestrator 不是多模态模型。
+- `disabled_agents: []` 启用 Observer。
 
 ## 启动与验证
 
