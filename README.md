@@ -1,15 +1,15 @@
 # OpenCode 配置项目
 
-本目录保存一套由 Nix/Home Manager 管理的 OpenCode 全局配置。当前配置已经替换为 [`oh-my-opencode-slim`](https://github.com/alvinunreal/oh-my-opencode-slim) beta 版，不再保留旧的本地 agents/skills 工作流。
+本目录保存一套由 Nix/Home Manager 管理的 OpenCode 全局配置。当前配置已经替换为 [`oh-my-opencode-slim`](https://github.com/alvinunreal/oh-my-opencode-slim) 稳定 release 版，不再保留旧的本地 agents/skills 工作流。
 
 ## 当前版本
 
-- Plugin package: `oh-my-opencode-slim@2.0.0-beta.7`
-- Plugin config schema: `https://unpkg.com/oh-my-opencode-slim@2.0.0-beta.7/oh-my-opencode-slim.schema.json`
+- Plugin package: `oh-my-opencode-slim@1.1.1`
+- Plugin config schema: `https://unpkg.com/oh-my-opencode-slim@1.1.1/oh-my-opencode-slim.schema.json`
 - Active preset: `opencode-go`
-- Beta V2 需求：启动 OpenCode 时需要 `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=1`
+- 版本策略：使用 npm `latest` dist-tag 对应的稳定 release，不使用 beta 预发布版本。
 
-`modules/home/opencode/default.nix` 会设置该环境变量，并把本目录中的配置同步到 `~/.config/opencode/`。
+`modules/home/opencode/default.nix` 会把本目录中的配置同步到 `~/.config/opencode/`。
 
 ## 目录结构
 
@@ -26,7 +26,6 @@
 │   ├── simplify/
 │   ├── codemap/
 │   ├── clonedeps/
-│   └── deepwork/
 ├── devenv.nix / devenv.yaml          # 本配置目录的开发环境
 └── README.md
 ```
@@ -37,7 +36,7 @@
 
 - 启用插件：
   - `@tarquinen/opencode-dcp@latest`
-  - `oh-my-opencode-slim@2.0.0-beta.7`
+  - `oh-my-opencode-slim@1.1.1`
 - 禁用 OpenCode 默认 `explore` / `general` agents，让 slim orchestrator 接管工作流。
 - 启用 LSP：`"lsp": true`。
 - 保留 `context7` MCP 与原有安全权限策略。
@@ -70,11 +69,11 @@ ping all agents
 也可以诊断插件配置：
 
 ```bash
-bunx oh-my-opencode-slim@2.0.0-beta.7 doctor
+bunx oh-my-opencode-slim@1.1.1 doctor
 ```
 
 ## 维护建议
 
 - 不要重新加入旧 `agents/` 目录；slim 插件自带 Pantheon agents。
 - 新增 repo-specific 覆盖时，优先使用 `.opencode/oh-my-opencode-slim.json`，不要直接修改插件包源码。
-- 需要更稳定时，可把 package 从 beta pin 到 release 版，例如 `oh-my-opencode-slim@2.0.0-beta.7`，同时确认 V2 beta 环境变量是否仍需要。
+- 更新版本时优先跟随 npm `latest` 稳定 release；如需切回 beta，需同步确认 bundled skills 与环境变量要求。
