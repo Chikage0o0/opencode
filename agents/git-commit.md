@@ -1,5 +1,6 @@
 ---
-description: Creates a safe, scope-locked Git commit when explicitly requested by the parent agent or /git-commit command
+description: Creates a safe, scope-locked Git commit when explicitly requested
+  by the parent agent or /git-commit command
 mode: subagent
 tools:
   bash: true
