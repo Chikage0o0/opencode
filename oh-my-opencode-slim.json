@@ -24,7 +24,7 @@
         "mcps": []
       },
       "council": {
-        "model": "openai/gpt-5.3-codex",
+        "model": "openai/gpt-5.4",
         "variant": "high",
         "skills": [],
         "mcps": []
@@ -46,13 +46,13 @@
         "mcps": []
       },
       "designer": {
-        "model": "openai/gpt-5.3-codex",
+        "model": "openai/gpt-5.4",
         "variant": "high",
         "skills": [],
         "mcps": []
       },
       "fixer": {
-        "model": "openai/gpt-5.3-codex",
+        "model": "openai/gpt-5.4",
         "variant": "high",
         "skills": [],
         "mcps": []
