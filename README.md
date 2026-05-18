@@ -19,7 +19,7 @@
 ├── opencode.json                     # OpenCode 主配置：插件、权限、MCP、默认 agent 禁用
 ├── tui.json                          # TUI 配置与 slim TUI 插件
 ├── oh-my-opencode-slim.json          # slim agent presets 与全局插件配置
-├── agent/
+├── agents/
 │   └── git-commit.md                 # 专用 Git 提交 subagent
 ├── commands/
 │   └── git-commit.md                 # /git-commit 命令，轻量调度到 subagent
@@ -61,7 +61,7 @@
 ### `/git-commit` command + subagent
 
 - `commands/git-commit.md` 定义 `/git-commit` 命令，默认走 `subtask`/`task` 调度，不让主 agent 直接执行 `git commit`。
-- `agent/git-commit.md` 是专用提交 subagent，自己读取 staged diff、必要文件内容和仓库历史，生成中文提交信息，并使用临时文件执行 `git commit -F`。
+- `agents/git-commit.md` 是专用提交 subagent，自己读取 staged diff、必要文件内容和仓库历史，生成中文提交信息，并使用临时文件执行 `git commit -F`。
 - `/git-commit <范围说明>` 会把参数作为 `task_scope`；`/git-commit` 不带参数时，由主 agent 根据当前对话、短 `git status` 和 staged set 生成一两句最小范围说明。
 - command 不注入完整 diff、log 或历史样例，避免污染主 agent 上下文并降低提交成本。
 - subagent 默认不 push、不改 git config、不做 destructive git 操作；提交成功后只返回紧凑结果。
@@ -89,6 +89,6 @@ bunx oh-my-opencode-slim@1.1.1 doctor
 
 ## 维护建议
 
-- 不要重新加入旧 `agents/` 目录；slim 插件自带 Pantheon agents。
+- 不要重新加入旧工作流；slim 插件自带 Pantheon agents，本目录只保留少量必要的自定义 agents/commands。
 - 新增 repo-specific 覆盖时，优先使用 `.opencode/oh-my-opencode-slim.json`，不要直接修改插件包源码。
 - 更新版本时优先跟随 npm `latest` 稳定 release；如需切回 beta，需同步确认 bundled skills 与环境变量要求。
