@@ -1,0 +1,173 @@
+import type { Event, Permission } from "@opencode-ai/sdk"
+import type { Plugin } from "@opencode-ai/plugin"
+
+type AlertState = "default" | "question" | "permission" | "done"
+type AlertTimer = unknown
+
+type PermissionAskOutput = { status: "ask" | "deny" | "allow" }
+
+type TitleAlertOptions = {
+  write?: (value: string) => void
+  setInterval?: (callback: () => void, delay: number) => AlertTimer
+  clearInterval?: (timer: AlertTimer) => void
+  intervalMs?: number
+}
+
+const prefixByState: Record<AlertState, string> = {
+  default: "OC",
+  question: "OC?",
+  permission: "OC!",
+  done: "OC✓",
+}
+
+const spinnerFrames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+
+function sessionIDOf(event: Event) {
+  const properties = event.properties as { sessionID?: unknown }
+  return typeof properties.sessionID === "string" ? properties.sessionID : undefined
+}
+
+function sessionTitleOf(event: Event) {
+  if (event.type !== "session.created" && event.type !== "session.updated") return
+
+  const info = event.properties.info as { title?: unknown }
+  return typeof info.title === "string" && info.title.trim() ? info.title.trim() : undefined
+}
+
+function sanitizeTitle(value: string) {
+  return value.replace(/[\u0000-\u001f\u007f]/g, "").trim()
+}
+
+export function terminalTitleSequence(title: string) {
+  return `\u001b]0;${sanitizeTitle(title)}\u0007`
+}
+
+export function createTitleAlert(options: TitleAlertOptions = {}) {
+  const write = options.write ?? ((value: string) => process.stdout.write(value))
+  const startTimer = options.setInterval ?? ((callback: () => void, delay: number) => setInterval(callback, delay))
+  const stopTimer = options.clearInterval ?? ((timer: AlertTimer) => clearInterval(timer as ReturnType<typeof setInterval>))
+  const intervalMs = options.intervalMs ?? 250
+  const titles = new Map<string, string>()
+  let activeSessionID: string | undefined
+  let lastSequence: string | undefined
+  let isRunning = false
+  let spinnerIndex = 0
+  let spinnerTimer: AlertTimer | undefined
+
+  function currentTitle() {
+    return (activeSessionID && titles.get(activeSessionID)) || "opencode"
+  }
+
+  function setTitlePrefix(prefix: string) {
+    const sequence = terminalTitleSequence(`${prefix} | ${currentTitle()}`)
+    if (sequence === lastSequence) return
+
+    lastSequence = sequence
+    write(sequence)
+  }
+
+  function setTitle(state: AlertState) {
+    stopSpinner()
+    setTitlePrefix(prefixByState[state])
+  }
+
+  function setSpinnerTitle() {
+    setTitlePrefix(`OC${spinnerFrames[spinnerIndex]}`)
+  }
+
+  function startSpinner() {
+    spinnerIndex = 0
+    setSpinnerTitle()
+    if (spinnerTimer !== undefined) return
+
+    spinnerTimer = startTimer(() => {
+      spinnerIndex = (spinnerIndex + 1) % spinnerFrames.length
+      setSpinnerTitle()
+    }, intervalMs)
+  }
+
+  function stopSpinner() {
+    if (spinnerTimer === undefined) return
+
+    stopTimer(spinnerTimer)
+    spinnerTimer = undefined
+  }
+
+  function resumeRunningOrSetDefault() {
+    if (isRunning) {
+      startSpinner()
+      return
+    }
+
+    setTitle("default")
+  }
+
+  async function onEvent(event: Event) {
+    const sessionID = sessionIDOf(event)
+    if (sessionID) activeSessionID = sessionID
+
+    const sessionTitle = sessionTitleOf(event)
+    if (sessionID && sessionTitle) titles.set(sessionID, sessionTitle)
+
+    switch (event.type) {
+      case "question.asked":
+        setTitle("question")
+        break
+      case "permission.asked":
+        setTitle("permission")
+        break
+      case "session.idle":
+        isRunning = false
+        setTitle("done")
+        break
+      case "session.status":
+        if (event.properties.status.type === "busy") {
+          isRunning = true
+          startSpinner()
+          break
+        }
+
+        if (event.properties.status.type === "idle") {
+          isRunning = false
+          setTitle("done")
+          break
+        }
+
+        break
+      case "question.replied":
+      case "question.rejected":
+      case "permission.replied":
+        resumeRunningOrSetDefault()
+        break
+      case "session.next.step.started":
+        isRunning = true
+        startSpinner()
+        break
+    }
+  }
+
+  async function onPermissionAsk(input: Permission, output: PermissionAskOutput) {
+    if (typeof input.sessionID === "string") activeSessionID = input.sessionID
+    setTitle("permission")
+
+    // 只提醒，不改变 opencode 原本的权限决策流程。
+    output.status = output.status === "deny" || output.status === "allow" ? output.status : "ask"
+  }
+
+  return { onEvent, onPermissionAsk }
+}
+
+export const TitleAlertPlugin: Plugin = async () => {
+  const alert = createTitleAlert()
+
+  return {
+    event: async ({ event }) => {
+      await alert.onEvent(event)
+    },
+    "permission.ask": async (input, output) => {
+      await alert.onPermissionAsk(input, output)
+    },
+  }
+}
+
+export default TitleAlertPlugin
