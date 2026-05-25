@@ -138,4 +138,54 @@ describe("title alert renderer", () => {
     expect(timers.size).toBe(0)
     expect(writes.at(-1)).toBe("\u001b]0;OC✓ | 实现插件\u0007")
   })
+
+  test("ignores status updates from subagent sessions", async () => {
+    const writes: string[] = []
+    const timers = new Map<number, () => void>()
+    let nextTimerID = 1
+    const alert = createTitleAlert({
+      write: (value) => writes.push(value),
+      setInterval: (callback) => {
+        const timerID = nextTimerID++
+        timers.set(timerID, callback)
+        return timerID
+      },
+      clearInterval: (timerID) => {
+        timers.delete(timerID as number)
+      },
+    })
+
+    await alert.onEvent({
+      id: "parent-session",
+      type: "session.updated",
+      properties: { sessionID: "parent", info: { title: "主任务" } },
+    })
+    await alert.onEvent({
+      id: "subagent-session",
+      type: "session.updated",
+      properties: { sessionID: "child", info: { title: "子任务", parentID: "parent" } },
+    })
+    await alert.onEvent({
+      id: "subagent-busy",
+      type: "session.status",
+      properties: { sessionID: "child", status: { type: "busy" } },
+    })
+    await alert.onEvent({
+      id: "subagent-idle",
+      type: "session.status",
+      properties: { sessionID: "child", status: { type: "idle" } },
+    })
+
+    expect(timers.size).toBe(0)
+    expect(writes).toEqual([])
+
+    await alert.onEvent({
+      id: "parent-busy",
+      type: "session.status",
+      properties: { sessionID: "parent", status: { type: "busy" } },
+    })
+
+    expect(writes).toEqual(["\u001b]0;OC⠋ | 主任务\u0007"])
+    expect(timers.size).toBe(1)
+  })
 })

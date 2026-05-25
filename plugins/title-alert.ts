@@ -5,6 +5,7 @@ type AlertState = "default" | "question" | "permission" | "done"
 type AlertTimer = unknown
 
 type PermissionAskOutput = { status: "ask" | "deny" | "allow" }
+type SessionInfo = { id?: unknown; parentID?: unknown; title?: unknown }
 
 type TitleAlertOptions = {
   write?: (value: string) => void
@@ -24,14 +25,26 @@ const spinnerFrames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "
 
 function sessionIDOf(event: Event) {
   const properties = event.properties as { sessionID?: unknown }
-  return typeof properties.sessionID === "string" ? properties.sessionID : undefined
+  if (typeof properties.sessionID === "string") return properties.sessionID
+
+  const info = (event.properties as { info?: SessionInfo }).info
+  return typeof info?.id === "string" ? info.id : undefined
+}
+
+function sessionInfoOf(event: Event) {
+  if (event.type !== "session.created" && event.type !== "session.updated") return
+
+  const info = event.properties.info as SessionInfo
+  return info && typeof info === "object" ? info : undefined
 }
 
 function sessionTitleOf(event: Event) {
-  if (event.type !== "session.created" && event.type !== "session.updated") return
+  const info = sessionInfoOf(event)
+  return typeof info?.title === "string" && info.title.trim() ? info.title.trim() : undefined
+}
 
-  const info = event.properties.info as { title?: unknown }
-  return typeof info.title === "string" && info.title.trim() ? info.title.trim() : undefined
+function isSubagentSessionInfo(info: SessionInfo | undefined) {
+  return typeof info?.parentID === "string" && info.parentID.trim().length > 0
 }
 
 function sanitizeTitle(value: string) {
@@ -48,6 +61,7 @@ export function createTitleAlert(options: TitleAlertOptions = {}) {
   const stopTimer = options.clearInterval ?? ((timer: AlertTimer) => clearInterval(timer as ReturnType<typeof setInterval>))
   const intervalMs = options.intervalMs ?? 250
   const titles = new Map<string, string>()
+  const subagentSessionIDs = new Set<string>()
   let activeSessionID: string | undefined
   let lastSequence: string | undefined
   let isRunning = false
@@ -104,6 +118,10 @@ export function createTitleAlert(options: TitleAlertOptions = {}) {
 
   async function onEvent(event: Event) {
     const sessionID = sessionIDOf(event)
+    const sessionInfo = sessionInfoOf(event)
+    if (sessionID && isSubagentSessionInfo(sessionInfo)) subagentSessionIDs.add(sessionID)
+    if (sessionID && subagentSessionIDs.has(sessionID)) return
+
     if (sessionID) activeSessionID = sessionID
 
     const sessionTitle = sessionTitleOf(event)
