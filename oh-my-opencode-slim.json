@@ -6,21 +6,14 @@
     "openai": {
       "orchestrator": {
         "model": "openai/gpt-5.5",
-        "variant": "high",
-        "skills": [
-          "*"
-        ],
-        "mcps": [
-          "*",
-          "!context7"
-        ]
+        "variant": "xhigh",
+        "skills": ["*"],
+        "mcps": ["*", "!context7"]
       },
       "oracle": {
         "model": "openai/gpt-5.5",
         "variant": "high",
-        "skills": [
-          "simplify"
-        ],
+        "skills": ["simplify"],
         "mcps": []
       },
       "council": {
@@ -33,11 +26,7 @@
         "model": "openai/gpt-5.4-mini",
         "variant": "low",
         "skills": [],
-        "mcps": [
-          "websearch",
-          "context7",
-          "grep_app"
-        ]
+        "mcps": ["websearch", "context7", "grep_app"]
       },
       "explorer": {
         "model": "openai/gpt-5.4-mini",
@@ -56,32 +45,19 @@
         "variant": "high",
         "skills": [],
         "mcps": []
-      },
-      "observer": {
-        "model": "openai/gpt-5.4-mini",
-        "variant": "low",
-        "skills": [],
-        "mcps": []
       }
     },
     "opencode-go": {
       "orchestrator": {
         "model": "opencode-go/qwen3.6-plus",
         "variant": "high",
-        "skills": [
-          "*"
-        ],
-        "mcps": [
-          "*",
-          "!context7"
-        ]
+        "skills": ["*"],
+        "mcps": ["*", "!context7"]
       },
       "oracle": {
         "model": "opencode-go/kimi-k2.6",
         "variant": "high",
-        "skills": [
-          "simplify"
-        ],
+        "skills": ["simplify"],
         "mcps": []
       },
       "council": {
@@ -94,11 +70,7 @@
         "model": "opencode-go/minimax-m2.7",
         "variant": "medium",
         "skills": [],
-        "mcps": [
-          "websearch",
-          "context7",
-          "grep_app"
-        ]
+        "mcps": ["websearch", "context7", "grep_app"]
       },
       "explorer": {
         "model": "opencode-go/deepseek-v4-flash",
@@ -117,32 +89,19 @@
         "variant": "high",
         "skills": [],
         "mcps": []
-      },
-      "observer": {
-        "model": "opencode-go/qwen3.6-plus",
-        "variant": "medium",
-        "skills": [],
-        "mcps": []
       }
     },
     "hybrid": {
       "orchestrator": {
         "model": "openai/gpt-5.5",
         "variant": "high",
-        "skills": [
-          "*"
-        ],
-        "mcps": [
-          "*",
-          "!context7"
-        ]
+        "skills": ["*"],
+        "mcps": ["*", "!context7"]
       },
       "oracle": {
         "model": "openai/gpt-5.5",
         "variant": "high",
-        "skills": [
-          "simplify"
-        ],
+        "skills": ["simplify"],
         "mcps": []
       },
       "council": {
@@ -155,11 +114,7 @@
         "model": "opencode-go/minimax-m2.7",
         "variant": "medium",
         "skills": [],
-        "mcps": [
-          "websearch",
-          "context7",
-          "grep_app"
-        ]
+        "mcps": ["websearch", "context7", "grep_app"]
       },
       "explorer": {
         "model": "opencode-go/deepseek-v4-flash",
@@ -178,14 +133,8 @@
         "variant": "high",
         "skills": [],
         "mcps": []
-      },
-      "observer": {
-        "model": "opencode-go/qwen3.6-plus",
-        "variant": "medium",
-        "skills": [],
-        "mcps": []
       }
     }
   },
-  "disabled_agents": []
+  "disabled_agents": ["observer"]
 }
