@@ -4,6 +4,19 @@ import { dirname, join } from "node:path"
 const files = ["devenv.nix", "devenv.yaml", "devenv.yml"]
 const cache = new Map<string, Promise<Record<string, string>>>()
 
+type DevenvPluginOptions = {
+  hasDevenv?: () => boolean | Promise<boolean>
+}
+
+async function commandExists(command: string) {
+  const run = Bun.spawn(["bash", "-lc", `command -v -- ${command}`], {
+    stdout: "ignore",
+    stderr: "ignore",
+  })
+
+  return (await run.exited) === 0
+}
+
 function devenvEnv(baseEnv: Record<string, string>) {
   return {
     ...baseEnv,
@@ -206,26 +219,35 @@ function applyLoadedEnv(outputEnv: Record<string, string>, loaded: Record<string
   Object.assign(outputEnv, loaded)
 }
 
-export const DevenvPlugin: Plugin = async () => {
-  return {
-    "shell.env": async (input, output) => {
-      const dir = await findDevenvRoot(input.cwd)
-      if (!dir) return
+export function createDevenvPlugin(options: DevenvPluginOptions = {}): Plugin {
+  return async () => {
+    const hasDevenv = options.hasDevenv ?? (() => commandExists("devenv"))
+    if (!(await hasDevenv())) return {}
 
-      const baseEnv = shellEnv({ ...process.env, ...output.env })
+    return {
+      "shell.env": async (input, output) => {
+        const dir = await findDevenvRoot(input.cwd)
+        if (!dir) return
 
-      const key = cacheKey(dir, baseEnv)
-      const env =
-        cache.get(key) ??
-        loadResolvedEnv(dir, baseEnv).catch((err) => {
-          cache.delete(key)
-          throw err
-        })
+        const baseEnv = shellEnv({ ...process.env, ...output.env })
 
-      cache.set(key, env)
-      const loaded = await env
+        const key = cacheKey(dir, baseEnv)
+        const env =
+          cache.get(key) ??
+          loadResolvedEnv(dir, baseEnv).catch((err) => {
+            cache.delete(key)
+            throw err
+          })
 
-      applyLoadedEnv(output.env, loaded)
-    },
+        cache.set(key, env)
+        const loaded = await env
+
+        applyLoadedEnv(output.env, loaded)
+      },
+    }
   }
 }
+
+export const DevenvPlugin: Plugin = createDevenvPlugin()
+
+export default DevenvPlugin
