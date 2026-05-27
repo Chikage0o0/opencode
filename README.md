@@ -39,8 +39,9 @@
 ### `opencode.json`
 
 - 启用插件：
-  - `@tarquinen/opencode-dcp@latest`
+  - `opencode-acp@latest`（Active Context Pruning，DCP 的硬化增强分支）
   - `oh-my-opencode-slim@1.1.1`
+- 禁用 OpenCode 内置 auto-compaction（`"compaction.auto": false`），由 ACP 接管上下文管理。
 - 禁用 OpenCode 默认 `explore` / `general` agents，让 slim orchestrator 接管工作流。
 - 启用 LSP：`"lsp": true`。
 - 保留 `context7` MCP 与原有安全权限策略。
