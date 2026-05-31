@@ -1,7 +1,7 @@
 {
   "autoupdate": false,
   "share": "disabled",
-  "plugin": ["@tarquinen/opencode-dcp@latest", "oh-my-opencode-slim@1.1.1"],
+  "plugin": ["oh-my-opencode-slim@latest", "@tarquinen/opencode-dcp@latest"],
   "default_agent": "orchestrator",
   "agent": {
     "title": {
