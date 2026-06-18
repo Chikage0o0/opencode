@@ -1,18 +1,11 @@
 { pkgs, ... }:
 
 {
-  starship = {
-    enable = true;
-    config = {
-      enable = true;
-      path = ./starship.toml;
-    };
-  };
-  
-
+  env.STARSHIP_CONFIG = "${./starship.toml}";
   packages = with pkgs; [
     git
     ripgrep
+    starship
   ];
 
   languages.javascript = {

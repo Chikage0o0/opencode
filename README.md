@@ -4,8 +4,8 @@
 
 ## 当前版本
 
-- Plugin package: `oh-my-opencode-slim@1.1.1`
-- Plugin config schema: `https://unpkg.com/oh-my-opencode-slim@1.1.1/oh-my-opencode-slim.schema.json`
+- Plugin package: `oh-my-opencode-slim@2.0.3`
+- Plugin config schema: `https://unpkg.com/oh-my-opencode-slim@2.0.3/oh-my-opencode-slim.schema.json`
 - Active preset: `hybrid`
 - 版本策略：使用 npm `latest` dist-tag 对应的稳定 release，不使用 beta 预发布版本。
 
@@ -25,11 +25,13 @@
 │   └── git-commit.md                 # /git-commit 命令，轻量调度到 subagent
 ├── plugins/
 │   └── devenv.ts                     # devenv.sh 环境集成插件
-├── skills/                           # slim bundled skills
+├── skills/                           # slim bundled skills 与本地补充 skills
 │   ├── codemap.md
-│   ├── simplify/
 │   ├── codemap/
 │   ├── clonedeps/
+│   ├── oh-my-opencode-slim/
+│   ├── reflect/
+│   ├── simplify/
 ├── devenv.nix / devenv.yaml          # 本配置目录的开发环境
 └── README.md
 ```
@@ -40,7 +42,7 @@
 
 - 启用插件：
   - `@tarquinen/opencode-dcp@latest`
-  - `oh-my-opencode-slim@1.1.1`
+  - `oh-my-opencode-slim@2.0.3`
 - 禁用 OpenCode 默认 `explore` / `general` agents，让 slim orchestrator 接管工作流。
 - 启用 LSP：`"lsp": true`。
 - 保留 `context7` MCP 与原有安全权限策略。
@@ -57,6 +59,20 @@
 - `hybrid` 用 OpenAI 承担最高风险决策与审查，用 opencode-go 承担高频探索、修复、设计、检索和观察。
 - `autoUpdate` 设置为 `false`，版本由 Nix 仓库显式控制。
 - `disabled_agents: []` 启用 Observer。
+
+### Bundled skills
+
+本目录保留以下 `oh-my-opencode-slim@2.0.3` bundled skills：
+
+- `codemap/` 与 `codemap.md`
+- `clonedeps/`
+- `oh-my-opencode-slim/`
+- `reflect/`
+- `simplify/`
+
+本目录还保留若干本地补充 skills（例如 `tdd/`、`diagnose/`、`write-a-skill/` 等），它们不是 npm 包随附内容。
+
+2.0.3 相比 1.1.1 新增的随包 skill 载荷包括 `deepwork/`、`oh-my-opencode-slim/`、`reflect/`、`worktrees/`。本配置仅保留 `oh-my-opencode-slim/` 与 `reflect/`；`deepwork/`、`worktrees/` 不附带，避免与本地 OpenSpec 主流程和 Git 工作区策略竞争。
 
 ### `/git-commit` command + subagent
 
@@ -84,7 +100,7 @@ ping all agents
 也可以诊断插件配置：
 
 ```bash
-bunx oh-my-opencode-slim@1.1.1 doctor
+bunx oh-my-opencode-slim@2.0.3 doctor
 ```
 
 ## 维护建议

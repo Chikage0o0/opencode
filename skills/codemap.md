@@ -18,6 +18,9 @@
   - `src/skills/codemap/` (command-style repository mapping skill)
   - `src/skills/clonedeps/` (workflow skill for dependency source mirroring)
   - `src/skills/simplify/` (readability/refactor guidance skill)
+  - `src/skills/reflect/` (orchestrator-only workflow for learning from repeated work and suggesting reusable improvements)
+  - `src/skills/oh-my-opencode-slim/` (orchestrator-only plugin configuration and self-improvement guidance)
+- The upstream 2.0.3 package also ships `src/skills/deepwork/` and `src/skills/worktrees/`, but this local config intentionally does not vendor them to keep OpenSpec and Git workflow ownership explicit.
 - Files are considered static runtime payload. No plugin TS module in `src/` imports these files directly; they
   are loaded by OpenCode via filesystem installation.
 
@@ -36,8 +39,5 @@
 - `src/cli/custom-skills.ts`: source-of-truth registry consumed by installer and permission helpers.
 - `src/cli/skills.ts:getSkillPermissionsForAgent()` auto-populates permission rules for
   bundled skills when agent policy is derived from built-in recommendations.
-- `verify-release-artifact.ts` enforces artifact completeness by asserting key
-  bundled skill payloads such as `src/skills/simplify/SKILL.md`,
-  `src/skills/codemap/SKILL.md`, and `src/skills/clonedeps/SKILL.md` are present
-  in the tarball.
+- `verify-release-artifact.ts` in upstream enforces artifact completeness for the full npm tarball. This local vendored subset intentionally differs by omitting `deepwork/` and `worktrees/`.
 - `package.json` scripts (`verify:release`, `build`) rely on these assets to ensure install-time skill availability.
