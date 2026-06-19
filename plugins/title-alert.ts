@@ -18,8 +18,8 @@ type TitleAlertOptions = {
 const prefixByState: Record<AlertState, string> = {
   default: "OC",
   question: "OC?",
-  permission: "OC!",
-  done: "OC✓",
+  permission: "! OC",
+  done: "✓ OC",
 }
 
 const spinnerFrames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]

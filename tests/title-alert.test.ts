@@ -12,7 +12,7 @@ describe("title alert renderer", () => {
     expect(isOpencodeServeMode(["node", "opencode"])).toBe(false)
   })
 
-  test("updates only the OC prefix for question, permission and idle states", async () => {
+  test("uses the spinner marker slot for permission and done states", async () => {
     const writes: string[] = []
     const alert = createTitleAlert({ write: (value) => writes.push(value) })
 
@@ -40,8 +40,8 @@ describe("title alert renderer", () => {
 
     expect(writes).toEqual([
       "\u001b]0;OC? | 实现插件\u0007",
-      "\u001b]0;OC! | 实现插件\u0007",
-      "\u001b]0;OC✓ | 实现插件\u0007",
+      "\u001b]0;! OC | 实现插件\u0007",
+      "\u001b]0;✓ OC | 实现插件\u0007",
     ])
   })
 
@@ -53,7 +53,7 @@ describe("title alert renderer", () => {
     await alert.onPermissionAsk({ id: "p1", sessionID: "s1" }, output)
 
     expect(output.status).toBe("ask")
-    expect(writes).toEqual(["\u001b]0;OC! | opencode\u0007"])
+    expect(writes).toEqual(["\u001b]0;! OC | opencode\u0007"])
   })
 
   test("does not change terminal title when disabled for opencode serve", async () => {
@@ -127,7 +127,7 @@ describe("title alert renderer", () => {
     })
 
     expect(timers.size).toBe(0)
-    expect(writes.at(-1)).toBe("\u001b]0;OC✓ | 实现插件\u0007")
+    expect(writes.at(-1)).toBe("\u001b]0;✓ OC | 实现插件\u0007")
   })
 
   test("animates while the session status is busy", async () => {
@@ -170,7 +170,7 @@ describe("title alert renderer", () => {
     })
 
     expect(timers.size).toBe(0)
-    expect(writes.at(-1)).toBe("\u001b]0;OC✓ | 实现插件\u0007")
+    expect(writes.at(-1)).toBe("\u001b]0;✓ OC | 实现插件\u0007")
   })
 
   test("keeps spinning while a background subagent session is busy", async () => {
@@ -217,6 +217,6 @@ describe("title alert renderer", () => {
     })
 
     expect(timers.size).toBe(0)
-    expect(writes.at(-1)).toBe("\u001b]0;OC✓ | 主任务\u0007")
+    expect(writes.at(-1)).toBe("\u001b]0;✓ OC | 主任务\u0007")
   })
 })
