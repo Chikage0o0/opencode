@@ -10,22 +10,5 @@
       "enabled": true
     },
     "diff_style": "auto"
-  },
-  "keybinds": {
-    "leader": "space",
-    "command_list": "<leader>p",
-    "model_list": "<leader>m",
-    "agent_list": "<leader>a",
-    "theme_list": "<leader>t",
-    "session_new": "<leader>n",
-    "session_list": "<leader>s",
-    "session_compact": "<leader>c",
-    "session_interrupt": "ctrl+c",
-    "sidebar_toggle": "<leader>b",
-    "tool_details": "<leader>d",
-    "messages_first": "g",
-    "messages_last": "G",
-    "messages_page_up": "ctrl+u",
-    "messages_page_down": "ctrl+d"
   }
 }

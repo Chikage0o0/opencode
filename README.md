@@ -48,6 +48,7 @@
 - 启用 LSP：`"lsp": true`。
 - 保留 `context7` MCP 与原有安全权限策略。
 - 保留中文标题生成 agent。
+- Windows 下默认 shell 由 `plugins/windows-git-env.ts` 动态指向发现到的 Git Bash。
 
 ### Background subagent 实验开关
 
@@ -55,6 +56,13 @@
 - 该开关是运行时环境变量，不是 `opencode.json` 的 `experimental` 字段；不要把 `background_subagents` 之类键写入 `opencode.json`。
 - 当前 Windows 用户环境变量已设置为 `true`；新开的终端和重启后的 OpenCode 会读取该值。
 - `devenv.nix` 也同步设置了该变量，保证本配置目录的开发 shell 与系统用户环境一致。
+
+### Windows Git 环境
+
+- `plugins/windows-git-env.ts` 仅在 Windows 上启用，会从 `Path`、`GIT_HOME`、常见安装目录以及 Scoop 用户目录动态发现 Git for Windows。
+- 发现后会通过 OpenCode `config` hook 把默认 shell 指向同一安装目录下的 `bin\bash.exe`，无需在 `opencode.json` 写死本机路径。
+- shell 命令环境会把该安装目录下的 `cmd`、`mingw64\bin`、`usr\bin`、`bin` 放到 `Path` 前面，避免优先命中 Scoop shim 或 Windows 自带 `bash.exe`。
+- 同时设置对应的 `GIT_EXEC_PATH=<Git Home>\mingw64\libexec\git-core`，确保 Git 使用同一套 Git for Windows 内置 helper exe。
 
 > 注意：如果某个 host 通过 `platform.home.opencode.configFile` 指向 sops 渲染文件，则该文件会覆盖 Home Manager 生成的 `opencode.json`。示例 host 已通过读取本目录 `opencode.json` 并合并 provider 密钥来避免配置丢失。
 
