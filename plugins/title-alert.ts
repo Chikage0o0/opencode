@@ -8,6 +8,7 @@ type PermissionAskOutput = { status: "ask" | "deny" | "allow" }
 type SessionInfo = { id?: unknown; parentID?: unknown; title?: unknown }
 
 type TitleAlertOptions = {
+  enabled?: boolean
   write?: (value: string) => void
   setInterval?: (callback: () => void, delay: number) => AlertTimer
   clearInterval?: (timer: AlertTimer) => void
@@ -47,6 +48,10 @@ function isSubagentSessionInfo(info: SessionInfo | undefined) {
   return typeof info?.parentID === "string" && info.parentID.trim().length > 0
 }
 
+export function isOpencodeServeMode(argv = process.argv) {
+  return argv.some((arg) => arg === "serve")
+}
+
 function sanitizeTitle(value: string) {
   return value.replace(/[\u0000-\u001f\u007f]/g, "").trim()
 }
@@ -56,15 +61,16 @@ export function terminalTitleSequence(title: string) {
 }
 
 export function createTitleAlert(options: TitleAlertOptions = {}) {
+  const enabled = options.enabled ?? true
   const write = options.write ?? ((value: string) => process.stdout.write(value))
   const startTimer = options.setInterval ?? ((callback: () => void, delay: number) => setInterval(callback, delay))
   const stopTimer = options.clearInterval ?? ((timer: AlertTimer) => clearInterval(timer as ReturnType<typeof setInterval>))
   const intervalMs = options.intervalMs ?? 250
   const titles = new Map<string, string>()
   const subagentSessionIDs = new Set<string>()
+  const runningSessionIDs = new Set<string>()
   let activeSessionID: string | undefined
   let lastSequence: string | undefined
-  let isRunning = false
   let spinnerIndex = 0
   let spinnerTimer: AlertTimer | undefined
 
@@ -73,6 +79,8 @@ export function createTitleAlert(options: TitleAlertOptions = {}) {
   }
 
   function setTitlePrefix(prefix: string) {
+    if (!enabled) return
+
     const sequence = terminalTitleSequence(`${prefix} | ${currentTitle()}`)
     if (sequence === lastSequence) return
 
@@ -86,10 +94,12 @@ export function createTitleAlert(options: TitleAlertOptions = {}) {
   }
 
   function setSpinnerTitle() {
-    setTitlePrefix(`OC${spinnerFrames[spinnerIndex]}`)
+    setTitlePrefix(`${spinnerFrames[spinnerIndex]} OC`)
   }
 
   function startSpinner() {
+    if (!enabled) return
+
     spinnerIndex = 0
     setSpinnerTitle()
     if (spinnerTimer !== undefined) return
@@ -108,7 +118,7 @@ export function createTitleAlert(options: TitleAlertOptions = {}) {
   }
 
   function resumeRunningOrSetDefault() {
-    if (isRunning) {
+    if (runningSessionIDs.size > 0) {
       startSpinner()
       return
     }
@@ -119,13 +129,33 @@ export function createTitleAlert(options: TitleAlertOptions = {}) {
   async function onEvent(event: Event) {
     const sessionID = sessionIDOf(event)
     const sessionInfo = sessionInfoOf(event)
-    if (sessionID && isSubagentSessionInfo(sessionInfo)) subagentSessionIDs.add(sessionID)
-    if (sessionID && subagentSessionIDs.has(sessionID)) return
 
-    if (sessionID) activeSessionID = sessionID
+    if (sessionID && isSubagentSessionInfo(sessionInfo)) subagentSessionIDs.add(sessionID)
+    const isSubagentSession = sessionID !== undefined && subagentSessionIDs.has(sessionID)
+
+    if (sessionID && !subagentSessionIDs.has(sessionID)) activeSessionID = sessionID
 
     const sessionTitle = sessionTitleOf(event)
-    if (sessionID && sessionTitle) titles.set(sessionID, sessionTitle)
+    if (sessionID && sessionTitle && !subagentSessionIDs.has(sessionID)) titles.set(sessionID, sessionTitle)
+
+    const isRunningStateEvent =
+      event.type === "session.idle" || event.type === "session.next.step.started" || event.type === "session.status"
+    if (isSubagentSession && !isRunningStateEvent) return
+
+    function markRunning() {
+      if (sessionID) runningSessionIDs.add(sessionID)
+      startSpinner()
+    }
+
+    function markIdle() {
+      if (sessionID) runningSessionIDs.delete(sessionID)
+      if (runningSessionIDs.size > 0) {
+        startSpinner()
+        return
+      }
+
+      setTitle("done")
+    }
 
     switch (event.type) {
       case "question.asked":
@@ -135,19 +165,16 @@ export function createTitleAlert(options: TitleAlertOptions = {}) {
         setTitle("permission")
         break
       case "session.idle":
-        isRunning = false
-        setTitle("done")
+        markIdle()
         break
       case "session.status":
         if (event.properties.status.type === "busy") {
-          isRunning = true
-          startSpinner()
+          markRunning()
           break
         }
 
         if (event.properties.status.type === "idle") {
-          isRunning = false
-          setTitle("done")
+          markIdle()
           break
         }
 
@@ -158,13 +185,14 @@ export function createTitleAlert(options: TitleAlertOptions = {}) {
         resumeRunningOrSetDefault()
         break
       case "session.next.step.started":
-        isRunning = true
-        startSpinner()
+        markRunning()
         break
     }
   }
 
   async function onPermissionAsk(input: Permission, output: PermissionAskOutput) {
+    if (!enabled) return
+
     if (typeof input.sessionID === "string") activeSessionID = input.sessionID
     setTitle("permission")
 
@@ -176,7 +204,7 @@ export function createTitleAlert(options: TitleAlertOptions = {}) {
 }
 
 export const TitleAlertPlugin: Plugin = async () => {
-  const alert = createTitleAlert()
+  const alert = createTitleAlert({ enabled: !isOpencodeServeMode() })
 
   return {
     event: async ({ event }) => {

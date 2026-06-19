@@ -2,6 +2,8 @@
 
 {
   env.STARSHIP_CONFIG = "${./starship.toml}";
+  env.OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS = "true";
+
   packages = with pkgs; [
     git
     ripgrep

@@ -4,8 +4,8 @@
 
 ## 当前版本
 
-- Plugin package: `oh-my-opencode-slim@2.0.3`
-- Plugin config schema: `https://unpkg.com/oh-my-opencode-slim@2.0.3/oh-my-opencode-slim.schema.json`
+- Plugin package: `oh-my-opencode-slim@2.0.4`
+- Plugin config schema: `https://unpkg.com/oh-my-opencode-slim@2.0.4/oh-my-opencode-slim.schema.json`
 - Active preset: `hybrid`
 - 版本策略：使用 npm `latest` dist-tag 对应的稳定 release，不使用 beta 预发布版本。
 
@@ -24,7 +24,8 @@
 ├── commands/
 │   └── git-commit.md                 # /git-commit 命令，轻量调度到 subagent
 ├── plugins/
-│   └── devenv.ts                     # devenv.sh 环境集成插件
+│   ├── openai-instructions.ts        # GPT-5+ OpenAI instructions 兼容插件
+│   └── title-alert.ts                # 终端标题状态提醒插件
 ├── skills/                           # slim bundled skills 与本地补充 skills
 │   ├── codemap.md
 │   ├── codemap/
@@ -42,11 +43,18 @@
 
 - 启用插件：
   - `@tarquinen/opencode-dcp@latest`
-  - `oh-my-opencode-slim@2.0.3`
+  - `oh-my-opencode-slim@2.0.4`
 - 禁用 OpenCode 默认 `explore` / `general` agents，让 slim orchestrator 接管工作流。
 - 启用 LSP：`"lsp": true`。
 - 保留 `context7` MCP 与原有安全权限策略。
 - 保留中文标题生成 agent。
+
+### Background subagent 实验开关
+
+- OpenCode 的后台 subagent 功能通过用户环境变量启用：`OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true`。
+- 该开关是运行时环境变量，不是 `opencode.json` 的 `experimental` 字段；不要把 `background_subagents` 之类键写入 `opencode.json`。
+- 当前 Windows 用户环境变量已设置为 `true`；新开的终端和重启后的 OpenCode 会读取该值。
+- `devenv.nix` 也同步设置了该变量，保证本配置目录的开发 shell 与系统用户环境一致。
 
 > 注意：如果某个 host 通过 `platform.home.opencode.configFile` 指向 sops 渲染文件，则该文件会覆盖 Home Manager 生成的 `opencode.json`。示例 host 已通过读取本目录 `opencode.json` 并合并 provider 密钥来避免配置丢失。
 
@@ -62,7 +70,7 @@
 
 ### Bundled skills
 
-本目录保留以下 `oh-my-opencode-slim@2.0.3` bundled skills：
+本目录保留以下 `oh-my-opencode-slim@2.0.4` bundled skills：
 
 - `codemap/` 与 `codemap.md`
 - `clonedeps/`
@@ -72,7 +80,7 @@
 
 本目录还保留若干本地补充 skills（例如 `tdd/`、`diagnose/`、`write-a-skill/` 等），它们不是 npm 包随附内容。
 
-2.0.3 相比 1.1.1 新增的随包 skill 载荷包括 `deepwork/`、`oh-my-opencode-slim/`、`reflect/`、`worktrees/`。本配置仅保留 `oh-my-opencode-slim/` 与 `reflect/`；`deepwork/`、`worktrees/` 不附带，避免与本地 OpenSpec 主流程和 Git 工作区策略竞争。
+2.x 相比 1.1.1 新增的随包 skill 载荷包括 `deepwork/`、`oh-my-opencode-slim/`、`reflect/`、`worktrees/`。本配置仅保留 `oh-my-opencode-slim/` 与 `reflect/`；`deepwork/`、`worktrees/` 不附带，避免与本地 OpenSpec 主流程和 Git 工作区策略竞争。
 
 ### `/git-commit` command + subagent
 
@@ -100,7 +108,7 @@ ping all agents
 也可以诊断插件配置：
 
 ```bash
-bunx oh-my-opencode-slim@2.0.3 doctor
+bunx oh-my-opencode-slim@2.0.4 doctor
 ```
 
 ## 维护建议

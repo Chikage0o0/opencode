@@ -1,10 +1,15 @@
 import { describe, expect, test } from "bun:test"
 
-import { createTitleAlert, terminalTitleSequence } from "../plugins/title-alert"
+import { createTitleAlert, isOpencodeServeMode, terminalTitleSequence } from "../plugins/title-alert"
 
 describe("title alert renderer", () => {
   test("uses OSC terminal title escape and strips controls", () => {
     expect(terminalTitleSequence("OC? | hello\u001b]0;bad\u0007")).toBe("\u001b]0;OC? | hello]0;bad\u0007")
+  })
+
+  test("detects opencode serve mode from process arguments", () => {
+    expect(isOpencodeServeMode(["node", "opencode", "serve"])).toBe(true)
+    expect(isOpencodeServeMode(["node", "opencode"])).toBe(false)
   })
 
   test("updates only the OC prefix for question, permission and idle states", async () => {
@@ -51,6 +56,35 @@ describe("title alert renderer", () => {
     expect(writes).toEqual(["\u001b]0;OC! | opencode\u0007"])
   })
 
+  test("does not change terminal title when disabled for opencode serve", async () => {
+    const writes: string[] = []
+    const timers = new Map<number, () => void>()
+    const alert = createTitleAlert({
+      enabled: false,
+      write: (value) => writes.push(value),
+      setInterval: (callback) => {
+        timers.set(1, callback)
+        return 1
+      },
+      clearInterval: (timerID) => {
+        timers.delete(timerID as number)
+      },
+    })
+    const output = { status: "ask" as const }
+
+    await alert.onEvent({
+      id: "busy",
+      type: "session.status",
+      properties: { sessionID: "s1", status: { type: "busy" } },
+    })
+    await alert.onPermissionAsk({ id: "p1", sessionID: "s1" }, output)
+    timers.get(1)?.()
+
+    expect(output.status).toBe("ask")
+    expect(writes).toEqual([])
+    expect(timers.size).toBe(0)
+  })
+
   test("animates the OC prefix with a spinner while a session step is running", async () => {
     const writes: string[] = []
     const timers = new Map<number, () => void>()
@@ -81,9 +115,9 @@ describe("title alert renderer", () => {
     timers.get(1)?.()
 
     expect(writes).toEqual([
-      "\u001b]0;OC⠋ | 实现插件\u0007",
-      "\u001b]0;OC⠙ | 实现插件\u0007",
-      "\u001b]0;OC⠹ | 实现插件\u0007",
+      "\u001b]0;⠋ OC | 实现插件\u0007",
+      "\u001b]0;⠙ OC | 实现插件\u0007",
+      "\u001b]0;⠹ OC | 实现插件\u0007",
     ])
 
     await alert.onEvent({
@@ -125,8 +159,8 @@ describe("title alert renderer", () => {
     timers.get(1)?.()
 
     expect(writes).toEqual([
-      "\u001b]0;OC⠋ | 实现插件\u0007",
-      "\u001b]0;OC⠙ | 实现插件\u0007",
+      "\u001b]0;⠋ OC | 实现插件\u0007",
+      "\u001b]0;⠙ OC | 实现插件\u0007",
     ])
 
     await alert.onEvent({
@@ -139,7 +173,7 @@ describe("title alert renderer", () => {
     expect(writes.at(-1)).toBe("\u001b]0;OC✓ | 实现插件\u0007")
   })
 
-  test("ignores status updates from subagent sessions", async () => {
+  test("keeps spinning while a background subagent session is busy", async () => {
     const writes: string[] = []
     const timers = new Map<number, () => void>()
     let nextTimerID = 1
@@ -170,6 +204,12 @@ describe("title alert renderer", () => {
       type: "session.status",
       properties: { sessionID: "child", status: { type: "busy" } },
     })
+
+    timers.get(1)?.()
+
+    expect(writes).toEqual(["\u001b]0;⠋ OC | 主任务\u0007", "\u001b]0;⠙ OC | 主任务\u0007"])
+    expect(timers.size).toBe(1)
+
     await alert.onEvent({
       id: "subagent-idle",
       type: "session.status",
@@ -177,15 +217,6 @@ describe("title alert renderer", () => {
     })
 
     expect(timers.size).toBe(0)
-    expect(writes).toEqual([])
-
-    await alert.onEvent({
-      id: "parent-busy",
-      type: "session.status",
-      properties: { sessionID: "parent", status: { type: "busy" } },
-    })
-
-    expect(writes).toEqual(["\u001b]0;OC⠋ | 主任务\u0007"])
-    expect(timers.size).toBe(1)
+    expect(writes.at(-1)).toBe("\u001b]0;OC✓ | 主任务\u0007")
   })
 })
