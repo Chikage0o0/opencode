@@ -48,8 +48,9 @@ function isSubagentSessionInfo(info: SessionInfo | undefined) {
   return typeof info?.parentID === "string" && info.parentID.trim().length > 0
 }
 
-export function isOpencodeServeMode(argv = process.argv) {
-  return argv.some((arg) => arg === "serve")
+export function isOpencodeServeMode(argv: unknown = process.argv) {
+  const args = Array.isArray(argv) ? argv : []
+  return args.some((arg) => arg === "serve")
 }
 
 function sanitizeTitle(value: string) {

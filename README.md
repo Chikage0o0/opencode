@@ -98,6 +98,12 @@
 - command 不注入完整 diff、log 或历史样例，避免污染主 agent 上下文并降低提交成本。
 - subagent 默认不 push、不改 git config、不做 destructive git 操作；提交成功后只返回紧凑结果。
 
+### `/improve-codebase-architecture` command
+
+- `commands/improve-codebase-architecture.md` 定义架构深度扫描命令，替代旧的 `skills/improve-codebase-architecture/`。
+- 命令会读取项目领域词汇和 ADR，生成临时目录中的可视化 HTML 报告，再让用户选择候选项进入 `/grilling`。
+- 报告模板自包含在 command 文件中，避免依赖已删除的 skill 附件文件。
+
 ## 启动与验证
 
 应用 Home Manager/NixOS 配置后：

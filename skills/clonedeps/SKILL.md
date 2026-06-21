@@ -1,6 +1,6 @@
 ---
 name: clonedeps
-description: Clone important project dependency source code into an ignored local workspace so OpenCode can inspect library internals. Use when the user asks to clone dependencies, inspect dependency/source internals, understand SDK/framework behavior from source, debug library implementation details, or make core dependency repos locally readable. Do not use for ordinary API/docs questions where @librarian is enough.
+description: 'Use when the user wants to clone, inspect, or debug core dependency source locally. Triggers on "clone the repo for X", "read the SDK source", "inspect framework internals", or "see the implementation". Delegates repo choice to @librarian, then clones into .slim/clonedeps/repos/, writes the manifest, and updates ignore/context files.'
 ---
 
 # Clonedeps Skill

@@ -1,4 +1,5 @@
 import type { Hooks, Plugin } from "@opencode-ai/plugin"
+import { execFileSync } from "node:child_process"
 import { existsSync } from "node:fs"
 
 type WindowsGitEnvOptions = {
@@ -6,6 +7,15 @@ type WindowsGitEnvOptions = {
   platform?: NodeJS.Platform
   env?: NodeJS.ProcessEnv
   exists?: (path: string) => boolean
+  execFileSync?: (file: string, args: string[], options: { encoding: "utf8"; timeout: number }) => string
+}
+
+type EnvironmentRegistryScope = "system" | "user"
+
+type RegistryEnvironmentValue = {
+  name: string
+  type: string
+  value: string
 }
 
 type ShellEnvOutput = {
@@ -31,7 +41,6 @@ function prependPathEntries(currentPath: string | undefined, entries: string[]) 
     const key = normalizePath(trimmed)
     if (seen.has(key)) continue
 
-
     seen.add(key)
     result.push(trimmed)
   }
@@ -41,6 +50,14 @@ function prependPathEntries(currentPath: string | undefined, entries: string[]) 
 
 function pathKey(env: Record<string, string | undefined>) {
   return Object.keys(env).find((key) => key.toLowerCase() === "path") ?? "Path"
+}
+
+function envKey(env: Record<string, string | undefined>, name: string) {
+  return Object.keys(env).find((key) => key.toLowerCase() === name.toLowerCase())
+}
+
+function setEnvValue(env: Record<string, string | undefined>, name: string, value: string | undefined) {
+  env[envKey(env, name) ?? name] = value
 }
 
 function cleanWindowsPath(path: string) {
@@ -78,6 +95,70 @@ function commonGitHomes(env: NodeJS.ProcessEnv) {
   ].filter((path): path is string => typeof path === "string" && path.trim().length > 0)
 }
 
+function windowsEnvironmentRegistryKey(scope: EnvironmentRegistryScope) {
+  return scope === "system" ? "HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment" : "HKCU\\Environment"
+}
+
+function parseRegistryEnvironment(output: string) {
+  const values: RegistryEnvironmentValue[] = []
+
+  for (const line of output.split(/\r?\n/)) {
+    const match = /^\s*([^\s]+)\s+(REG_[A-Z_]+)\s*(.*)$/.exec(line)
+    if (!match) continue
+
+    values.push({ name: match[1], type: match[2], value: match[3] ?? "" })
+  }
+
+  return values
+}
+
+function expandWindowsEnvironmentValue(value: string, env: Record<string, string | undefined>) {
+  return value.replace(/%([^%]+)%/g, (match, name: string) => env[envKey(env, name) ?? name] ?? match)
+}
+
+function readWindowsRegistryEnvironment(options: WindowsGitEnvOptions = {}) {
+  const run = options.execFileSync ?? execFileSync
+  const result: Record<string, string> = {}
+
+  for (const scope of ["system", "user"] as const) {
+    let output: string
+    try {
+      output = run("reg", ["query", windowsEnvironmentRegistryKey(scope)], { encoding: "utf8", timeout: 1000 })
+    } catch {
+      continue
+    }
+
+    for (const item of parseRegistryEnvironment(output)) {
+      const baseEnv = { ...(options.env ?? process.env), ...result }
+      const value = item.type === "REG_EXPAND_SZ" ? expandWindowsEnvironmentValue(item.value, baseEnv) : item.value
+      const existingKey = envKey(result, item.name)
+
+      if (item.name.toLowerCase() === "path" && existingKey) {
+        result[existingKey] = prependPathEntries(result[existingKey], value.split(";"))
+      } else {
+        result[existingKey ?? item.name] = value
+      }
+    }
+  }
+
+  return result
+}
+
+function mergeWindowsRegistryEnvironment(env: Record<string, string | undefined>, registryEnv: Record<string, string>) {
+  const registryPath = registryEnv[envKey(registryEnv, "Path") ?? "Path"]
+
+  for (const [name, value] of Object.entries(registryEnv)) {
+    if (name.toLowerCase() === "path") continue
+
+    setEnvValue(env, name, value)
+  }
+
+  if (registryPath) {
+    const key = pathKey(env)
+    env[key] = prependPathEntries(env[key], registryPath.split(";"))
+  }
+}
+
 export function gitForWindowsPaths(gitHome: string) {
   return {
     bash: `${gitHome}\\bin\\bash.exe`,
@@ -108,7 +189,9 @@ export function createWindowsGitEnvPlugin(defaultOptions: WindowsGitEnvOptions =
   return async (_input, runtimeOptions?: WindowsGitEnvOptions): Promise<Hooks> => {
     const options = { ...defaultOptions, ...runtimeOptions }
     const platform = options.platform ?? process.platform
-    const gitHome = platform === "win32" ? findGitForWindowsHome(options) : undefined
+    const registryEnv = platform === "win32" ? readWindowsRegistryEnvironment(options) : undefined
+    const discoveryEnv = registryEnv ? ({ ...(options.env ?? process.env), ...registryEnv } as NodeJS.ProcessEnv) : options.env
+    const gitHome = platform === "win32" ? findGitForWindowsHome({ ...options, env: discoveryEnv }) : undefined
     const gitPaths = gitHome ? gitForWindowsPaths(gitHome) : undefined
 
     return {
@@ -119,6 +202,7 @@ export function createWindowsGitEnvPlugin(defaultOptions: WindowsGitEnvOptions =
       },
 
       "shell.env": async (_input, output: ShellEnvOutput) => {
+        if (registryEnv) mergeWindowsRegistryEnvironment(output.env, registryEnv)
         if (!gitPaths) return
 
         const key = pathKey(output.env)

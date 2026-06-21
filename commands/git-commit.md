@@ -1,5 +1,5 @@
 ---
-description: Create a safe Git commit via the git-commit subagent. Optional argument is the commit scope; if omitted, the primary agent infers a minimal scope.
+description: 通过 git-commit 子代理创建安全的 Git 提交。可选参数为提交范围；省略时由主代理推断最小范围。
 ---
 
 You are handling the `/git-commit` command.

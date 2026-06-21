@@ -1,3 +1,59 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Opencode-DCP/opencode-dynamic-context-pruning/master/dcp.schema.json"
+  "$schema": "https://raw.githubusercontent.com/Opencode-DCP/opencode-dynamic-context-pruning/master/dcp.schema.json",
+  // ═══ 基础配置 ═════════════════════════════════════════════════════
+  "enabled": true,
+  "autoUpdate": true,
+  "debug": false,
+  "pruneNotification": "minimal",
+  "pruneNotificationType": "chat",
+  // ═══ 自动策略 ═════════════════════════════════════════════════════
+  "strategies": {
+    "deduplication": {
+      "enabled": true,
+    },
+    "purgeErrors": {
+      "enabled": true,
+      "turns": 4,
+    },
+  },
+  // ═══ 压缩控制 ═════════════════════════════════════════════════════
+  "compress": {
+    "mode": "range",
+    "permission": "allow",
+    "showCompression": false,
+    "summaryBuffer": true, // 防止压缩级联死循环
+    // 全局回退阈值
+    "maxContextLimit": 150000,
+    "minContextLimit": 80000,
+    // ── 提醒策略 ───────────────────────────────────────────────────────
+    "nudgeFrequency": 15, // 15 轮提醒一次，降低缓存破坏频率
+    "iterationNudgeThreshold": 15,
+    "nudgeForce": "soft",
+    // ── 锚点保护 ───────────────────────────────────────────────────────
+    "protectUserMessages": true, // 用户消息作为缓存锚点
+    "protectTags": false,
+    "protectedTools": ["task", "todowrite"],
+  },
+  // ═══ 轮次保护 ═════════════════════════════════════════════════════
+  "turnProtection": {
+    "enabled": true,
+    "turns": 4,
+  },
+  // ═══ 任务保护 ═════════════════════════════════════════════════════
+  "commands": {
+    "enabled": true,
+    "protectedTools": ["task", "todo", "question"],
+  },
+  // ═══ 手动模式 ═════════════════════════════════════════════════════
+  "manualMode": {
+    "enabled": false,
+    "automaticStrategies": true,
+  },
+  // ═══ 实验功能 ═════════════════════════════════════════════════════
+  "experimental": {
+    "allowSubAgents": true,
+    "customPrompts": false,
+  },
+  // ═══ 文件保护 ═════════════════════════════════════════════════════
+  "protectedFilePatterns": [],
 }
