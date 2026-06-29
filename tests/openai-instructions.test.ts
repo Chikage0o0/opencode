@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 
-import { createOpenAIInstructionsPlugin } from "../plugins/openai-instructions"
+import { createOpenAIInstructionsPlugin } from "../lib/openai-instructions"
 
 const openAIModel = {
   id: "gpt-5.5",

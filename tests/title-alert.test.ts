@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 
-import { createTitleAlert, isOpencodeServeMode, terminalTitleSequence } from "../plugins/title-alert"
+import { createTitleAlert, isOpencodeServeMode, terminalTitleSequence } from "../lib/title-alert-core"
 
 describe("title alert renderer", () => {
   test("uses OSC terminal title escape and strips controls", () => {

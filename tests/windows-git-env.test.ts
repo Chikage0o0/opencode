@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test"
 
-import { createWindowsGitEnvPlugin, findGitForWindowsHome } from "../plugins/windows-git-env"
+import { createWindowsGitEnvPlugin, findGitForWindowsHome } from "../lib/windows-git-env"
 
 const gitHome = "C:\\Users\\me\\scoop\\apps\\git\\current"
 const existingPaths = new Set([`${gitHome}\\bin\\bash.exe`, `${gitHome}\\cmd\\git.exe`].map((path) => path.toLowerCase()))

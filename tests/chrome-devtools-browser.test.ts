@@ -5,7 +5,7 @@ import {
   createChromeDevtoolsBrowserPlugin,
   findBrowserExecutable,
   shouldUseHeadless,
-} from "../plugins/chrome-devtools-browser"
+} from "../lib/chrome-devtools-browser"
 
 describe("Chrome DevTools browser plugin", () => {
   test("finds Chrome before Edge on Windows", () => {
