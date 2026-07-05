@@ -1,6 +1,6 @@
 ---
 name: clonedeps
-description: 'Use when the user wants to clone, inspect, or debug core dependency source locally. Triggers on "clone the repo for X", "read the SDK source", "inspect framework internals", or "see the implementation". Delegates repo choice to @librarian, then clones into .slim/clonedeps/repos/, writes the manifest, and updates ignore/context files.'
+description: Clone important project dependency source code into an ignored local workspace so OpenCode can inspect library internals. Use when the user asks to clone dependencies, inspect dependency/source internals, understand SDK/framework behavior from source, debug library implementation details, or make core dependency repos locally readable. Do not use for ordinary API/docs questions where @librarian is enough.
 ---
 
 # Clonedeps Skill
@@ -217,9 +217,9 @@ sentence so future agents do not need an extra read just to know what is there:
 Read-only dependency source repositories are available under
 `.slim/clonedeps/repos/` for inspection. Do not edit these clones.
 
-- `.slim/clonedeps/repos/<safe-name>/` — `<repo>` at `<ref>`; <one sentence on
+- `.slim/clonedeps/repos/<safe-name>/` - `<repo>` at `<ref>`; <one sentence on
   why this source is useful>.
-- `.slim/clonedeps/repos/<safe-name-2>/` — `<repo>` at `<ref>`; <one sentence on
+- `.slim/clonedeps/repos/<safe-name-2>/` - `<repo>` at `<ref>`; <one sentence on
   why this source is useful>.
 ```
 

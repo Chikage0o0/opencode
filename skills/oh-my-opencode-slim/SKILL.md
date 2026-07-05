@@ -1,6 +1,6 @@
 ---
 name: oh-my-opencode-slim
-description: 'Use when tuning the oh-my-opencode-slim plugin: agent models, variants, skills, MCPs, presets, custom agents, or prompt overrides. Triggers on "switch model for librarian", "add a custom agent", "tune subagents", "recurring workflow friction", or plugin behavior changes. Inspects oh-my-opencode-slim.json[c] and .opencode overrides, prefers narrow *_append.md edits, and warns when restart is needed.'
+description: Configure and improve oh-my-opencode-slim for the current user. Use when users want to tune agents, models, prompts, custom agents, skills, MCPs, presets, or plugin behavior. Also use when recurring workflow friction suggests a safe config or prompt improvement.
 ---
 
 # oh-my-opencode-slim Configuration Skill

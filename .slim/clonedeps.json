@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2026-07-05T04:22:33.000Z",
+  "dependencies": [
+    {
+      "name": "@tarquinen/opencode-dcp",
+      "resolvedVersion": "3.1.14",
+      "repoUrl": "https://github.com/Opencode-DCP/opencode-dynamic-context-pruning.git",
+      "ref": "v3.1.14",
+      "path": ".slim/clonedeps/repos/Opencode-DCP__opencode-dynamic-context-pruning",
+      "packagePath": ".",
+      "reason": "当前 OpenCode 配置已切到该 clone 的 index.ts，便于继续本地开发与联调 DCP。"
+    }
+  ]
+}

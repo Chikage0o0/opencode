@@ -9,6 +9,7 @@ antigravity-signature-cache.json
 antigravity-logs/
 .swarm/
 .worktrees/
+.oh-my-opencode-slim/
 
 # Devenv
 .devenv*
@@ -20,3 +21,7 @@ devenv.local.yaml
 
 # pre-commit
 .pre-commit-config.yaml
+
+# BEGIN oh-my-opencode-slim clonedeps
+.slim/clonedeps/repos/
+# END oh-my-opencode-slim clonedeps

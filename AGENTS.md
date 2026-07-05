@@ -303,6 +303,12 @@ Deprecated：
 - 不放 secrets、客户数据、临时状态、长教程。
 - 项目规则变化时，优先更新项目级文件。
 
+## Cloned Dependency Source
+
+本地依赖源码仓库位于 `.slim/clonedeps/repos/`。
+
+- `.slim/clonedeps/repos/Opencode-DCP__opencode-dynamic-context-pruning/` — `Opencode-DCP/opencode-dynamic-context-pruning` at `v3.1.14`；当前 `opencode.json` 已切到此 clone 的 `index.ts`，用于继续本地开发与联调 DCP。
+
 ## 最终回复
 
 代码任务：

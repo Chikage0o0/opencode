@@ -7,38 +7,32 @@
       "orchestrator": {
         "model": "openai/gpt-5.5",
         "variant": "high",
-        "skills": [
-          "*",
-          "!make-interfaces-feel-better",
-          "!frontend-design",
-          "!better-icons"
-        ],
+        "skills": ["*", "!make-interfaces-feel-better", "!frontend-design"],
         "mcps": ["*", "!context7", "!gh_grep", "!websearch"]
       },
       "oracle": {
         "model": "openai/gpt-5.5",
-        "variant": "high",
+        "variant": "xhigh",
         "skills": ["codebase-design", "resolving-merge-conflicts", "web-perf"],
         "mcps": ["codegraph", "chrome-devtools"]
       },
       "librarian": {
-        "model": "openai/gpt-5.4-mini",
-        "variant": "low",
+        "model": "ollama-cloud/minimax-m3",
+        "variant": "thinking",
         "skills": [],
         "mcps": ["context7", "gh_grep", "websearch", "chrome-devtools"]
       },
       "explorer": {
-        "model": "openai/gpt-5.4-mini",
-        "variant": "low",
+        "model": "ollama-cloud/deepseek-v4-flash",
+        "variant": "high",
         "skills": [],
         "mcps": ["codegraph"]
       },
       "designer": {
-        "model": "zhipuai-coding-plan/glm-5.2",
+        "model": "ollama-cloud/glm-5.2",
         "variant": "max",
         "skills": [
           "make-interfaces-feel-better",
-          "better-icons",
           "frontend-design",
           "svelte-code-writer",
           "shadcn-svelte"
@@ -46,8 +40,8 @@
         "mcps": ["codegraph"]
       },
       "fixer": {
-        "model": "openai/gpt-5.5",
-        "variant": "low",
+        "model": "ollama-cloud/glm-5.2",
+        "variant": "max",
         "skills": [
           "tdd",
           "diagnosing-bugs",

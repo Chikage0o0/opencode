@@ -14,11 +14,11 @@
       "disable": true
     },
     "git-commit": {
-      "model": "openai/gpt-5.4-mini",
+      "model": "ollama-cloud/deepseek-v4-flash",
       "variant": "low"
     },
     "title": {
-      "model": "openai/gpt-5.4-mini",
+      "model": "ollama-cloud/deepseek-v4-flash",
       "temperature": 0,
       "variant": "low",
       "options": {},
@@ -38,7 +38,8 @@
   "permission": "allow",
   "plugin": [
     "opencode-direnv",
-    "@tarquinen/opencode-dcp@latest",
+    "./plugins/windows-shell-utf8.ts",
+    "./.slim/clonedeps/repos/Opencode-DCP__opencode-dynamic-context-pruning/index.ts",
     "oh-my-opencode-slim"
   ],
   "mcp": {
@@ -61,7 +62,7 @@
     }
   },
   "share": "disabled",
-  "small_model": "openai/gpt-5.4-mini",
+  "small_model": "ollama-cloud/deepseek-v4-flash",
   "tool_output": {
     "max_lines": 800,
     "max_bytes": 24000

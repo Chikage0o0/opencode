@@ -42,14 +42,12 @@
     "summaryBuffer": true,
 
     // 使用百分比阈值，避免切换模型后固定 token 阈值失真。
-    "maxContextLimit": "80%",
-    "minContextLimit": "50%",
+    "maxContextLimit": 150000,
+    "minContextLimit": 80000,
 
     // 低频提醒，减少提示注入对 prompt cache 的破坏。
     "nudgeFrequency": 15,
     "iterationNudgeThreshold": 15,
-    "nudgeForce": "soft",
-
     // 保护用户原文，避免压缩破坏边界语义。
     "protectUserMessages": true,
 
@@ -60,7 +58,7 @@
   // ═══ 最近轮次保护 ═════════════════════════════════════════════════
   "turnProtection": {
     "enabled": true,
-    "turns": 8,
+    "turns": 4,
   },
 
   // ═══ 命令与托管工具保护 ═══════════════════════════════════════════
