@@ -2,11 +2,10 @@
   "$schema": "https://opencode.ai/tui.json",
   "theme": "catppuccin",
   "plugin": [
-    "oh-my-opencode-slim@2.0.5",
     "opencode-direnv",
-    "opencode-acp@latest"
+    "opencode-acp@latest",
+    "oh-my-opencode-slim"
   ],
-
   "scroll_speed": 3,
   "scroll_acceleration": {
     "enabled": true

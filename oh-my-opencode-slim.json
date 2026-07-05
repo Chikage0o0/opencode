@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/oh-my-opencode-slim@2.0.4/oh-my-opencode-slim.schema.json",
+  "$schema": "https://unpkg.com/oh-my-opencode-slim@2.1.0/oh-my-opencode-slim.schema.json",
   "preset": "default",
   "autoUpdate": false,
   "presets": {

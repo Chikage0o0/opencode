@@ -116,17 +116,43 @@ function expandWindowsEnvironmentValue(value: string, env: Record<string, string
   return value.replace(/%([^%]+)%/g, (match, name: string) => env[envKey(env, name) ?? name] ?? match)
 }
 
+function windowsRegCommands(options: WindowsGitEnvOptions) {
+  const env = options.env ?? process.env
+  const exists = options.exists ?? existsSync
+  const commands: string[] = []
+
+  for (const root of [env.SystemRoot, env.WINDIR]) {
+    if (!root) continue
+
+    const command = `${cleanWindowsPath(root)}\\System32\\reg.exe`
+    if (exists(command) && !commands.some((item) => normalizePath(item) === normalizePath(command))) commands.push(command)
+  }
+
+  commands.push("reg")
+
+  return commands
+}
+
 function readWindowsRegistryEnvironment(options: WindowsGitEnvOptions = {}) {
   const run = options.execFileSync ?? execFileSync
   const result: Record<string, string> = {}
+  const commands = windowsRegCommands(options)
 
   for (const scope of ["system", "user"] as const) {
-    let output: string
-    try {
-      output = run("reg", ["query", windowsEnvironmentRegistryKey(scope)], { encoding: "utf8", timeout: 1000 })
-    } catch {
-      continue
+    let output = ""
+    let read = false
+
+    for (const command of commands) {
+      try {
+        output = run(command, ["query", windowsEnvironmentRegistryKey(scope)], { encoding: "utf8", timeout: 1000 })
+        read = true
+        break
+      } catch {
+        continue
+      }
     }
+
+    if (!read) continue
 
     for (const item of parseRegistryEnvironment(output)) {
       const baseEnv = { ...(options.env ?? process.env), ...result }

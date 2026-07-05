@@ -37,19 +37,27 @@
   "model": "openai/gpt-5.5",
   "permission": "allow",
   "plugin": [
-    "oh-my-opencode-slim@2.0.5",
     "opencode-direnv",
-    "@tarquinen/opencode-dcp@latest"
+    "@tarquinen/opencode-dcp@latest",
+    "oh-my-opencode-slim"
   ],
   "mcp": {
     "codegraph": {
       "type": "local",
-      "command": ["codegraph", "serve", "--mcp"],
+      "command": [
+        "codegraph",
+        "serve",
+        "--mcp"
+      ],
       "enabled": true
     },
     "chrome-devtools": {
       "type": "local",
-      "command": ["bunx", "-y", "chrome-devtools-mcp@latest"]
+      "command": [
+        "bunx",
+        "-y",
+        "chrome-devtools-mcp@latest"
+      ]
     }
   },
   "share": "disabled",

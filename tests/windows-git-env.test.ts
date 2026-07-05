@@ -57,4 +57,38 @@ describe("Windows Git environment", () => {
     expect(config.shell).toBeUndefined()
     expect(output.shell).toBe(`${gitHome}\\bin\\bash.exe`)
   })
+
+  test("reads registry through SystemRoot reg.exe when shell PATH misses System32", async () => {
+    const regExe = "C:\\Windows\\System32\\reg.exe"
+    const powershellPath = "C:\\Windows\\System32\\WindowsPowerShell\\v1.0"
+    const calls: string[] = []
+    const plugin = await createWindowsGitEnvPlugin({
+      platform: "win32",
+      env: {
+        Path: `C:\\Users\\me\\scoop\\shims;${gitHome}\\cmd`,
+        SystemRoot: "C:\\Windows",
+      },
+      exists: (path) => path.toLowerCase() === regExe.toLowerCase() || exists(path),
+      execFileSync: (file) => {
+        calls.push(file)
+        return file.toLowerCase() === regExe.toLowerCase()
+          ? `
+HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment
+    Path    REG_EXPAND_SZ    C:\\Windows\\System32;C:\\Windows;${powershellPath}
+`
+          : ""
+      },
+    })({} as never)
+    const output = {
+      env: {
+        Path: "C:\\Users\\chika\\scoop\\shims",
+      },
+    }
+
+    await plugin["shell.env"]?.({ cwd: process.cwd() }, output)
+
+    expect(calls).toContain(regExe)
+    expect(output.env.Path.split(";")).toContain("C:\\Windows\\System32")
+    expect(output.env.Path.split(";")).toContain(powershellPath)
+  })
 })
