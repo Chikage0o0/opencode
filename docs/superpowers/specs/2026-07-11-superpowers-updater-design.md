@@ -14,7 +14,7 @@
 ## 更新流程
 
 1. 在临时目录下载并安全解压目标 tag tarball。
-2. 拒绝归档中的绝对路径、`..` 路径穿越、链接逃逸和异常根目录结构。
+2. 拒绝归档中的绝对路径、`..` 路径穿越、hardlink 和异常根目录结构。唯一例外是官方 archive 根目录下的 `superpowers-<version>/AGENTS.md` symlink：其 member type 必须是 symlink、名称必须精确匹配、target 必须是同一根目录内的 `CLAUDE.md` 普通文件；其他 symlink 一律拒绝。
 3. 收集上游 `skills/`；排除 `using-superpowers`，其余 skill 复制到 staging 目录。
 4. 修改每个顶层 `SKILL.md` frontmatter `description`，添加 `/use-superpowers` 当前 session 激活门控。
 5. 精确应用两个本地路径适配：

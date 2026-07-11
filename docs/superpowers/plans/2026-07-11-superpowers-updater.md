@@ -183,7 +183,7 @@ EXECUTABLES = (
 实现要求：
 
 - `validate_version` 使用 full match `[0-9]+\.[0-9]+\.[0-9]+`。
-- `safe_extract` 在写文件前解析所有 member，拒绝绝对路径、`..`、symlink 和 hardlink；归档必须只有一个根目录。
+- `safe_extract` 在写文件前解析所有 member，拒绝绝对路径、`..` 和 hardlink；归档必须只有一个根目录。唯一批准的 symlink 是 archive 根目录的 `superpowers-<version>/AGENTS.md`，且必须精确指向同根 `CLAUDE.md` 普通文件；其他 symlink 一律拒绝。
 - `gate_skill` 只修改首个 frontmatter 的唯一 `description:`，重复执行不得叠加 gate。
 - `replace_exact` 要求 `text.count(old) == 1`。
 - `prepare_update` 校验 package version，复制除 `using-superpowers` 外全部 skill，应用 gate、路径补丁及 executable 存在检查，并生成 staged command。

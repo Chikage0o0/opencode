@@ -47,6 +47,8 @@ class UpdateSuperpowersTests(unittest.TestCase):
         source = root / f"superpowers-{version}"
         (source / "skills").mkdir(parents=True)
         (source / "package.json").write_text(json.dumps({"version": version}), encoding="utf-8")
+        (source / "README.md").write_text("readme", encoding="utf-8")
+        (source / "CLAUDE.md").write_text("claude", encoding="utf-8")
         for skill in SKILLS:
             content = "---\nname: " + skill + "\ndescription: Original description\n---\n\nBody\n"
             if skill == "brainstorming":
@@ -59,7 +61,8 @@ class UpdateSuperpowersTests(unittest.TestCase):
         using = source / "skills" / "using-superpowers" / "SKILL.md"
         using.parent.mkdir()
         using.write_text(
-            "---\nname: using-superpowers\ndescription: Bootstrap\n---\n\nBootstrap body\n",
+            "---\nname: using-superpowers\ndescription: Bootstrap\n---\n\n"
+            "<EXTREMELY-IMPORTANT>\nBootstrap rule\n</EXTREMELY-IMPORTANT>\n\nBootstrap body\n",
             encoding="utf-8",
         )
         for executable in EXECUTABLES:
@@ -74,7 +77,7 @@ class UpdateSuperpowersTests(unittest.TestCase):
             archive.add(source, arcname=source.name)
             link = tarfile.TarInfo(f"{source.name}/AGENTS.md")
             link.type = tarfile.SYMTYPE
-            link.linkname = "README.md"
+            link.linkname = "CLAUDE.md"
             archive.addfile(link)
         return payload.getvalue()
 
@@ -108,7 +111,10 @@ class UpdateSuperpowersTests(unittest.TestCase):
             self.assertIn("./visual-companion.md", (staged_skills / "brainstorming" / "SKILL.md").read_text(encoding="utf-8"))
             self.assertIn("../../../commands/use-superpowers.md", (staged_skills / "executing-plans" / "SKILL.md").read_text(encoding="utf-8"))
             command = staged_command.read_text(encoding="utf-8")
-            self.assertIn("<EXTREMELY-IMPORTANT>", command)
+            self.assertTrue(command.startswith("---\ndescription: "))
+            self.assertEqual(command.count("<EXTREMELY-IMPORTANT>"), 1)
+            self.assertEqual(command.count("</EXTREMELY-IMPORTANT>"), 1)
+            self.assertIn("当前 session 已通过 `/use-superpowers` 激活 Superpowers。", command)
             self.assertIn("OpenCode's native `skill` tool", command)
             self.assertIn("Bootstrap body", command)
             self.assertNotIn("name: using-superpowers", command)
@@ -120,11 +126,55 @@ class UpdateSuperpowersTests(unittest.TestCase):
             previous_file = self.updater.__file__
             self.updater.__file__ = str(repo / "scripts" / "update-superpowers.py")
             try:
-                with mock.patch.object(self.updater, "urlopen", return_value=io.BytesIO(payload)), mock.patch.object(self.updater.subprocess, "run"):
+                modes = {f"skills/superpowers/{path}": "100755" for path in EXECUTABLES}
+                with mock.patch.object(self.updater, "urlopen", return_value=io.BytesIO(payload)), mock.patch.object(self.updater, "read_index_modes", return_value=modes), mock.patch.object(self.updater.subprocess, "run"):
                     self.assertEqual(self.updater.main(["6.1.1"]), 0)
             finally:
                 self.updater.__file__ = previous_file
             self.assertTrue((repo / "commands" / "use-superpowers.md").exists())
+
+    def test_safe_extract_allows_only_the_expected_agents_symlink(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            archive_path = Path(temporary) / "safe.tar.gz"
+            with tarfile.open(archive_path, "w:gz") as archive:
+                directory = tarfile.TarInfo("superpowers-6.1.1")
+                directory.type = tarfile.DIRTYPE
+                archive.addfile(directory)
+                claude = tarfile.TarInfo("superpowers-6.1.1/CLAUDE.md")
+                claude.size = 1
+                archive.addfile(claude, io.BytesIO(b"x"))
+                link = tarfile.TarInfo("superpowers-6.1.1/AGENTS.md")
+                link.type = tarfile.SYMTYPE
+                link.linkname = "CLAUDE.md"
+                archive.addfile(link)
+            with tarfile.open(archive_path, "r:gz") as archive:
+                root = self.updater.safe_extract(archive, Path(temporary) / "output")
+            self.assertTrue((root / "AGENTS.md").is_symlink())
+
+    def test_safe_extract_rejects_other_links_and_non_directory_root(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            for name, link_type, link_target in (
+                ("superpowers-6.1.1/other", tarfile.SYMTYPE, "CLAUDE.md"),
+                ("superpowers-6.1.1/AGENTS.md", tarfile.LNKTYPE, "CLAUDE.md"),
+                ("superpowers-6.1.1/AGENTS.md", tarfile.SYMTYPE, "../escape"),
+            ):
+                archive_path = Path(temporary) / f"{link_type.decode()}.tar.gz"
+                with tarfile.open(archive_path, "w:gz") as archive:
+                    info = tarfile.TarInfo(name)
+                    info.type = link_type
+                    info.linkname = link_target
+                    archive.addfile(info)
+                with tarfile.open(archive_path, "r:gz") as archive:
+                    with self.assertRaises(ValueError):
+                        self.updater.safe_extract(archive, Path(temporary) / "output")
+            archive_path = Path(temporary) / "file-root.tar.gz"
+            with tarfile.open(archive_path, "w:gz") as archive:
+                info = tarfile.TarInfo("superpowers-6.1.1")
+                info.size = 1
+                archive.addfile(info, io.BytesIO(b"x"))
+            with tarfile.open(archive_path, "r:gz") as archive:
+                with self.assertRaises(ValueError):
+                    self.updater.safe_extract(archive, Path(temporary) / "output")
 
     def test_prepare_update_rejects_package_version_mismatch(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -155,6 +205,14 @@ class UpdateSuperpowersTests(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 self.updater.prepare_update(source, root / "staging", "6.1.1")
 
+    def test_prepare_update_rejects_skill_directory_without_skill_file(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = self.make_source_tree(root)
+            (source / "skills" / "writing-skills" / "SKILL.md").unlink()
+            with self.assertRaises(ValueError):
+                self.updater.prepare_update(source, root / "staging", "6.1.1")
+
     def test_install_update_restores_existing_targets_when_replace_fails(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -182,3 +240,47 @@ class UpdateSuperpowersTests(unittest.TestCase):
                     self.updater.install_update(staged_skills, staged_command, repo)
             self.assertEqual((old_skills / "old.txt").read_text(encoding="utf-8"), "old skills")
             self.assertEqual(old_command.read_text(encoding="utf-8"), "old command")
+
+    def test_install_update_restores_files_and_index_when_mode_update_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repo = root / "repo"
+            old_skills = repo / "skills" / "superpowers"
+            old_skills.mkdir(parents=True)
+            (old_skills / "old.txt").write_text("old skills", encoding="utf-8")
+            old_command = repo / "commands" / "use-superpowers.md"
+            old_command.parent.mkdir()
+            old_command.write_text("old command", encoding="utf-8")
+            staged_skills = root / "staged-skills"
+            staged_skills.mkdir()
+            staged_command = root / "staged-command.md"
+            staged_command.write_text("new command", encoding="utf-8")
+            modes = {"skills/superpowers/brainstorming/scripts/start-server.sh": "100755"}
+            with mock.patch.object(self.updater.subprocess, "run", side_effect=[OSError("index failed"), mock.Mock()]):
+                with self.assertRaisesRegex(OSError, "index failed"):
+                    self.updater.install_update(staged_skills, staged_command, repo, index_modes=modes)
+            self.assertEqual((old_skills / "old.txt").read_text(encoding="utf-8"), "old skills")
+            self.assertEqual(old_command.read_text(encoding="utf-8"), "old command")
+
+    def test_install_update_keeps_backup_and_reports_rollback_failure(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repo = root / "repo"
+            (repo / "skills" / "superpowers").mkdir(parents=True)
+            (repo / "commands").mkdir()
+            (repo / "commands" / "use-superpowers.md").write_text("old", encoding="utf-8")
+            staged_skills = root / "staged-skills"
+            staged_skills.mkdir()
+            staged_command = root / "staged-command.md"
+            staged_command.write_text("new", encoding="utf-8")
+            original_move = self.updater.shutil.move
+            def fail_install_and_restore(source, destination, *args, **kwargs):
+                if Path(source) == staged_skills:
+                    raise OSError("install failed")
+                if Path(source).name == "superpowers" and "update-superpowers-" in str(source):
+                    raise OSError("restore failed")
+                return original_move(source, destination, *args, **kwargs)
+            with mock.patch.object(self.updater.shutil, "move", side_effect=fail_install_and_restore):
+                with self.assertRaisesRegex(RuntimeError, "install failed.*restore failed"):
+                    self.updater.install_update(staged_skills, staged_command, repo)
+            self.assertTrue(list(repo.glob("update-superpowers-*")))

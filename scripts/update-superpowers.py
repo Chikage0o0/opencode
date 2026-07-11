@@ -32,21 +32,15 @@ EXECUTABLES = (
     "writing-skills/render-graphs.js",
 )
 
-ACTIVATION_WRAPPER = """当前 session 已通过 `/use-superpowers` 激活 Superpowers。
+COMMAND_FRONTMATTER = """---
+description: Activate Superpowers workflows for the current session.
+---
 
-<SUBAGENT-STOP>
-If you were dispatched as a subagent to execute a specific task, ignore this skill.
-</SUBAGENT-STOP>
+"""
 
-<EXTREMELY-IMPORTANT>
-If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
+SESSION_MARKER = "当前 session 已通过 `/use-superpowers` 激活 Superpowers。\n\n"
 
-IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
-
-This is not negotiable. You cannot rationalize your way out of this.
-</EXTREMELY-IMPORTANT>
-
-## OpenCode Tool Mapping
+OPEN_CODE_TOOL_MAPPING = """## OpenCode Tool Mapping
 
 Use OpenCode's native `skill` tool to list and load skills.
 
@@ -73,34 +67,35 @@ def safe_extract(archive: tarfile.TarFile, destination: Path) -> Path:
     """验证 tar 成员后解压，并返回唯一的归档根目录。"""
     members = archive.getmembers()
     roots: set[str] = set()
+    members_by_name: dict[str, tarfile.TarInfo] = {}
     for member in members:
         name = member.name
         posix = PurePosixPath(name)
         windows = PureWindowsPath(name)
         if not name or posix.is_absolute() or windows.is_absolute() or ".." in posix.parts or ".." in windows.parts:
             raise ValueError(f"Unsafe archive path: {name!r}")
-        if member.issym() or member.islnk():
-            raise ValueError(f"Archive links are not allowed: {name!r}")
         if not posix.parts:
             raise ValueError(f"Invalid archive path: {name!r}")
         roots.add(posix.parts[0])
+        members_by_name[name] = member
     if len(roots) != 1:
         raise ValueError("Archive must contain exactly one root directory")
+    root = roots.pop()
+    if root not in members_by_name or not members_by_name[root].isdir():
+        raise ValueError(f"Archive root must be a directory: {root!r}")
+    agents_name = f"{root}/AGENTS.md"
+    for member in members:
+        if member.islnk():
+            raise ValueError(f"Archive hardlinks are not allowed: {member.name!r}")
+        if member.issym():
+            if member.name != agents_name or member.linkname != "CLAUDE.md":
+                raise ValueError(f"Unexpected archive symlink: {member.name!r} -> {member.linkname!r}")
+            target = members_by_name.get(f"{root}/CLAUDE.md")
+            if target is None or not target.isfile():
+                raise ValueError("AGENTS.md symlink target must be the archive root CLAUDE.md file")
     destination.mkdir(parents=True, exist_ok=True)
     archive.extractall(destination, members=members, filter="data")
-    return destination / roots.pop()
-
-
-def without_links(archive: tarfile.TarFile, destination: Path) -> Path:
-    """复制普通成员到新归档，跳过上游仓库根目录的非运行时链接。"""
-    sanitized = destination / "without-links.tar.gz"
-    with tarfile.open(sanitized, "w:gz") as output:
-        for member in archive.getmembers():
-            if member.issym() or member.islnk():
-                continue
-            file_object = archive.extractfile(member) if member.isfile() else None
-            output.addfile(member, file_object)
-    return sanitized
+    return destination / root
 
 
 def gate_skill(skill_file: Path) -> None:
@@ -138,7 +133,10 @@ def generate_command(using_skill: Path) -> str:
     match = re.match(r"\A---\n.*?\n---\n?", text, re.DOTALL)
     if not match:
         raise ValueError(f"Missing frontmatter: {using_skill}")
-    return "# /use-superpowers\n\n" + ACTIVATION_WRAPPER + text[match.end():].lstrip("\n")
+    body = text[match.end():].lstrip("\n")
+    if body.count("<EXTREMELY-IMPORTANT>") != 1 or body.count("</EXTREMELY-IMPORTANT>") != 1:
+        raise ValueError("using-superpowers body must contain exactly one activation wrapper")
+    return COMMAND_FRONTMATTER + SESSION_MARKER + body.rstrip() + "\n\n" + OPEN_CODE_TOOL_MAPPING
 
 
 def prepare_update(source_root: Path, staging_root: Path, version: str) -> tuple[Path, Path]:
@@ -157,13 +155,14 @@ def prepare_update(source_root: Path, staging_root: Path, version: str) -> tuple
         raise FileNotFoundError(f"Missing using-superpowers bootstrap: {using_skill}")
     staged_skills = staging_root / "skills" / "superpowers"
     staged_command = staging_root / "commands" / "use-superpowers.md"
-    for source_skill in sorted(source_skills.iterdir()):
-        if not source_skill.is_dir() or source_skill.name == "using-superpowers":
-            continue
+    source_skill_directories = [path for path in sorted(source_skills.iterdir()) if path.is_dir() and path.name != "using-superpowers"]
+    for source_skill in source_skill_directories:
+        if not (source_skill / "SKILL.md").is_file():
+            raise ValueError(f"Missing top-level SKILL.md: {source_skill}")
         shutil.copytree(source_skill, staged_skills / source_skill.name)
     skill_files = sorted(staged_skills.glob("*/SKILL.md"))
-    if not skill_files:
-        raise ValueError("No skills found in upstream archive")
+    if len(skill_files) != len(source_skill_directories):
+        raise ValueError("Every copied skill directory must contain exactly one top-level SKILL.md")
     for skill_file in skill_files:
         gate_skill(skill_file)
     for relative_path, old, new in PATH_PATCHES:
@@ -176,8 +175,25 @@ def prepare_update(source_root: Path, staging_root: Path, version: str) -> tuple
     return staged_skills, staged_command
 
 
-def install_update(staged_skills: Path, staged_command: Path, repo_root: Path) -> None:
-    """替换两个目标；任一替换失败时恢复更新前内容。"""
+def read_index_modes(repo_root: Path, paths: Sequence[str]) -> dict[str, str]:
+    """读取目标文件当前 Git index mode。"""
+    result = subprocess.run(["git", "ls-files", "-s", "--", *paths], cwd=repo_root, check=True, capture_output=True, text=True)
+    modes = {parts[3]: parts[0] for line in result.stdout.splitlines() if len(parts := line.split(maxsplit=3)) == 4}
+    if set(modes) != set(paths):
+        raise ValueError("All executable paths must already be tracked")
+    return modes
+
+
+def restore_index_modes(repo_root: Path, modes: dict[str, str]) -> None:
+    """恢复 Git index executable bit。"""
+    for mode, flag in (("100755", "+x"), ("100644", "-x")):
+        paths = sorted(path for path, current_mode in modes.items() if current_mode == mode)
+        if paths:
+            subprocess.run(["git", "update-index", f"--chmod={flag}", *paths], cwd=repo_root, check=True)
+
+
+def install_update(staged_skills: Path, staged_command: Path, repo_root: Path, index_modes: dict[str, str] | None = None) -> None:
+    """替换文件并可选更新 index；任何失败都恢复文件和 index。"""
     target_skills = repo_root / "skills" / "superpowers"
     target_command = repo_root / "commands" / "use-superpowers.md"
     backup_root = Path(tempfile.mkdtemp(prefix="update-superpowers-", dir=repo_root))
@@ -195,18 +211,29 @@ def install_update(staged_skills: Path, staged_command: Path, repo_root: Path) -
         target_command.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(staged_skills, target_skills)
         shutil.move(staged_command, target_command)
-    except Exception:
-        if target_skills.exists():
-            shutil.rmtree(target_skills)
-        if target_command.exists():
-            target_command.unlink()
-        if skills_backed_up:
-            shutil.move(backup_skills, target_skills)
-        if command_backed_up:
-            shutil.move(backup_command, target_command)
+        if index_modes is not None:
+            subprocess.run(["git", "update-index", "--chmod=+x", *sorted(index_modes)], cwd=repo_root, check=True)
+    except Exception as original_error:
+        rollback_errors: list[Exception] = []
+        try:
+            if target_skills.exists():
+                shutil.rmtree(target_skills)
+            if target_command.exists():
+                target_command.unlink()
+            if skills_backed_up:
+                shutil.move(backup_skills, target_skills)
+            if command_backed_up:
+                shutil.move(backup_command, target_command)
+            if index_modes is not None:
+                restore_index_modes(repo_root, index_modes)
+        except Exception as rollback_error:
+            rollback_errors.append(rollback_error)
+        if rollback_errors:
+            raise RuntimeError(f"Update failed: {original_error}; rollback failed: {rollback_errors[0]}; backup kept at {backup_root}") from original_error
+        shutil.rmtree(backup_root)
         raise
-    finally:
-        shutil.rmtree(backup_root, ignore_errors=True)
+    else:
+        shutil.rmtree(backup_root)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -224,16 +251,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             with urlopen(TAG_URL.format(version=version)) as response:
                 archive_path.write_bytes(response.read())
             with tarfile.open(archive_path, "r:gz") as archive:
-                sanitized_archive = without_links(archive, temporary_root)
-            with tarfile.open(sanitized_archive, "r:gz") as archive:
                 source_root = safe_extract(archive, temporary_root / "source")
             staged_skills, staged_command = prepare_update(source_root, temporary_root / "staging", version)
-            install_update(staged_skills, staged_command, repo_root)
-        subprocess.run(
-            ["git", "update-index", "--chmod=+x", *[f"skills/superpowers/{path}" for path in EXECUTABLES]],
-            cwd=repo_root,
-            check=True,
-        )
+            executable_paths = [f"skills/superpowers/{path}" for path in EXECUTABLES]
+            install_update(staged_skills, staged_command, repo_root, read_index_modes(repo_root, executable_paths))
         print(f"Updated Superpowers {version}: skills/superpowers and commands/use-superpowers.md")
         return 0
     except Exception as error:

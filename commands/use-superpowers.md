@@ -1,31 +1,8 @@
-# /use-superpowers
+---
+description: Activate Superpowers workflows for the current session.
+---
 
 当前 session 已通过 `/use-superpowers` 激活 Superpowers。
-
-<SUBAGENT-STOP>
-If you were dispatched as a subagent to execute a specific task, ignore this skill.
-</SUBAGENT-STOP>
-
-<EXTREMELY-IMPORTANT>
-If you think there is even a 1% chance a skill might apply to what you are doing, you ABSOLUTELY MUST invoke the skill.
-
-IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
-
-This is not negotiable. You cannot rationalize your way out of this.
-</EXTREMELY-IMPORTANT>
-
-## OpenCode Tool Mapping
-
-Use OpenCode's native `skill` tool to list and load skills.
-
-- Create or update todos → `todowrite`
-- `Subagent (general-purpose):` → `task` with `subagent_type: "general"`
-- Invoke a skill → OpenCode's native `skill` tool
-- Read files → `read`
-- Create, edit, or delete files → `apply_patch`
-- Run shell commands → `bash`
-- Search files → `grep`, `glob`
-- Fetch a URL → `webfetch`
 
 <SUBAGENT-STOP>
 If you were dispatched as a subagent to execute a specific task, ignore this skill.
@@ -84,3 +61,17 @@ If your harness appears here, read its reference file for special instructions:
 ## User Instructions
 
 User instructions (CLAUDE.md, AGENTS.md, GEMINI.md, etc, direct requests) take precedence over skills, which in turn override default behavior. Only skip skill workflows or instructions when your human partner has explicitly told you to.
+
+## OpenCode Tool Mapping
+
+Use OpenCode's native `skill` tool to list and load skills.
+
+- Create or update todos → `todowrite`
+- `Subagent (general-purpose):` → `task` with `subagent_type: "general"`
+- Invoke a skill → OpenCode's native `skill` tool
+- Read files → `read`
+- Create, edit, or delete files → `apply_patch`
+- Run shell commands → `bash`
+- Search files → `grep`, `glob`
+- Fetch a URL → `webfetch`
+
