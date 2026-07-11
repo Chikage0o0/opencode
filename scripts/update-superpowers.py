@@ -11,7 +11,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
-from typing import Sequence
+from typing import Callable, Sequence
 from urllib.request import urlopen
 
 
@@ -217,22 +217,35 @@ def install_update(staged_skills: Path, staged_command: Path, repo_root: Path, i
         if index_modes is not None:
             subprocess.run(["git", "update-index", "--chmod=+x", *sorted(index_modes)], cwd=repo_root, check=True)
     except Exception as original_error:
-        rollback_errors: list[Exception] = []
-        try:
-            if target_skills.exists():
-                shutil.rmtree(target_skills)
-            if target_command.exists():
-                target_command.unlink()
-            if skills_backed_up:
-                shutil.move(backup_skills, target_skills)
-            if command_backed_up:
-                shutil.move(backup_command, target_command)
-            if index_modes is not None:
-                restore_index_modes(repo_root, index_modes)
-        except Exception as rollback_error:
-            rollback_errors.append(rollback_error)
+        rollback_errors: list[tuple[str, Exception]] = []
+
+        def attempt(label: str, action: Callable[[], object]) -> None:
+            try:
+                action()
+            except Exception as rollback_error:
+                rollback_errors.append((label, rollback_error))
+
+        if target_skills.exists():
+            attempt("remove new skills", lambda: shutil.rmtree(target_skills))
+        if skills_backed_up:
+            attempt("restore old skills", lambda: shutil.move(backup_skills, target_skills))
+        if target_command.exists():
+            attempt("remove new command", target_command.unlink)
+        if command_backed_up:
+            attempt("restore old command", lambda: shutil.move(backup_command, target_command))
+        if index_modes is not None:
+            for mode, flag in (("100755", "+x"), ("100644", "-x")):
+                paths = sorted(path for path, current_mode in index_modes.items() if current_mode == mode)
+                if paths:
+                    attempt(
+                        f"restore index modes {flag}",
+                        lambda paths=paths, flag=flag: subprocess.run(
+                            ["git", "update-index", f"--chmod={flag}", *paths], cwd=repo_root, check=True
+                        ),
+                    )
         if rollback_errors:
-            raise RuntimeError(f"Update failed: {original_error}; rollback failed: {rollback_errors[0]}; backup kept at {backup_root}") from original_error
+            details = "; ".join(f"{label}: {error}" for label, error in rollback_errors)
+            raise RuntimeError(f"Update failed: {original_error}; rollback failed: {details}; backup kept at {backup_root}") from original_error
         shutil.rmtree(backup_root)
         raise
     else:

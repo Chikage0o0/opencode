@@ -353,3 +353,41 @@ Use OpenCode's native `skill` tool to load applicable Superpowers skills.
                 with self.assertRaisesRegex(RuntimeError, "install failed.*restore failed"):
                     self.updater.install_update(staged_skills, staged_command, repo)
             self.assertTrue(list(repo.glob("update-superpowers-*")))
+
+    def test_install_update_attempts_remaining_rollback_after_skills_restore_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repo = root / "repo"
+            old_skills = repo / "skills" / "superpowers"
+            old_skills.mkdir(parents=True)
+            (old_skills / "old.txt").write_text("old skills", encoding="utf-8")
+            old_command = repo / "commands" / "use-superpowers.md"
+            old_command.parent.mkdir()
+            old_command.write_text("old command", encoding="utf-8")
+            staged_skills = root / "staged-skills"
+            staged_skills.mkdir()
+            staged_command = root / "staged-command.md"
+            staged_command.write_text("new command", encoding="utf-8")
+            modes = {
+                "skills/superpowers/brainstorming/scripts/start-server.sh": "100755",
+                "skills/superpowers/writing-skills/render-graphs.js": "100644",
+            }
+            original_move = self.updater.shutil.move
+
+            def fail_install_and_skills_restore(source, destination, *args, **kwargs):
+                source_path = Path(source)
+                if source_path == staged_skills:
+                    raise OSError("install failed")
+                if source_path.name == "superpowers" and "update-superpowers-" in str(source_path):
+                    raise OSError("skills restore failed")
+                return original_move(source, destination, *args, **kwargs)
+
+            with mock.patch.object(self.updater.shutil, "move", side_effect=fail_install_and_skills_restore), mock.patch.object(self.updater.subprocess, "run", return_value=mock.Mock()) as run:
+                with self.assertRaisesRegex(RuntimeError, "install failed.*skills restore failed"):
+                    self.updater.install_update(staged_skills, staged_command, repo, index_modes=modes)
+            self.assertEqual(old_command.read_text(encoding="utf-8"), "old command")
+            self.assertEqual(run.call_args_list, [
+                mock.call(["git", "update-index", "--chmod=+x", "skills/superpowers/brainstorming/scripts/start-server.sh"], cwd=repo, check=True),
+                mock.call(["git", "update-index", "--chmod=-x", "skills/superpowers/writing-skills/render-graphs.js"], cwd=repo, check=True),
+            ])
+            self.assertTrue(list(repo.glob("update-superpowers-*")))
