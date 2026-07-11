@@ -4,10 +4,10 @@
 
 ## 当前版本
 
-- Plugin package: `oh-my-opencode-slim@2.0.4`
-- Plugin config schema: `https://unpkg.com/oh-my-opencode-slim@2.0.4/oh-my-opencode-slim.schema.json`
-- Active preset: `hybrid`
-- 版本策略：使用 npm `latest` dist-tag 对应的稳定 release，不使用 beta 预发布版本。
+- Plugin package: `oh-my-opencode-slim@1.1.2`
+- Plugin config schema: `https://unpkg.com/oh-my-opencode-slim@1.1.2/oh-my-opencode-slim.schema.json`
+- Active preset: `default`
+- 版本策略：固定 npm release `1.1.2`；不跟随 `latest`，不启用插件自更新检测。
 
 `modules/home/opencode/default.nix` 会把本目录中的配置同步到 `~/.config/opencode/`。
 
@@ -43,7 +43,7 @@
 
 - 启用插件：
   - `@tarquinen/opencode-dcp@latest`
-  - `oh-my-opencode-slim@2.0.4`
+  - `oh-my-opencode-slim@1.1.2`
 - 禁用 OpenCode 默认 `explore` / `general` agents，让 slim orchestrator 接管工作流。
 - 启用 LSP：`"lsp": true`。
 - 保留 `context7` MCP 与原有安全权限策略。
@@ -61,24 +61,21 @@
 
 - `plugins/windows-git-env.ts` 仅在 Windows 上启用，会从 `Path`、`GIT_HOME`、常见安装目录以及 Scoop 用户目录动态发现 Git for Windows。
 - 发现后会通过 OpenCode `config` hook 把默认 shell 指向同一安装目录下的 `bin\bash.exe`，无需在 `opencode.json` 写死本机路径。
-- shell 命令环境会把该安装目录下的 `cmd`、`mingw64\bin`、`usr\bin`、`bin` 放到 `Path` 前面，避免优先命中 Scoop shim 或 Windows 自带 `bash.exe`。
-- 同时设置对应的 `GIT_EXEC_PATH=<Git Home>\mingw64\libexec\git-core`，确保 Git 使用同一套 Git for Windows 内置 helper exe。
+- shell 命令环境会把该安装目录下的 `bin` 放在 `Path` 第一位，随后加入 `cmd`、`mingw64\bin`、`usr\bin`，避免优先命中 Scoop shim 或 Windows 自带 `bash.exe`。
+- 插件不修改全局 `process.env`；每次执行只在已有 `shell.env` 或父进程 `Path` 前追加 Git 目录，保留系统环境、启动终端临时变量以及 direnv 等前序插件的注入。
 
 > 注意：如果某个 host 通过 `platform.home.opencode.configFile` 指向 sops 渲染文件，则该文件会覆盖 Home Manager 生成的 `opencode.json`。示例 host 已通过读取本目录 `opencode.json` 并合并 provider 密钥来避免配置丢失。
 
 ### `oh-my-opencode-slim.json`
 
-- `preset` 默认为 `hybrid`。
-- 同时保留 `openai`、`opencode-go` 与 `hybrid` 三套 presets，便于在 OpenCode 内通过 `/preset` 切换。
-- `openai` 用 GPT-5.5 承担 orchestrator/oracle，用 GPT-5.3-Codex 承担 council/designer/fixer，用 GPT-5.4-Mini 承担检索、探索与观察，控制缓存型请求成本。
-- `opencode-go` 优先使用 Qwen3.6 Plus、Kimi K2.6、DeepSeek V4 Pro/Flash 与 MiniMax M2.7，在保持较高智力的同时提升速度和额度效率。
-- `hybrid` 用 OpenAI 承担最高风险决策与审查，用 opencode-go 承担高频探索、修复、设计、检索和观察。
-- `autoUpdate` 设置为 `false`，版本由 Nix 仓库显式控制。
-- `disabled_agents: []` 启用 Observer。
+- `preset` 默认为 `default`。
+- `default` preset 按 agent 分配模型、skills 与 MCP 访问。
+- `autoUpdate` 设置为 `false`，配合 `opencode.json` / `tui.json` 中的 `oh-my-opencode-slim@1.1.2` 固定版本，避免插件自更新检测或自动安装新版本。
+- `disabled_agents: ["observer"]` 禁用 Observer。
 
 ### Bundled skills
 
-本目录保留以下 `oh-my-opencode-slim@2.0.4` bundled skills：
+本目录保留以下 `oh-my-opencode-slim@1.1.2` bundled skills：
 
 - `codemap/` 与 `codemap.md`
 - `clonedeps/`
@@ -88,7 +85,7 @@
 
 本目录还保留若干本地补充 skills（例如 `tdd/`、`diagnose/`、`write-a-skill/` 等），它们不是 npm 包随附内容。
 
-2.x 相比 1.1.1 新增的随包 skill 载荷包括 `deepwork/`、`oh-my-opencode-slim/`、`reflect/`、`worktrees/`。本配置仅保留 `oh-my-opencode-slim/` 与 `reflect/`；`deepwork/`、`worktrees/` 不附带，避免与本地 OpenSpec 主流程和 Git 工作区策略竞争。
+当前仅保留本配置实际使用的 bundled skills；不附带会与本地 OpenSpec 主流程和 Git 工作区策略竞争的可选工作流。
 
 ### `/git-commit` command + subagent
 
@@ -122,11 +119,11 @@ ping all agents
 也可以诊断插件配置：
 
 ```bash
-bunx oh-my-opencode-slim@2.0.4 doctor
+bunx oh-my-opencode-slim@1.1.2 doctor
 ```
 
 ## 维护建议
 
 - 不要重新加入旧工作流；slim 插件自带 Pantheon agents，本目录只保留少量必要的自定义 agents/commands。
 - 新增 repo-specific 覆盖时，优先使用 `.opencode/oh-my-opencode-slim.json`，不要直接修改插件包源码。
-- 更新版本时优先跟随 npm `latest` 稳定 release；如需切回 beta，需同步确认 bundled skills 与环境变量要求。
+- 更新版本必须显式修改 `opencode.json`、`tui.json`、`oh-my-opencode-slim.json` schema 与本文档；不要改回未固定版本或 `latest`。

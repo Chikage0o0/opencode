@@ -1,50 +1,51 @@
 {
-  "$schema": "https://unpkg.com/oh-my-opencode-slim@2.1.0/oh-my-opencode-slim.schema.json",
+  "$schema": "https://unpkg.com/oh-my-opencode-slim@2.1.1/oh-my-opencode-slim.schema.json",
   "preset": "default",
   "autoUpdate": false,
   "presets": {
     "default": {
       "orchestrator": {
-        "model": "openai/gpt-5.5",
-        "variant": "high",
+        "model": "openai/gpt-5.6-sol",
+        "variant": "medium",
         "skills": ["*", "!make-interfaces-feel-better", "!frontend-design"],
         "mcps": ["*", "!context7", "!gh_grep", "!websearch"]
       },
       "oracle": {
-        "model": "openai/gpt-5.5",
-        "variant": "xhigh",
-        "skills": ["codebase-design", "resolving-merge-conflicts", "web-perf"],
+        "model": "openai/gpt-5.6-sol",
+        "variant": "high",
+        "skills": ["codebase-design", "diagnosing-bugs", "web-perf"],
         "mcps": ["codegraph", "chrome-devtools"]
       },
       "librarian": {
-        "model": "ollama-cloud/minimax-m3",
-        "variant": "thinking",
+        "model": "openai/gpt-5.6-luna",
+        "variant": "low",
         "skills": [],
         "mcps": ["context7", "gh_grep", "websearch", "chrome-devtools"]
       },
       "explorer": {
-        "model": "ollama-cloud/deepseek-v4-flash",
-        "variant": "high",
+        "model": "openai/gpt-5.6-luna",
+        "variant": "low",
         "skills": [],
         "mcps": ["codegraph"]
       },
       "designer": {
-        "model": "ollama-cloud/glm-5.2",
-        "variant": "max",
+        "model": "openai/gpt-5.6-terra",
+        "variant": "medium",
         "skills": [
           "make-interfaces-feel-better",
           "frontend-design",
           "svelte-code-writer",
           "shadcn-svelte"
         ],
-        "mcps": ["codegraph"]
+        "mcps": ["codegraph", "chrome-devtools"]
       },
       "fixer": {
-        "model": "ollama-cloud/glm-5.2",
-        "variant": "max",
+        "model": "openai/gpt-5.6-terra",
+        "variant": "medium",
         "skills": [
-          "tdd",
+          "test-driven-development",
           "diagnosing-bugs",
+          "verification-before-completion",
           "svelte-code-writer",
           "shadcn-svelte"
         ],

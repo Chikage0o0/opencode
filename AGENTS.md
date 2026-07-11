@@ -50,6 +50,21 @@
 - 无法验证就标注假设。不伪造结果。
 - 检索服务当前决策。不为“显得完整”过度搜索。
 
+## RTK - Rust Token Killer
+
+RTK 是 token 优化的 CLI 代理，用于开发操作，目标节省 60-90% token。
+
+Shell 命令会由插件自动重写到 RTK。正常运行命令即可，不需要手动加 `rtk` 前缀。
+
+示例：`git status` 会透明变成 `rtk git status`，输出会被压缩。
+
+```bash
+rtk gain              # 显示 token 节省统计
+rtk gain --history    # 显示命令使用历史和节省情况
+rtk discover          # 分析历史，找出错过的优化机会
+rtk proxy <cmd>       # 不过滤输出，直接执行原始命令（用于调试）
+```
+
 ## 检索与 Skill 使用
 
 原则：先接地，再推理。内部知识只能做兜底，不作为事实来源。
@@ -302,12 +317,6 @@ Deprecated：
 - 保持短、明确、可执行。
 - 不放 secrets、客户数据、临时状态、长教程。
 - 项目规则变化时，优先更新项目级文件。
-
-## Cloned Dependency Source
-
-本地依赖源码仓库位于 `.slim/clonedeps/repos/`。
-
-- `.slim/clonedeps/repos/Opencode-DCP__opencode-dynamic-context-pruning/` — `Opencode-DCP/opencode-dynamic-context-pruning` at `v3.1.14`；当前 `opencode.json` 已切到此 clone 的 `index.ts`，用于继续本地开发与联调 DCP。
 
 ## 最终回复
 
