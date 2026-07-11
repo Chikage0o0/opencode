@@ -87,6 +87,16 @@
 
 当前仅保留本配置实际使用的 bundled skills；不附带会与本地 OpenSpec 主流程和 Git 工作区策略竞争的可选工作流。
 
+### 更新 Superpowers skills
+
+Superpowers 固定为本地副本，不通过 plugin 自动加载。更新到指定上游版本：
+
+```bash
+python scripts/update-superpowers.py 6.2.0
+```
+
+脚本会下载官方 `v<version>` tag，重建本地 skills 和 `/use-superpowers` command，并重放 session gate、本地路径补丁和 executable mode。更新后检查 diff、运行测试，再手动提交；脚本不会自动 commit 或 push。
+
 ### `/git-commit` command + subagent
 
 - `commands/git-commit.md` 定义 `/git-commit` 命令，默认走 `subtask`/`task` 调度，不让主 agent 直接执行 `git commit`。
