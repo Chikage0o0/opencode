@@ -96,7 +96,7 @@ class UpdateSuperpowersTests(unittest.TestCase):
                 archive.addfile(info, io.BytesIO(b"x"))
             with tarfile.open(archive_path, "r:gz") as archive:
                 with self.assertRaises(ValueError):
-                    self.updater.safe_extract(archive, Path(temporary) / "output")
+                    self.updater.safe_extract(archive, Path(temporary) / "output", "6.1.1")
 
     def test_prepare_update_gates_skills_patches_paths_and_generates_command(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -111,13 +111,37 @@ class UpdateSuperpowersTests(unittest.TestCase):
             self.assertIn("./visual-companion.md", (staged_skills / "brainstorming" / "SKILL.md").read_text(encoding="utf-8"))
             self.assertIn("../../../commands/use-superpowers.md", (staged_skills / "executing-plans" / "SKILL.md").read_text(encoding="utf-8"))
             command = staged_command.read_text(encoding="utf-8")
-            self.assertTrue(command.startswith("---\ndescription: "))
-            self.assertEqual(command.count("<EXTREMELY-IMPORTANT>"), 1)
-            self.assertEqual(command.count("</EXTREMELY-IMPORTANT>"), 1)
-            self.assertIn("当前 session 已通过 `/use-superpowers` 激活 Superpowers。", command)
-            self.assertIn("OpenCode's native `skill` tool", command)
-            self.assertIn("Bootstrap body", command)
-            self.assertNotIn("name: using-superpowers", command)
+            expected_command = """---
+description: Activate the vendored Superpowers workflow for the current session.
+---
+
+<EXTREMELY_IMPORTANT>
+The user has explicitly activated Superpowers for this session by running `/use-superpowers`.
+Treat this command message as the session activation marker. Apply the following rules to every subsequent response and action in this session. Do not claim activation in any other session.
+
+<EXTREMELY-IMPORTANT>
+Bootstrap rule
+</EXTREMELY-IMPORTANT>
+
+Bootstrap body
+
+**Tool Mapping for OpenCode:**
+When skills request actions, substitute OpenCode equivalents:
+- Create or update todos → `todowrite`
+- `Subagent (general-purpose):` → `task` with the closest available specialist `subagent_type`
+- Invoke a skill → OpenCode's native `skill` tool
+- Read files → `read`
+- Create, edit, or delete files → `apply_patch`
+- Run shell commands → `bash`
+- Search files → `grep`, `glob`
+- Fetch a URL → `webfetch`
+
+Use OpenCode's native `skill` tool to load applicable Superpowers skills.
+</EXTREMELY_IMPORTANT>
+"""
+            self.assertEqual(command, expected_command)
+            self.assertEqual(command.count("<EXTREMELY_IMPORTANT>"), 1)
+            self.assertEqual(command.count("</EXTREMELY_IMPORTANT>"), 1)
 
             repo = root / "repo"
             (repo / "scripts").mkdir(parents=True)
@@ -148,7 +172,7 @@ class UpdateSuperpowersTests(unittest.TestCase):
                 link.linkname = "CLAUDE.md"
                 archive.addfile(link)
             with tarfile.open(archive_path, "r:gz") as archive:
-                root = self.updater.safe_extract(archive, Path(temporary) / "output")
+                root = self.updater.safe_extract(archive, Path(temporary) / "output", "6.1.1")
             self.assertTrue((root / "AGENTS.md").is_symlink())
 
     def test_safe_extract_rejects_other_links_and_non_directory_root(self):
@@ -160,13 +184,19 @@ class UpdateSuperpowersTests(unittest.TestCase):
             ):
                 archive_path = Path(temporary) / f"{link_type.decode()}.tar.gz"
                 with tarfile.open(archive_path, "w:gz") as archive:
+                    directory = tarfile.TarInfo("superpowers-6.1.1")
+                    directory.type = tarfile.DIRTYPE
+                    archive.addfile(directory)
+                    claude = tarfile.TarInfo("superpowers-6.1.1/CLAUDE.md")
+                    claude.size = 1
+                    archive.addfile(claude, io.BytesIO(b"x"))
                     info = tarfile.TarInfo(name)
                     info.type = link_type
                     info.linkname = link_target
                     archive.addfile(info)
                 with tarfile.open(archive_path, "r:gz") as archive:
-                    with self.assertRaises(ValueError):
-                        self.updater.safe_extract(archive, Path(temporary) / "output")
+                    with self.assertRaisesRegex(ValueError, "hardlinks|symlink"):
+                        self.updater.safe_extract(archive, Path(temporary) / "output", "6.1.1")
             archive_path = Path(temporary) / "file-root.tar.gz"
             with tarfile.open(archive_path, "w:gz") as archive:
                 info = tarfile.TarInfo("superpowers-6.1.1")
@@ -174,7 +204,18 @@ class UpdateSuperpowersTests(unittest.TestCase):
                 archive.addfile(info, io.BytesIO(b"x"))
             with tarfile.open(archive_path, "r:gz") as archive:
                 with self.assertRaises(ValueError):
-                    self.updater.safe_extract(archive, Path(temporary) / "output")
+                    self.updater.safe_extract(archive, Path(temporary) / "output", "6.1.1")
+
+    def test_safe_extract_rejects_wrong_root_name(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            archive_path = Path(temporary) / "wrong-root.tar.gz"
+            with tarfile.open(archive_path, "w:gz") as archive:
+                directory = tarfile.TarInfo("superpowers-6.1.2")
+                directory.type = tarfile.DIRTYPE
+                archive.addfile(directory)
+            with tarfile.open(archive_path, "r:gz") as archive:
+                with self.assertRaisesRegex(ValueError, "root"):
+                    self.updater.safe_extract(archive, Path(temporary) / "output", "6.1.1")
 
     def test_prepare_update_rejects_package_version_mismatch(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -255,12 +296,40 @@ class UpdateSuperpowersTests(unittest.TestCase):
             staged_skills.mkdir()
             staged_command = root / "staged-command.md"
             staged_command.write_text("new command", encoding="utf-8")
-            modes = {"skills/superpowers/brainstorming/scripts/start-server.sh": "100755"}
-            with mock.patch.object(self.updater.subprocess, "run", side_effect=[OSError("index failed"), mock.Mock()]):
+            modes = {
+                "skills/superpowers/brainstorming/scripts/start-server.sh": "100755",
+                "skills/superpowers/writing-skills/render-graphs.js": "100644",
+            }
+            with mock.patch.object(self.updater.subprocess, "run", side_effect=[OSError("index failed"), mock.Mock(), mock.Mock()]) as run:
                 with self.assertRaisesRegex(OSError, "index failed"):
                     self.updater.install_update(staged_skills, staged_command, repo, index_modes=modes)
+            self.assertEqual(run.call_args_list, [
+                mock.call(["git", "update-index", "--chmod=+x", *sorted(modes)], cwd=repo, check=True),
+                mock.call(["git", "update-index", "--chmod=+x", "skills/superpowers/brainstorming/scripts/start-server.sh"], cwd=repo, check=True),
+                mock.call(["git", "update-index", "--chmod=-x", "skills/superpowers/writing-skills/render-graphs.js"], cwd=repo, check=True),
+            ])
             self.assertEqual((old_skills / "old.txt").read_text(encoding="utf-8"), "old skills")
             self.assertEqual(old_command.read_text(encoding="utf-8"), "old command")
+
+    def test_install_update_warns_when_successful_backup_cleanup_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repo = root / "repo"
+            repo.mkdir()
+            staged_skills = root / "staged-skills"
+            staged_skills.mkdir()
+            staged_command = root / "staged-command.md"
+            staged_command.write_text("new command", encoding="utf-8")
+            original_rmtree = self.updater.shutil.rmtree
+            def fail_backup_cleanup(path, *args, **kwargs):
+                if Path(path).name.startswith("update-superpowers-"):
+                    raise OSError("cleanup failed")
+                return original_rmtree(path, *args, **kwargs)
+            with mock.patch.object(self.updater.shutil, "rmtree", side_effect=fail_backup_cleanup), mock.patch("builtins.print") as print_mock:
+                self.updater.install_update(staged_skills, staged_command, repo)
+            self.assertTrue((repo / "skills" / "superpowers").exists())
+            self.assertTrue((repo / "commands" / "use-superpowers.md").exists())
+            self.assertIn("backup kept", print_mock.call_args.args[0])
 
     def test_install_update_keeps_backup_and_reports_rollback_failure(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -14,7 +14,7 @@
 ## 更新流程
 
 1. 在临时目录下载并安全解压目标 tag tarball。
-2. 拒绝归档中的绝对路径、`..` 路径穿越、hardlink 和异常根目录结构。唯一例外是官方 archive 根目录下的 `superpowers-<version>/AGENTS.md` symlink：其 member type 必须是 symlink、名称必须精确匹配、target 必须是同一根目录内的 `CLAUDE.md` 普通文件；其他 symlink 一律拒绝。
+2. 拒绝归档中的绝对路径、`..` 路径穿越、hardlink 和异常根目录结构。唯一根必须是目录且精确命名为 `superpowers-<version>`。唯一例外是该根的 `AGENTS.md` symlink：其 member type 必须是 symlink、名称必须精确匹配、target 必须是同根 `CLAUDE.md` 普通文件；其他 symlink 一律拒绝。
 3. 收集上游 `skills/`；排除 `using-superpowers`，其余 skill 复制到 staging 目录。
 4. 修改每个顶层 `SKILL.md` frontmatter `description`，添加 `/use-superpowers` 当前 session 激活门控。
 5. 精确应用两个本地路径适配：
@@ -22,8 +22,8 @@
    - `executing-plans/SKILL.md` 中已排除的 `using-superpowers/references/` 路径改为 `../../../commands/use-superpowers.md`。
 6. 两个路径补丁都必须各命中一次；零次或多次均中止，防止上游变化被静默忽略。
 7. 从上游 `using-superpowers/SKILL.md` 去除 frontmatter，重新生成 `commands/use-superpowers.md`；保留本地 session activation wrapper 和 OpenCode tool mapping。
-8. 校验已知的 7 个 executable 文件存在，并恢复 Git index 中的 `100755` mode。
-9. 所有内容和结构校验通过后，才替换 `skills/superpowers/` 与 command。任何前置步骤失败时，现有文件保持不变。
+8. 校验已知的 7 个 executable 文件存在，记录其 Git index mode，并在文件安装事务内更新为 `100755`。
+9. 所有内容和结构校验通过后，才替换 `skills/superpowers/` 与 command。文件替换或 index 更新失败时，恢复文件和原 index modes；已成功安装后的 backup 清理失败只警告并保留 backup。
 
 ## Executable 文件
 

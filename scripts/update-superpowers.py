@@ -33,19 +33,21 @@ EXECUTABLES = (
 )
 
 COMMAND_FRONTMATTER = """---
-description: Activate Superpowers workflows for the current session.
+description: Activate the vendored Superpowers workflow for the current session.
 ---
 
 """
 
-SESSION_MARKER = "当前 session 已通过 `/use-superpowers` 激活 Superpowers。\n\n"
+ACTIVATION_OPENING = """<EXTREMELY_IMPORTANT>
+The user has explicitly activated Superpowers for this session by running `/use-superpowers`.
+Treat this command message as the session activation marker. Apply the following rules to every subsequent response and action in this session. Do not claim activation in any other session.
 
-OPEN_CODE_TOOL_MAPPING = """## OpenCode Tool Mapping
+"""
 
-Use OpenCode's native `skill` tool to list and load skills.
-
+OPEN_CODE_TOOL_MAPPING = """**Tool Mapping for OpenCode:**
+When skills request actions, substitute OpenCode equivalents:
 - Create or update todos → `todowrite`
-- `Subagent (general-purpose):` → `task` with `subagent_type: "general"`
+- `Subagent (general-purpose):` → `task` with the closest available specialist `subagent_type`
 - Invoke a skill → OpenCode's native `skill` tool
 - Read files → `read`
 - Create, edit, or delete files → `apply_patch`
@@ -53,7 +55,7 @@ Use OpenCode's native `skill` tool to list and load skills.
 - Search files → `grep`, `glob`
 - Fetch a URL → `webfetch`
 
-"""
+Use OpenCode's native `skill` tool to load applicable Superpowers skills."""
 
 
 def validate_version(value: str) -> str:
@@ -63,7 +65,7 @@ def validate_version(value: str) -> str:
     return value
 
 
-def safe_extract(archive: tarfile.TarFile, destination: Path) -> Path:
+def safe_extract(archive: tarfile.TarFile, destination: Path, version: str) -> Path:
     """验证 tar 成员后解压，并返回唯一的归档根目录。"""
     members = archive.getmembers()
     roots: set[str] = set()
@@ -81,6 +83,9 @@ def safe_extract(archive: tarfile.TarFile, destination: Path) -> Path:
     if len(roots) != 1:
         raise ValueError("Archive must contain exactly one root directory")
     root = roots.pop()
+    expected_root = f"superpowers-{version}"
+    if root != expected_root:
+        raise ValueError(f"Archive root must be {expected_root!r}, got {root!r}")
     if root not in members_by_name or not members_by_name[root].isdir():
         raise ValueError(f"Archive root must be a directory: {root!r}")
     agents_name = f"{root}/AGENTS.md"
@@ -133,10 +138,8 @@ def generate_command(using_skill: Path) -> str:
     match = re.match(r"\A---\n.*?\n---\n?", text, re.DOTALL)
     if not match:
         raise ValueError(f"Missing frontmatter: {using_skill}")
-    body = text[match.end():].lstrip("\n")
-    if body.count("<EXTREMELY-IMPORTANT>") != 1 or body.count("</EXTREMELY-IMPORTANT>") != 1:
-        raise ValueError("using-superpowers body must contain exactly one activation wrapper")
-    return COMMAND_FRONTMATTER + SESSION_MARKER + body.rstrip() + "\n\n" + OPEN_CODE_TOOL_MAPPING
+    body = text[match.end():].lstrip("\n").rstrip()
+    return COMMAND_FRONTMATTER + ACTIVATION_OPENING + body + "\n\n" + OPEN_CODE_TOOL_MAPPING + "\n</EXTREMELY_IMPORTANT>\n"
 
 
 def prepare_update(source_root: Path, staging_root: Path, version: str) -> tuple[Path, Path]:
@@ -233,7 +236,10 @@ def install_update(staged_skills: Path, staged_command: Path, repo_root: Path, i
         shutil.rmtree(backup_root)
         raise
     else:
-        shutil.rmtree(backup_root)
+        try:
+            shutil.rmtree(backup_root)
+        except OSError as cleanup_error:
+            print(f"update-superpowers: update succeeded but backup kept at {backup_root}: {cleanup_error}", file=sys.stderr)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -251,7 +257,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             with urlopen(TAG_URL.format(version=version)) as response:
                 archive_path.write_bytes(response.read())
             with tarfile.open(archive_path, "r:gz") as archive:
-                source_root = safe_extract(archive, temporary_root / "source")
+                source_root = safe_extract(archive, temporary_root / "source", version)
             staged_skills, staged_command = prepare_update(source_root, temporary_root / "staging", version)
             executable_paths = [f"skills/superpowers/{path}" for path in EXECUTABLES]
             install_update(staged_skills, staged_command, repo_root, read_index_modes(repo_root, executable_paths))

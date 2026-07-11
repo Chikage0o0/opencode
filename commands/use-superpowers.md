@@ -1,8 +1,10 @@
 ---
-description: Activate Superpowers workflows for the current session.
+description: Activate the vendored Superpowers workflow for the current session.
 ---
 
-当前 session 已通过 `/use-superpowers` 激活 Superpowers。
+<EXTREMELY_IMPORTANT>
+The user has explicitly activated Superpowers for this session by running `/use-superpowers`.
+Treat this command message as the session activation marker. Apply the following rules to every subsequent response and action in this session. Do not claim activation in any other session.
 
 <SUBAGENT-STOP>
 If you were dispatched as a subagent to execute a specific task, ignore this skill.
@@ -62,12 +64,10 @@ If your harness appears here, read its reference file for special instructions:
 
 User instructions (CLAUDE.md, AGENTS.md, GEMINI.md, etc, direct requests) take precedence over skills, which in turn override default behavior. Only skip skill workflows or instructions when your human partner has explicitly told you to.
 
-## OpenCode Tool Mapping
-
-Use OpenCode's native `skill` tool to list and load skills.
-
+**Tool Mapping for OpenCode:**
+When skills request actions, substitute OpenCode equivalents:
 - Create or update todos → `todowrite`
-- `Subagent (general-purpose):` → `task` with `subagent_type: "general"`
+- `Subagent (general-purpose):` → `task` with the closest available specialist `subagent_type`
 - Invoke a skill → OpenCode's native `skill` tool
 - Read files → `read`
 - Create, edit, or delete files → `apply_patch`
@@ -75,3 +75,5 @@ Use OpenCode's native `skill` tool to list and load skills.
 - Search files → `grep`, `glob`
 - Fetch a URL → `webfetch`
 
+Use OpenCode's native `skill` tool to load applicable Superpowers skills.
+</EXTREMELY_IMPORTANT>

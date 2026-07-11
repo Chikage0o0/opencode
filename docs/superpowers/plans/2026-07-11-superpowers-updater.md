@@ -126,7 +126,7 @@ Expected: commit 包含 7 个 `100644 => 100755` mode changes 和 2 个单行引
 **Interfaces:**
 - CLI: `python scripts/update-superpowers.py VERSION`
 - `validate_version(value: str) -> str`
-- `safe_extract(archive: tarfile.TarFile, destination: Path) -> Path`
+- `safe_extract(archive: tarfile.TarFile, destination: Path, version: str) -> Path`
 - `gate_skill(skill_file: Path) -> None`
 - `replace_exact(path: Path, old: str, new: str) -> None`
 - `generate_command(using_skill: Path) -> str`
@@ -183,13 +183,13 @@ EXECUTABLES = (
 实现要求：
 
 - `validate_version` 使用 full match `[0-9]+\.[0-9]+\.[0-9]+`。
-- `safe_extract` 在写文件前解析所有 member，拒绝绝对路径、`..` 和 hardlink；归档必须只有一个根目录。唯一批准的 symlink 是 archive 根目录的 `superpowers-<version>/AGENTS.md`，且必须精确指向同根 `CLAUDE.md` 普通文件；其他 symlink 一律拒绝。
+- `safe_extract` 在写文件前解析所有 member，拒绝绝对路径、`..` 和 hardlink；归档必须只有一个名为 `superpowers-<version>` 的目录根。唯一批准的 symlink 是该根的 `AGENTS.md`，且必须精确指向同根 `CLAUDE.md` 普通文件；其他 symlink 一律拒绝。
 - `gate_skill` 只修改首个 frontmatter 的唯一 `description:`，重复执行不得叠加 gate。
 - `replace_exact` 要求 `text.count(old) == 1`。
 - `prepare_update` 校验 package version，复制除 `using-superpowers` 外全部 skill，应用 gate、路径补丁及 executable 存在检查，并生成 staged command。
 - `generate_command` 去除 `using-superpowers` frontmatter，使用已批准设计中的 activation wrapper 和 OpenCode tool mapping。
 - `install_update` 先备份现有两个目标，再替换；任一步失败时恢复二者。
-- `main` 下载到临时目录，完成 staging 后安装，再对 7 个已跟踪脚本运行 `git update-index --chmod=+x`；不运行 `git add`、commit 或 push。
+- `main` 下载到临时目录，完成 staging 后在同一安装事务内对 7 个已跟踪脚本运行 `git update-index --chmod=+x`；任一步失败恢复文件和原 index modes，不运行 `git add`、commit 或 push。
 - CLI 错误写 stderr 并返回非零；成功打印更新版本和两个目标路径。
 
 - [ ] **Step 4: 运行窄测并修到通过**
