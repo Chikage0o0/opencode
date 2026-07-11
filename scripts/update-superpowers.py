@@ -187,14 +187,6 @@ def read_index_modes(repo_root: Path, paths: Sequence[str]) -> dict[str, str]:
     return modes
 
 
-def restore_index_modes(repo_root: Path, modes: dict[str, str]) -> None:
-    """恢复 Git index executable bit。"""
-    for mode, flag in (("100755", "+x"), ("100644", "-x")):
-        paths = sorted(path for path, current_mode in modes.items() if current_mode == mode)
-        if paths:
-            subprocess.run(["git", "update-index", f"--chmod={flag}", *paths], cwd=repo_root, check=True)
-
-
 def install_update(staged_skills: Path, staged_command: Path, repo_root: Path, index_modes: dict[str, str] | None = None) -> None:
     """替换文件并可选更新 index；任何失败都恢复文件和 index。"""
     target_skills = repo_root / "skills" / "superpowers"
@@ -219,20 +211,30 @@ def install_update(staged_skills: Path, staged_command: Path, repo_root: Path, i
     except Exception as original_error:
         rollback_errors: list[tuple[str, Exception]] = []
 
-        def attempt(label: str, action: Callable[[], object]) -> None:
+        def attempt(label: str, action: Callable[[], object]) -> bool:
             try:
                 action()
+                return True
             except Exception as rollback_error:
                 rollback_errors.append((label, rollback_error))
+                return False
 
+        skills_target_available = not target_skills.exists()
         if target_skills.exists():
-            attempt("remove new skills", lambda: shutil.rmtree(target_skills))
+            skills_target_available = attempt("remove new skills", lambda: shutil.rmtree(target_skills))
         if skills_backed_up:
-            attempt("restore old skills", lambda: shutil.move(backup_skills, target_skills))
+            if skills_target_available:
+                attempt("restore old skills", lambda: shutil.move(backup_skills, target_skills))
+            else:
+                rollback_errors.append(("restore old skills blocked", RuntimeError("target skills still exists")))
+        command_target_available = not target_command.exists()
         if target_command.exists():
-            attempt("remove new command", target_command.unlink)
+            command_target_available = attempt("remove new command", target_command.unlink)
         if command_backed_up:
-            attempt("restore old command", lambda: shutil.move(backup_command, target_command))
+            if command_target_available:
+                attempt("restore old command", lambda: shutil.move(backup_command, target_command))
+            else:
+                rollback_errors.append(("restore old command blocked", RuntimeError("target command still exists")))
         if index_modes is not None:
             for mode, flag in (("100755", "+x"), ("100644", "-x")):
                 paths = sorted(path for path, current_mode in index_modes.items() if current_mode == mode)

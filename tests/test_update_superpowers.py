@@ -391,3 +391,73 @@ Use OpenCode's native `skill` tool to load applicable Superpowers skills.
                 mock.call(["git", "update-index", "--chmod=-x", "skills/superpowers/writing-skills/render-graphs.js"], cwd=repo, check=True),
             ])
             self.assertTrue(list(repo.glob("update-superpowers-*")))
+
+    def test_install_update_keeps_skills_backup_when_new_skills_removal_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repo = root / "repo"
+            old_skills = repo / "skills" / "superpowers"
+            old_skills.mkdir(parents=True)
+            (old_skills / "old.txt").write_text("old skills", encoding="utf-8")
+            old_command = repo / "commands" / "use-superpowers.md"
+            old_command.parent.mkdir()
+            old_command.write_text("old command", encoding="utf-8")
+            staged_skills = root / "staged-skills"
+            staged_skills.mkdir()
+            staged_command = root / "staged-command.md"
+            staged_command.write_text("new command", encoding="utf-8")
+            modes = {
+                "skills/superpowers/brainstorming/scripts/start-server.sh": "100755",
+                "skills/superpowers/writing-skills/render-graphs.js": "100644",
+            }
+            original_move = self.updater.shutil.move
+            original_rmtree = self.updater.shutil.rmtree
+
+            def fail_command_install(source, destination, *args, **kwargs):
+                if Path(source) == staged_command:
+                    raise OSError("install failed")
+                return original_move(source, destination, *args, **kwargs)
+
+            def fail_new_skills_removal(path, *args, **kwargs):
+                if Path(path) == repo / "skills" / "superpowers":
+                    raise OSError("remove new skills failed")
+                return original_rmtree(path, *args, **kwargs)
+
+            with mock.patch.object(self.updater.shutil, "move", side_effect=fail_command_install) as move, mock.patch.object(self.updater.shutil, "rmtree", side_effect=fail_new_skills_removal), mock.patch.object(self.updater.subprocess, "run", return_value=mock.Mock()) as run:
+                with self.assertRaisesRegex(RuntimeError, "remove new skills: remove new skills failed"):
+                    self.updater.install_update(staged_skills, staged_command, repo, index_modes=modes)
+            backup_skills = next(repo.glob("update-superpowers-*/superpowers"))
+            self.assertEqual((backup_skills / "old.txt").read_text(encoding="utf-8"), "old skills")
+            self.assertFalse((repo / "skills" / "superpowers" / "superpowers").exists())
+            self.assertEqual(old_command.read_text(encoding="utf-8"), "old command")
+            self.assertNotIn(mock.call(backup_skills, repo / "skills" / "superpowers"), move.call_args_list)
+            self.assertEqual(run.call_args_list, [
+                mock.call(["git", "update-index", "--chmod=+x", "skills/superpowers/brainstorming/scripts/start-server.sh"], cwd=repo, check=True),
+                mock.call(["git", "update-index", "--chmod=-x", "skills/superpowers/writing-skills/render-graphs.js"], cwd=repo, check=True),
+            ])
+
+    def test_install_update_keeps_command_backup_when_new_command_removal_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            repo = root / "repo"
+            (repo / "skills" / "superpowers").mkdir(parents=True)
+            old_command = repo / "commands" / "use-superpowers.md"
+            old_command.parent.mkdir()
+            old_command.write_text("old command", encoding="utf-8")
+            staged_skills = root / "staged-skills"
+            staged_skills.mkdir()
+            staged_command = root / "staged-command.md"
+            staged_command.write_text("new command", encoding="utf-8")
+            original_unlink = Path.unlink
+
+            def fail_new_command_removal(path, *args, **kwargs):
+                if path == old_command:
+                    raise OSError("remove new command failed")
+                return original_unlink(path, *args, **kwargs)
+
+            with mock.patch.object(Path, "unlink", fail_new_command_removal), mock.patch.object(self.updater.subprocess, "run", side_effect=OSError("index failed")), mock.patch.object(self.updater.shutil, "move", wraps=self.updater.shutil.move) as move:
+                with self.assertRaisesRegex(RuntimeError, "remove new command: remove new command failed.*restore old command blocked"):
+                    self.updater.install_update(staged_skills, staged_command, repo, index_modes={"skills/superpowers/brainstorming/scripts/start-server.sh": "100755"})
+            backup_command = next(repo.glob("update-superpowers-*/use-superpowers.md"))
+            self.assertEqual(backup_command.read_text(encoding="utf-8"), "old command")
+            self.assertNotIn(mock.call(backup_command, old_command), move.call_args_list)
