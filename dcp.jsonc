@@ -42,8 +42,8 @@
     "summaryBuffer": true,
 
     // 使用百分比阈值，避免切换模型后固定 token 阈值失真。
-    "maxContextLimit": 250000,
-    "minContextLimit": 120000,
+    "maxContextLimit": 160000,
+    "minContextLimit": 80000,
 
     // 低频提醒，减少提示注入对 prompt cache 的破坏。
     "nudgeFrequency": 15,

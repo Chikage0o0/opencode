@@ -53,6 +53,13 @@ export function isOpencodeServeMode(argv: unknown = process.argv) {
   return args.some((arg) => arg === "serve")
 }
 
+export function shouldEnableTitleAlert(argv: unknown = process.argv) {
+  const args = Array.isArray(argv) ? argv : []
+
+  // run/serve 的标准输出是协议或批处理结果；写入 OSC 会污染调用方捕获的内容。
+  return !args.some((arg) => arg === "run" || arg === "serve")
+}
+
 function sanitizeTitle(value: string) {
   return value.replace(/[\u0000-\u001f\u007f]/g, "").trim()
 }
@@ -205,7 +212,7 @@ export function createTitleAlert(options: TitleAlertOptions = {}) {
 }
 
 export const TitleAlertPlugin: Plugin = async () => {
-  const alert = createTitleAlert({ enabled: !isOpencodeServeMode() })
+  const alert = createTitleAlert({ enabled: shouldEnableTitleAlert() })
 
   return {
     event: async ({ event }) => {

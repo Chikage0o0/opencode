@@ -18,21 +18,41 @@
 ├── AGENTS.md                         # 简短行为约定
 ├── opencode.json                     # OpenCode 主配置：插件、权限、MCP、默认 agent 禁用
 ├── oh-my-opencode-slim.json          # slim agent presets 与全局插件配置
+├── dcp.jsonc                         # Dynamic Context Pruning 策略
 ├── agents/
 │   └── git-commit.md                 # 专用 Git 提交 subagent
 ├── commands/
-│   └── git-commit.md                 # /git-commit 命令，轻量调度到 subagent
+│   ├── git-commit.md                 # /git-commit 命令，轻量调度到 subagent
+│   └── use-superpowers.md            # /use-superpowers 命令，激活 vendored Superpowers
 ├── plugins/
-│   ├── openai-instructions.ts        # GPT-5+ OpenAI instructions 兼容插件
-│   └── title-alert.ts                # 终端标题状态提醒插件
+│   ├── rtk.ts                        # 透明重写命令为 rtk，节省 token
+│   ├── title-alert.ts                # 终端标题状态提醒插件
+│   └── windows-git-env.ts            # Windows 下发现 Git for Windows 并设 shell/PATH
+├── lib/
+│   ├── title-alert-core.ts           # 标题提醒状态机与 OSC 转义渲染（可测）
+│   └── windows-git-env.ts            # Git 环境探测与 PATH 优先级（可测）
 ├── skills/                           # slim bundled skills 与本地补充 skills
-│   ├── codemap.md
-│   ├── codemap/
 │   ├── clonedeps/
+│   ├── codebase-design/
+│   ├── diagnosing-bugs/
+│   ├── frontend-design/
+│   ├── make-interfaces-feel-better/
 │   ├── oh-my-opencode-slim/
-│   ├── reflect/
-│   ├── simplify/
+│   ├── resolving-merge-conflicts/
+│   ├── shadcn-svelte/
+│   ├── superpowers/                  # vendored 套娃目录，内含 13 个子技能
+│   ├── svelte-code-writer/
+│   ├── web-perf/
+│   └── writing-great-skills/
+├── scripts/
+│   └── update-superpowers.py         # 按指定 tag 重建本地 Superpowers 技能与命令
+├── tests/
+│   ├── windows-git-env.test.ts
+│   ├── title-alert.test.ts
+│   └── test_update_superpowers.py
+├── docs/superpowers/                 # Superpowers 命令激活、updater、DCP git 源的 plans/specs
 ├── devenv.nix / devenv.yaml          # 本配置目录的开发环境
+├── starship.toml                     # devenv shell 终端提示配置
 └── README.md
 ```
 
@@ -41,12 +61,13 @@
 ### `opencode.json`
 
 - 启用插件：
-  - `@tarquinen/opencode-dcp@latest`
+  - `opencode-direnv`
+  - `@tarquinen/opencode-dcp@git+https://github.com/Chikage0o0/opencode-dynamic-context-pruning.git#588ba2a5bc2160065131469097d5ab5639af9bd6`
   - `oh-my-opencode-slim@2.2.0`
-- 禁用 OpenCode 默认 `explore` / `general` agents，让 slim orchestrator 接管工作流。
+- 禁用 OpenCode 默认 `build` / `plan` / `explore` / `general` agents，让 slim orchestrator 接管工作流。
 - 关闭全部 LSP：`"lsp": false`。
-- 保留 `context7` MCP 与原有安全权限策略。
-- 保留中文标题生成 agent。
+- MCP：`codegraph`（本地 `codegraph serve --mcp`）与 `chrome-devtools`（`bunx chrome-devtools-mcp@latest`）。
+- 保留中文标题生成 agent（`title`）。
 - Windows 下默认 shell 由 `plugins/windows-git-env.ts` 动态指向发现到的 Git Bash。
 
 ### Background subagent 实验开关
@@ -76,13 +97,9 @@
 
 本目录保留以下 bundled skills 的本地副本：
 
-- `codemap/` 与 `codemap.md`
 - `clonedeps/`
 - `oh-my-opencode-slim/`
-- `reflect/`
-- `simplify/`
-
-本目录还保留若干本地补充 skills（例如 `tdd/`、`diagnose/`、`write-a-skill/` 等），它们不是 npm 包随附内容。
+- 其余 `codebase-design`、`diagnosing-bugs`、`frontend-design`、`make-interfaces-feel-better`、`resolving-merge-conflicts`、`shadcn-svelte`、`superpowers/`、`svelte-code-writer`、`web-perf`、`writing-great-skills` 为本地补充 skills，不是 npm 包随附内容。
 
 当前仅保留本配置实际使用的 bundled skills；不附带会与本地 OpenSpec 主流程和 Git 工作区策略竞争的可选工作流。
 
@@ -104,11 +121,10 @@ python scripts/update-superpowers.py 6.2.0
 - command 不注入完整 diff、log 或历史样例，避免污染主 agent 上下文并降低提交成本。
 - subagent 默认不 push、不改 git config、不做 destructive git 操作；提交成功后只返回紧凑结果。
 
-### `/improve-codebase-architecture` command
+### `/use-superpowers` command
 
-- `commands/improve-codebase-architecture.md` 定义架构深度扫描命令，替代旧的 `skills/improve-codebase-architecture/`。
-- 命令会读取项目领域词汇和 ADR，生成临时目录中的可视化 HTML 报告，再让用户选择候选项进入 `/grilling`。
-- 报告模板自包含在 command 文件中，避免依赖已删除的 skill 附件文件。
+- `commands/use-superpowers.md` 定义 `/use-superpowers` 命令，激活 `skills/superpowers/` 中 vendored 的 Superpowers 工作流。
+- Superpowers 固定为本地副本，不通过 plugin 自动加载；更新由 `scripts/update-superpowers.py <version>` 重建。
 
 ## 启动与验证
 
@@ -135,4 +151,5 @@ bunx oh-my-opencode-slim@2.2.0 doctor
 
 - 不要重新加入旧工作流；slim 插件自带 Pantheon agents，本目录只保留少量必要的自定义 agents/commands。
 - 新增 repo-specific 覆盖时，优先使用 `.opencode/oh-my-opencode-slim.json`，不要直接修改插件包源码。
+- DCP 运行版本与本地 clone 版本独立：`opencode.json` 的插件 pin 到 git ref `588ba2a…`，而 `.slim/clonedeps.json` 记录的本地 clone 解析为 `3.1.14`。本地 clone 仅用于开发/联调 DCP 源码；运行期仍走 pin 的 git ref。两者有意解耦，更新时需分别维护。
 - 更新版本必须显式修改 `opencode.json`、`oh-my-opencode-slim.json` schema 与本文档；不要改回未固定版本或 `latest`。

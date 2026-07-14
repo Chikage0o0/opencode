@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test"
 
-import { createTitleAlert, isOpencodeServeMode, terminalTitleSequence } from "../lib/title-alert-core"
+import {
+  createTitleAlert,
+  isOpencodeServeMode,
+  shouldEnableTitleAlert,
+  terminalTitleSequence,
+} from "../lib/title-alert-core"
 
 describe("title alert renderer", () => {
   test("uses OSC terminal title escape and strips controls", () => {
@@ -10,6 +15,12 @@ describe("title alert renderer", () => {
   test("detects opencode serve mode from process arguments", () => {
     expect(isOpencodeServeMode(["node", "opencode", "serve"])).toBe(true)
     expect(isOpencodeServeMode(["node", "opencode"])).toBe(false)
+  })
+
+  test("disables terminal title output for non-interactive commands", () => {
+    expect(shouldEnableTitleAlert(["node", "opencode", "run"])).toBe(false)
+    expect(shouldEnableTitleAlert(["node", "opencode", "serve"])).toBe(false)
+    expect(shouldEnableTitleAlert(["node", "opencode"])).toBe(true)
   })
 
   test("uses the spinner marker slot for permission and done states", async () => {
