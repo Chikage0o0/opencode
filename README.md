@@ -4,10 +4,10 @@
 
 ## 当前版本
 
-- Plugin package: `oh-my-opencode-slim@1.1.2`
-- Plugin config schema: `https://unpkg.com/oh-my-opencode-slim@1.1.2/oh-my-opencode-slim.schema.json`
+- Plugin package: `oh-my-opencode-slim@2.2.0`
+- Plugin config schema: `https://unpkg.com/oh-my-opencode-slim@2.2.0/oh-my-opencode-slim.schema.json`
 - Active preset: `default`
-- 版本策略：固定 npm release `1.1.2`；不跟随 `latest`，不启用插件自更新检测。
+- 版本策略：固定 npm release `2.2.0`；不跟随 `latest`，不启用插件自更新检测。
 
 `modules/home/opencode/default.nix` 会把本目录中的配置同步到 `~/.config/opencode/`。
 
@@ -17,7 +17,6 @@
 .
 ├── AGENTS.md                         # 简短行为约定
 ├── opencode.json                     # OpenCode 主配置：插件、权限、MCP、默认 agent 禁用
-├── tui.json                          # TUI 配置与 slim TUI 插件
 ├── oh-my-opencode-slim.json          # slim agent presets 与全局插件配置
 ├── agents/
 │   └── git-commit.md                 # 专用 Git 提交 subagent
@@ -43,9 +42,9 @@
 
 - 启用插件：
   - `@tarquinen/opencode-dcp@latest`
-  - `oh-my-opencode-slim@1.1.2`
+  - `oh-my-opencode-slim@2.2.0`
 - 禁用 OpenCode 默认 `explore` / `general` agents，让 slim orchestrator 接管工作流。
-- 启用 LSP：`"lsp": true`。
+- 关闭全部 LSP：`"lsp": false`。
 - 保留 `context7` MCP 与原有安全权限策略。
 - 保留中文标题生成 agent。
 - Windows 下默认 shell 由 `plugins/windows-git-env.ts` 动态指向发现到的 Git Bash。
@@ -70,12 +69,12 @@
 
 - `preset` 默认为 `default`。
 - `default` preset 按 agent 分配模型、skills 与 MCP 访问。
-- `autoUpdate` 设置为 `false`，配合 `opencode.json` / `tui.json` 中的 `oh-my-opencode-slim@1.1.2` 固定版本，避免插件自更新检测或自动安装新版本。
+- `autoUpdate` 设置为 `false`，配合 `opencode.json` 中的 `oh-my-opencode-slim@2.2.0` 固定版本，避免插件自更新检测或自动安装新版本。
 - `disabled_agents: ["observer"]` 禁用 Observer。
 
 ### Bundled skills
 
-本目录保留以下 `oh-my-opencode-slim@1.1.2` bundled skills：
+本目录保留以下 bundled skills 的本地副本：
 
 - `codemap/` 与 `codemap.md`
 - `clonedeps/`
@@ -129,11 +128,11 @@ ping all agents
 也可以诊断插件配置：
 
 ```bash
-bunx oh-my-opencode-slim@1.1.2 doctor
+bunx oh-my-opencode-slim@2.2.0 doctor
 ```
 
 ## 维护建议
 
 - 不要重新加入旧工作流；slim 插件自带 Pantheon agents，本目录只保留少量必要的自定义 agents/commands。
 - 新增 repo-specific 覆盖时，优先使用 `.opencode/oh-my-opencode-slim.json`，不要直接修改插件包源码。
-- 更新版本必须显式修改 `opencode.json`、`tui.json`、`oh-my-opencode-slim.json` schema 与本文档；不要改回未固定版本或 `latest`。
+- 更新版本必须显式修改 `opencode.json`、`oh-my-opencode-slim.json` schema 与本文档；不要改回未固定版本或 `latest`。

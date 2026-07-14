@@ -43,7 +43,7 @@
     "prune": true
   },
   "default_agent": "orchestrator",
-  "lsp": true,
+  "lsp": false,
   "model": "openai/gpt-5.6-sol",
   "permission": {
     "*": "allow"
@@ -51,7 +51,7 @@
   "plugin": [
     "opencode-direnv",
     "@tarquinen/opencode-dcp@git+https://github.com/Chikage0o0/opencode-dynamic-context-pruning.git#588ba2a5bc2160065131469097d5ab5639af9bd6",
-    "oh-my-opencode-slim@2.1.1"
+    "oh-my-opencode-slim@2.2.0"
   ],
   "mcp": {
     "codegraph": {
