@@ -1,6 +1,6 @@
 # OpenCode 配置项目
 
-本目录保存一套由 Nix/Home Manager 管理的 OpenCode 全局配置。当前配置已经替换为 [`oh-my-opencode-slim`](https://github.com/alvinunreal/oh-my-opencode-slim) 稳定 release 版，不再保留旧的本地 agents/skills 工作流。
+本目录保存一套由 Nix/Home Manager 管理的 OpenCode 全局配置。当前配置使用 [`oh-my-opencode-slim`](https://github.com/alvinunreal/oh-my-opencode-slim) 稳定 release 版负责多 agent 调度，并使用 [`mattpocock/skills`](https://github.com/mattpocock/skills) 提供可组合的工程方法；不再保留 Superpowers 工作流。
 
 ## 当前版本
 
@@ -22,8 +22,7 @@
 ├── agents/
 │   └── git-commit.md                 # 专用 Git 提交 subagent
 ├── commands/
-│   ├── git-commit.md                 # /git-commit 命令，轻量调度到 subagent
-│   └── use-superpowers.md            # /use-superpowers 命令，激活 vendored Superpowers
+│   └── git-commit.md                 # /git-commit 命令，轻量调度到 subagent
 ├── plugins/
 │   ├── rtk.ts                        # 透明重写命令为 rtk，节省 token
 │   ├── title-alert.ts                # 终端标题状态提醒插件
@@ -33,24 +32,18 @@
 │   └── windows-git-env.ts            # Git 环境探测与 PATH 优先级（可测）
 ├── skills/                           # slim bundled skills 与本地补充 skills
 │   ├── clonedeps/
-│   ├── codebase-design/
-│   ├── diagnosing-bugs/
 │   ├── frontend-design/
 │   ├── make-interfaces-feel-better/
 │   ├── oh-my-opencode-slim/
-│   ├── resolving-merge-conflicts/
 │   ├── shadcn-svelte/
-│   ├── superpowers/                  # vendored 套娃目录，内含 13 个子技能
 │   ├── svelte-code-writer/
+│   ├── verification-planning/
 │   ├── web-perf/
-│   └── writing-great-skills/
-├── scripts/
-│   └── update-superpowers.py         # 按指定 tag 重建本地 Superpowers 技能与命令
+│   └── ...
 ├── tests/
 │   ├── windows-git-env.test.ts
-│   ├── title-alert.test.ts
-│   └── test_update_superpowers.py
-├── docs/superpowers/                 # Superpowers 命令激活、updater、DCP git 源的 plans/specs
+│   └── title-alert.test.ts
+├── docs/specs/                       # 配置本身的长期设计记录
 ├── devenv.nix / devenv.yaml          # 本配置目录的开发环境
 ├── starship.toml                     # devenv shell 终端提示配置
 └── README.md
@@ -99,19 +92,29 @@
 
 - `clonedeps/`
 - `oh-my-opencode-slim/`
-- 其余 `codebase-design`、`diagnosing-bugs`、`frontend-design`、`make-interfaces-feel-better`、`resolving-merge-conflicts`、`shadcn-svelte`、`superpowers/`、`svelte-code-writer`、`web-perf`、`writing-great-skills` 为本地补充 skills，不是 npm 包随附内容。
+- `verification-planning/`
+- 其余 `frontend-design`、`make-interfaces-feel-better`、`shadcn-svelte`、`svelte-code-writer`、`web-perf` 为本地补充 skills，不是 npm 包随附内容。
 
 当前仅保留本配置实际使用的 bundled skills；不附带会与本地 OpenSpec 主流程和 Git 工作区策略竞争的可选工作流。
 
-### 更新 Superpowers skills
+### Matt Pocock engineering skills
 
-Superpowers 固定为本地副本，不通过 plugin 自动加载。更新到指定上游版本：
+Matt Pocock skills 通过 Agent Skills 标准安装在 `~/.agents/skills/`，来源与版本记录在 `~/.agents/.skill-lock.json`。OpenCode 会直接发现这些全局 skills；当前安装其官方 README 中列出的 22 个 engineering/productivity skills。
+
+更新全部由 skills CLI 管理的全局 skills：
 
 ```bash
-python scripts/update-superpowers.py 6.2.0
+npx skills@latest update --global --yes
 ```
 
-脚本会下载官方 `v<version>` tag，重建本地 skills 和 `/use-superpowers` command，并重放 session gate、本地路径补丁和 executable mode。更新后检查 diff、运行测试，再手动提交；脚本不会自动 commit 或 push。
+职责划分：
+
+- OMO Slim Orchestrator 是唯一的多 agent 调度器。
+- `tdd` 与 `diagnosing-bugs` 提供 Fixer 的实现纪律。
+- `code-review` 与 `codebase-design` 提供 Oracle 的审查方法。
+- `research` 提供 Librarian 的可复用调研方法。
+- `domain-modeling`、`grill-with-docs` 等由 Orchestrator 或用户按需触发。
+- `to-spec`、`to-tickets`、`implement` 已安装但不作为默认主流程，避免与 OpenSpec 和 OMO Slim 重复维护规格或争夺调度权。
 
 ### `/git-commit` command + subagent
 
@@ -120,11 +123,6 @@ python scripts/update-superpowers.py 6.2.0
 - `/git-commit <范围说明>` 会把参数作为 `task_scope`；`/git-commit` 不带参数时，由主 agent 根据当前对话、短 `git status` 和 staged set 生成一两句最小范围说明。
 - command 不注入完整 diff、log 或历史样例，避免污染主 agent 上下文并降低提交成本。
 - subagent 默认不 push、不改 git config、不做 destructive git 操作；提交成功后只返回紧凑结果。
-
-### `/use-superpowers` command
-
-- `commands/use-superpowers.md` 定义 `/use-superpowers` 命令，激活 `skills/superpowers/` 中 vendored 的 Superpowers 工作流。
-- Superpowers 固定为本地副本，不通过 plugin 自动加载；更新由 `scripts/update-superpowers.py <version>` 重建。
 
 ## 启动与验证
 
@@ -149,7 +147,7 @@ bunx oh-my-opencode-slim@2.2.0 doctor
 
 ## 维护建议
 
-- 不要重新加入旧工作流；slim 插件自带 Pantheon agents，本目录只保留少量必要的自定义 agents/commands。
+- 不要重新加入会接管规划、worktree 和 subagent 调度的完整工作流；保持 OpenSpec 管规格、OMO Slim 管调度、Matt skills 管工程方法。
 - 新增 repo-specific 覆盖时，优先使用 `.opencode/oh-my-opencode-slim.json`，不要直接修改插件包源码。
 - DCP 运行版本与本地 clone 版本独立：`opencode.json` 的插件 pin 到 git ref `588ba2a…`，而 `.slim/clonedeps.json` 记录的本地 clone 解析为 `3.1.14`。本地 clone 仅用于开发/联调 DCP 源码；运行期仍走 pin 的 git ref。两者有意解耦，更新时需分别维护。
 - 更新版本必须显式修改 `opencode.json`、`oh-my-opencode-slim.json` schema 与本文档；不要改回未固定版本或 `latest`。

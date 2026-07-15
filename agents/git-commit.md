@@ -257,3 +257,4 @@ Stop immediately if any of the following is true:
 - post-commit verification fails
 
 Start from "1. Repository and conflict checks".
+
