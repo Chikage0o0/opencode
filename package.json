@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@opencode-ai/plugin": "1.17.8",
+    "opencode-acp": "file:vendor/opencode-acp"
+  }
+}

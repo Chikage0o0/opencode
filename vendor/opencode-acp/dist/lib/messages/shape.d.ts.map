@@ -1,0 +1,1 @@
+{"version":3,"file":"shape.d.ts","sourceRoot":"","sources":["../../../lib/messages/shape.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,SAAS,EAAE,MAAM,UAAU,CAAA;AAEzC,wBAAgB,iBAAiB,CAAC,OAAO,EAAE,OAAO,GAAG,OAAO,IAAI,SAAS,CAsBxE;AAED,wBAAgB,cAAc,CAAC,QAAQ,EAAE,OAAO,GAAG,SAAS,EAAE,CAM7D;AAED,wBAAgB,qBAAqB,CAAC,QAAQ,EAAE,OAAO,GAAG,SAAS,EAAE,CAepE"}

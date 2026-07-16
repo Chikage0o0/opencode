@@ -21,11 +21,210 @@
       "options": {},
       "permission": {}
     },
+    "orchestrator": {
+      "description": "AI coding orchestrator that plans, delegates, reconciles, and verifies specialist work",
+      "mode": "primary",
+      "model": "openai/gpt-5.6-sol",
+      "variant": "high",
+      "temperature": 0.1,
+      "prompt": "{file:./prompts/agents/orchestrator.md}",
+      "permission": {
+        "question": "allow",
+        "task": {
+          "*": "deny",
+          "oracle": "allow",
+          "librarian": "allow",
+          "explorer": "allow",
+          "designer": "allow",
+          "fixer": "allow",
+          "git-commit": "allow"
+        },
+        "skill": {
+          "*": "allow",
+          "make-interfaces-feel-better": "deny",
+          "frontend-design": "deny"
+        },
+        "context7_*": "deny",
+        "gh_grep_*": "deny",
+        "websearch": "deny",
+        "websearch_*": "deny",
+        "cancel_task": "allow",
+        "compress": "allow",
+        "decompress": "allow",
+        "prune": "allow",
+        "search_context": "allow",
+        "acp_status": "allow",
+        "acp_context_recap": "allow"
+      }
+    },
+    "oracle": {
+      "description": "Strategic technical advisor for architecture, complex debugging, code review, and simplification",
+      "mode": "subagent",
+      "model": "openai/gpt-5.6-sol",
+      "variant": "xhigh",
+      "temperature": 0.1,
+      "prompt": "{file:./prompts/agents/oracle.md}",
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "lsp": "allow",
+        "question": "allow",
+        "compress": "allow",
+        "decompress": "allow",
+        "prune": "allow",
+        "search_context": "allow",
+        "acp_status": "allow",
+        "acp_context_recap": "allow",
+        "skill": {
+          "*": "deny",
+          "code-review": "allow",
+          "codebase-design": "allow",
+          "diagnosing-bugs": "allow",
+          "web-perf": "allow"
+        },
+        "codegraph_*": "allow",
+        "chrome-devtools_*": "allow"
+      }
+    },
+    "librarian": {
+      "description": "External documentation and library research specialist for official docs, examples, and upstream internals",
+      "mode": "subagent",
+      "model": "xai/grok-4.5",
+      "variant": "low",
+      "temperature": 0.1,
+      "prompt": "{file:./prompts/agents/librarian.md}",
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "question": "allow",
+        "webfetch": "allow",
+        "websearch": "allow",
+        "compress": "allow",
+        "decompress": "allow",
+        "prune": "allow",
+        "search_context": "allow",
+        "acp_status": "allow",
+        "acp_context_recap": "allow",
+        "skill": {
+          "*": "deny",
+          "research": "allow"
+        },
+        "context7_*": "allow",
+        "gh_grep_*": "allow",
+        "websearch_*": "allow",
+        "chrome-devtools_*": "allow"
+      }
+    },
+    "explorer": {
+      "description": "Fast read-only codebase search and pattern matching specialist",
+      "mode": "subagent",
+      "model": "xai/grok-4.5",
+      "variant": "low",
+      "temperature": 0.1,
+      "prompt": "{file:./prompts/agents/explorer.md}",
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "lsp": "allow",
+        "question": "allow",
+        "compress": "allow",
+        "decompress": "allow",
+        "prune": "allow",
+        "search_context": "allow",
+        "acp_status": "allow",
+        "acp_context_recap": "allow",
+        "skill": "deny",
+        "codegraph_*": "allow"
+      }
+    },
+    "designer": {
+      "description": "UI/UX design, review, and implementation specialist for visual and interaction quality",
+      "mode": "subagent",
+      "model": "xai/grok-4.5",
+      "variant": "high",
+      "temperature": 0.7,
+      "prompt": "{file:./prompts/agents/designer.md}",
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "edit": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "bash": "allow",
+        "lsp": "allow",
+        "question": "allow",
+        "compress": "allow",
+        "decompress": "allow",
+        "prune": "allow",
+        "search_context": "allow",
+        "acp_status": "allow",
+        "acp_context_recap": "allow",
+        "skill": {
+          "*": "deny",
+          "make-interfaces-feel-better": "allow",
+          "frontend-design": "allow",
+          "svelte-code-writer": "allow",
+          "shadcn-svelte": "allow"
+        },
+        "codegraph_*": "allow",
+        "chrome-devtools_*": "allow"
+      }
+    },
+    "fixer": {
+      "description": "Fast implementation specialist for bounded, well-specified code changes",
+      "mode": "subagent",
+      "model": "xai/grok-4.5",
+      "variant": "high",
+      "temperature": 0.2,
+      "prompt": "{file:./prompts/agents/fixer.md}",
+      "permission": {
+        "*": "deny",
+        "read": "allow",
+        "edit": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "bash": "allow",
+        "lsp": "allow",
+        "question": "allow",
+        "compress": "allow",
+        "decompress": "allow",
+        "prune": "allow",
+        "search_context": "allow",
+        "acp_status": "allow",
+        "acp_context_recap": "allow",
+        "skill": {
+          "*": "deny",
+          "tdd": "allow",
+          "diagnosing-bugs": "allow",
+          "svelte-code-writer": "allow",
+          "shadcn-svelte": "allow"
+        },
+        "codegraph_*": "allow"
+      }
+    },
     "git-commit": {
       "model": "openai/gpt-5.6-luna",
       "variant": "low",
       "options": {},
-      "permission": {}
+      "permission": {
+        "compress": "allow",
+        "decompress": "allow",
+        "prune": "allow",
+        "search_context": "allow",
+        "acp_status": "allow",
+        "acp_context_recap": "allow"
+      }
     },
     "title": {
       "model": "openai/gpt-5.4-mini",
@@ -38,7 +237,7 @@
   },
   "autoupdate": false,
   "compaction": {
-    "auto": true,
+    "auto": false,
     "tail_turns": 12,
     "prune": true
   },
@@ -46,12 +245,17 @@
   "lsp": false,
   "model": "openai/gpt-5.6-sol",
   "permission": {
-    "*": "allow"
+    "*": "allow",
+    "cancel_task": "deny",
+    "compress": "allow",
+    "decompress": "allow",
+    "prune": "allow",
+    "search_context": "allow",
+    "acp_status": "allow",
+    "acp_context_recap": "allow"
   },
   "plugin": [
-    "opencode-direnv",
-    "@tarquinen/opencode-dcp@git+https://github.com/Chikage0o0/opencode-dynamic-context-pruning.git#588ba2a5bc2160065131469097d5ab5639af9bd6",
-    "oh-my-opencode-slim@2.2.0"
+    "opencode-direnv"
   ],
   "mcp": {
     "codegraph": {
@@ -70,6 +274,24 @@
         "-y",
         "chrome-devtools-mcp@latest"
       ]
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true,
+      "oauth": false
+    },
+    "gh_grep": {
+      "type": "remote",
+      "url": "https://mcp.grep.app",
+      "enabled": true,
+      "oauth": false
+    },
+    "websearch": {
+      "type": "remote",
+      "url": "https://mcp.exa.ai/mcp?tools=web_search_exa",
+      "enabled": true,
+      "oauth": false
     }
   },
   "share": "disabled",
@@ -78,5 +300,10 @@
     "max_lines": 800,
     "max_bytes": 24000
   },
-  "disabled_providers": []
+  "disabled_providers": [],
+  "experimental": {
+    "primary_tools": [
+      "cancel_task"
+    ]
+  }
 }

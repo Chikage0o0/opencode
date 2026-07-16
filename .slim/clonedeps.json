@@ -1,15 +1,16 @@
 {
   "version": "1.0.0",
-  "updatedAt": "2026-07-05T04:22:33.000Z",
+  "updatedAt": "2026-07-16T00:00:00.000Z",
   "dependencies": [
     {
-      "name": "@tarquinen/opencode-dcp",
-      "resolvedVersion": "3.1.14",
-      "repoUrl": "https://github.com/Opencode-DCP/opencode-dynamic-context-pruning.git",
-      "ref": "v3.1.14",
-      "path": ".slim/clonedeps/repos/Opencode-DCP__opencode-dynamic-context-pruning",
-      "packagePath": ".",
-      "reason": "当前 OpenCode 配置已切到该 clone 的 index.ts，便于继续本地开发与联调 DCP。"
+      "name": "opencode-acp",
+      "resolvedVersion": "1.12.6",
+      "repoUrl": "https://github.com/ranxianglei/opencode-acp.git",
+      "ref": "v1.12.6",
+      "commit": "f1a33d9f4ce55af808eb4e050717c914ed16084b",
+      "path": ".slim/clonedeps/repos/ranxianglei__opencode-acp",
+      "packagePath": "vendor/opencode-acp",
+      "reason": "ACP 1.12.6 source baseline and audit cache; runtime uses the tracked local package with session-safety patches."
     }
   ]
 }
