@@ -2,196 +2,22 @@
   "$schema": "https://opencode.ai/config.json",
   "agent": {
     "build": {
-      "disable": true,
-      "options": {},
-      "permission": {}
+      "disable": true
     },
     "plan": {
-      "disable": true,
-      "options": {},
-      "permission": {}
+      "disable": true
     },
     "explore": {
-      "disable": true,
-      "options": {},
-      "permission": {}
+      "disable": true
     },
     "general": {
-      "disable": true,
-      "options": {},
-      "permission": {}
-    },
-    "orchestrator": {
-      "description": "AI coding orchestrator that plans, delegates, reconciles, and verifies specialist work",
-      "mode": "primary",
-      "model": "openai/gpt-5.6-sol",
-      "variant": "high",
-      "prompt": "{file:./prompts/agents/orchestrator.md}",
-      "permission": {
-        "question": "allow",
-        "task": {
-          "*": "deny",
-          "oracle": "allow",
-          "librarian": "allow",
-          "explorer": "allow",
-          "designer": "allow",
-          "fixer": "allow",
-          "git-commit": "allow"
-        },
-        "skill": {
-          "*": "allow",
-          "make-interfaces-feel-better": "deny",
-          "frontend-design": "deny"
-        },
-        "context7_*": "deny",
-        "gh_grep_*": "deny",
-        "websearch": "deny",
-        "websearch_*": "deny",
-        "cancel_task": "allow",
-        "compress": "allow"
-      }
-    },
-    "oracle": {
-      "description": "Strategic technical advisor for architecture, complex debugging, code review, and simplification",
-      "mode": "subagent",
-      "model": "openai/gpt-5.6-sol",
-      "variant": "xhigh",
-      "prompt": "{file:./prompts/agents/oracle.md}",
-      "permission": {
-        "*": "deny",
-        "read": "allow",
-        "glob": "allow",
-        "grep": "allow",
-        "list": "allow",
-        "lsp": "allow",
-        "question": "deny",
-        "compress": "allow",
-        "skill": {
-          "*": "deny",
-          "codebase-design": "allow",
-          "diagnosing-bugs": "allow",
-          "web-perf": "allow"
-        },
-        "codegraph_*": "allow",
-        "chrome-devtools_*": "allow"
-      }
-    },
-    "librarian": {
-      "description": "External documentation and library research specialist for official docs, examples, and upstream internals",
-      "mode": "subagent",
-      "model": "zhipuai-coding-plan/glm-5.2",
-      "variant": "default",
-      "prompt": "{file:./prompts/agents/librarian.md}",
-      "permission": {
-        "*": "deny",
-        "read": "allow",
-        "glob": "allow",
-        "grep": "allow",
-        "list": "allow",
-        "question": "deny",
-        "webfetch": "allow",
-        "websearch": "allow",
-        "compress": "allow",
-        "skill": {
-          "*": "deny",
-          "research": "allow"
-        },
-        "context7_*": "allow",
-        "gh_grep_*": "allow",
-        "websearch_*": "allow",
-        "chrome-devtools_*": "allow"
-      }
-    },
-    "explorer": {
-      "description": "Fast read-only codebase search and pattern matching specialist",
-      "mode": "subagent",
-      "model": "zhipuai-coding-plan/glm-5.2",
-      "variant": "default",
-      "prompt": "{file:./prompts/agents/explorer.md}",
-      "permission": {
-        "*": "deny",
-        "read": "allow",
-        "glob": "allow",
-        "grep": "allow",
-        "list": "allow",
-        "lsp": "allow",
-        "question": "deny",
-        "compress": "allow",
-        "skill": "deny",
-        "codegraph_*": "allow"
-      }
-    },
-    "designer": {
-      "description": "UI/UX design, review, and implementation specialist for visual and interaction quality",
-      "mode": "subagent",
-      "model": "xai/grok-4.5",
-      "variant": "high",
-      "prompt": "{file:./prompts/agents/designer.md}",
-      "permission": {
-        "*": "deny",
-        "read": "allow",
-        "edit": "allow",
-        "glob": "allow",
-        "grep": "allow",
-        "list": "allow",
-        "bash": "allow",
-        "lsp": "allow",
-        "question": "deny",
-        "compress": "allow",
-        "skill": {
-          "*": "deny",
-          "make-interfaces-feel-better": "allow",
-          "frontend-design": "allow",
-          "svelte-code-writer": "allow",
-          "shadcn-svelte": "allow"
-        },
-        "codegraph_*": "allow",
-        "chrome-devtools_*": "allow"
-      }
-    },
-    "fixer": {
-      "description": "Fast implementation specialist for bounded, well-specified code changes",
-      "mode": "subagent",
-      "model": "xai/grok-4.5",
-      "variant": "high",
-      "prompt": "{file:./prompts/agents/fixer.md}",
-      "permission": {
-        "*": "deny",
-        "read": "allow",
-        "edit": "allow",
-        "glob": "allow",
-        "grep": "allow",
-        "list": "allow",
-        "bash": "allow",
-        "lsp": "allow",
-        "question": "deny",
-        "compress": "allow",
-        "skill": {
-          "*": "deny",
-          "tdd": "allow",
-          "diagnosing-bugs": "allow",
-          "svelte-code-writer": "allow",
-          "shadcn-svelte": "allow"
-        },
-        "codegraph_*": "allow"
-      }
+      "disable": true
     },
     "git-commit": {
       "model": "zhipuai-coding-plan/glm-5.2",
       "variant": "default",
       "options": {},
-      "permission": {
-        "question": "deny",
-        "compress": "allow"
-      }
-    },
-      "adversarial-author": {
-        "model": "zhipuai-coding-plan/glm-5.2",
-        "variant": "high",
-      },
-    "adversarial-reviewer": {
-      "model": "openai/gpt-5.6-sol",
-      "variant": "xhigh"
+      "permission": {}
     },
     "title": {
       "model": "zhipuai-coding-plan/glm-4.7",
@@ -208,64 +34,31 @@
     "prune": true
   },
   "default_agent": "orchestrator",
-  "lsp": false,
-  "model": "openai/gpt-5.6-sol",
+  "model": "openai/gpt-5.6-terra",
+  "small_model": "openai/gpt-5.6-luna",
   "permission": {
-    "*": "allow",
-    "cancel_task": "deny",
-    "compress": "allow"
+    "*": "allow"
   },
   "plugin": [
     "opencode-direnv",
-    "@chikage0o0/opencode-dcp@3.1.14"
+    "@chikage0o0/opencode-dcp@3.1.14",
+    "oh-my-opencode-slim"
   ],
   "mcp": {
     "codegraph": {
       "type": "local",
-      "command": [
-        "codegraph",
-        "serve",
-        "--mcp"
-      ],
+      "command": ["codegraph", "serve", "--mcp"],
       "enabled": true
     },
     "chrome-devtools": {
       "type": "local",
-      "command": [
-        "bunx",
-        "-y",
-        "chrome-devtools-mcp@latest"
-      ]
-    },
-    "context7": {
-      "type": "remote",
-      "url": "https://mcp.context7.com/mcp",
-      "enabled": true,
-      "oauth": false
-    },
-    "gh_grep": {
-      "type": "remote",
-      "url": "https://mcp.grep.app",
-      "enabled": true,
-      "oauth": false
-    },
-    "websearch": {
-      "type": "remote",
-      "url": "https://mcp.exa.ai/mcp?tools=web_search_exa",
-      "enabled": true,
-      "oauth": false
+      "command": ["bunx", "-y", "chrome-devtools-mcp@latest"],
+      "enabled": true
     }
   },
   "share": "disabled",
-  "small_model": "zhipuai-coding-plan/glm-4.7",
   "tool_output": {
     "max_lines": 800,
     "max_bytes": 24000
-  },
-  "disabled_providers": [],
-  "experimental": {
-    "primary_tools": [
-      "cancel_task"
-    ]
   }
 }
