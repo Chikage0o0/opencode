@@ -4,7 +4,7 @@
 
 ## 运行基线
 
-- OpenCode：`1.18.1`。
+- OpenCode：`1.18.3`。
 - Agent 编排：`oh-my-opencode-slim`，使用原生 background subagents。
 - 上下文管理：`@chikage0o0/opencode-dcp@3.1.14`，关闭自动更新。
 - 后台 Agent：环境变量 `OPENCODE_EXPERIMENTAL_BACKGROUND_SUBAGENTS=true`。

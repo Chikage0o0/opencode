@@ -4,8 +4,8 @@
   "presets": {
     "openai": {
       "orchestrator": {
-        "model": "openai/gpt-5.6-terra",
-        "variant": "high",
+        "model": "openai/gpt-5.6-sol",
+        "variant": "medium",
         "skills": [
           "*"
         ],
@@ -36,7 +36,7 @@
         "mcps": ["codegraph"]
       },
       "designer": {
-        "model": "openai/gpt-5.6-luna",
+        "model": "openai/gpt-5.6-terra",
         "variant": "high",
         "skills": [
           "frontend-design",
@@ -48,7 +48,7 @@
         "mcps": ["codegraph", "chrome-devtools"]
       },
       "fixer": {
-        "model": "openai/gpt-5.6-luna",
+        "model": "openai/gpt-5.6-terra",
         "variant": "high",
         "skills": [
           "tdd",
