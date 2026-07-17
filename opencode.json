@@ -207,8 +207,8 @@
       }
     },
     "git-commit": {
-      "model": "openai/gpt-5.6-luna",
-      "variant": "low",
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "default",
       "options": {},
       "permission": {
         "question": "deny",
@@ -220,8 +220,16 @@
         "acp_context_recap": "allow"
       }
     },
+    "adversarial-author": {
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "high",
+    },
+    "adversarial-reviewer": {
+      "model": "openai/gpt-5.6-sol",
+      "variant": "xhigh"
+    },
     "title": {
-      "model": "openai/gpt-5.4-mini",
+      "model": "zhipuai-coding-plan/glm-4.7",
       "variant": "low",
       "options": {},
       "permission": {},
@@ -288,7 +296,7 @@
     }
   },
   "share": "disabled",
-  "small_model": "openai/gpt-5.4-mini",
+  "small_model": "zhipuai-coding-plan/glm-4.7",
   "tool_output": {
     "max_lines": 800,
     "max_bytes": 24000
