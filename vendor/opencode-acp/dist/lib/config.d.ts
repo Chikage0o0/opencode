@@ -15,9 +15,6 @@ export interface CompressConfig {
     modelMaxLimits?: Record<string, number | `${number}%`>;
     modelMinLimits?: Record<string, number | `${number}%`>;
     nudgeFrequency: number;
-    minNudgeContextPercent: number;
-    nudgeGrowthTokens?: number;
-    toolOutputNudgeThreshold?: number;
     iterationNudgeThreshold: number;
     nudgeForce: "strong" | "soft";
     protectedTools: string[];
@@ -25,9 +22,6 @@ export interface CompressConfig {
     protectUserMessages: boolean;
     maxSummaryLengthHard: number;
     minCompressRange: number;
-    minNudgeGrowthRatio: number;
-    minNudgeGrowthFloor: number;
-    emergencyThresholdPercent: number | `${number}%`;
     maxVisibleSegments: number;
     keepEmbedMaxChars: number;
 }

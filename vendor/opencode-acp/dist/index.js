@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync, copyFileS
 import { join, dirname } from "path";
 import { homedir } from "os";
 
-// node_modules/jsonc-parser/lib/esm/impl/scanner.js
+// ../../node_modules/jsonc-parser/lib/esm/impl/scanner.js
 function createScanner(text, ignoreTrivia = false) {
   const len = text.length;
   let pos = 0, value = "", tokenOffset = 0, token = 16, lineNumber = 0, lineStartOffset = 0, tokenLineStartOffset = 0, prevTokenLineStartOffset = 0, scanError = 0;
@@ -424,7 +424,7 @@ var CharacterCodes;
   CharacterCodes2[CharacterCodes2["tab"] = 9] = "tab";
 })(CharacterCodes || (CharacterCodes = {}));
 
-// node_modules/jsonc-parser/lib/esm/impl/string-intern.js
+// ../../node_modules/jsonc-parser/lib/esm/impl/string-intern.js
 var cachedSpaces = new Array(20).fill(0).map((_, index) => {
   return " ".repeat(index);
 });
@@ -454,7 +454,7 @@ var cachedBreakLinesWithSpaces = {
   }
 };
 
-// node_modules/jsonc-parser/lib/esm/impl/parser.js
+// ../../node_modules/jsonc-parser/lib/esm/impl/parser.js
 var ParseOptions;
 (function(ParseOptions2) {
   ParseOptions2.DEFAULT = {
@@ -810,7 +810,7 @@ function visit(text, visitor, options = ParseOptions.DEFAULT) {
   return true;
 }
 
-// node_modules/jsonc-parser/lib/esm/main.js
+// ../../node_modules/jsonc-parser/lib/esm/main.js
 var ScanError;
 (function(ScanError2) {
   ScanError2[ScanError2["None"] = 0] = "None";
@@ -894,9 +894,6 @@ var VALID_CONFIG_KEYS = /* @__PURE__ */ new Set([
   "compress.modelMaxLimits",
   "compress.modelMinLimits",
   "compress.nudgeFrequency",
-  "compress.minNudgeContextPercent",
-  "compress.nudgeGrowthTokens",
-  "compress.toolOutputNudgeThreshold",
   "compress.iterationNudgeThreshold",
   "compress.nudgeForce",
   "compress.protectedTools",
@@ -904,9 +901,6 @@ var VALID_CONFIG_KEYS = /* @__PURE__ */ new Set([
   "compress.protectUserMessages",
   "compress.maxSummaryLengthHard",
   "compress.minCompressRange",
-  "compress.minNudgeGrowthRatio",
-  "compress.minNudgeGrowthFloor",
-  "compress.emergencyThresholdPercent",
   "compress.maxVisibleSegments",
   "compress.keepEmbedMaxChars",
   "gc",
@@ -1189,61 +1183,6 @@ function validateConfigTypes(config) {
           expected: "non-negative number (>= 0)",
           actual: `${compress.minCompressRange}`
         });
-      }
-      if (compress.minNudgeGrowthRatio !== void 0 && typeof compress.minNudgeGrowthRatio !== "number") {
-        errors.push({
-          key: "compress.minNudgeGrowthRatio",
-          expected: "number",
-          actual: typeof compress.minNudgeGrowthRatio
-        });
-      }
-      if (typeof compress.minNudgeGrowthRatio === "number" && (compress.minNudgeGrowthRatio < 0 || compress.minNudgeGrowthRatio > 1)) {
-        errors.push({
-          key: "compress.minNudgeGrowthRatio",
-          expected: "number in range [0, 1]",
-          actual: `${compress.minNudgeGrowthRatio}`
-        });
-      }
-      if (compress.minNudgeGrowthFloor !== void 0 && typeof compress.minNudgeGrowthFloor !== "number") {
-        errors.push({
-          key: "compress.minNudgeGrowthFloor",
-          expected: "number",
-          actual: typeof compress.minNudgeGrowthFloor
-        });
-      }
-      if (typeof compress.minNudgeGrowthFloor === "number" && compress.minNudgeGrowthFloor < 0) {
-        errors.push({
-          key: "compress.minNudgeGrowthFloor",
-          expected: "non-negative number (>= 0)",
-          actual: `${compress.minNudgeGrowthFloor}`
-        });
-      }
-      const emergencyThreshold = compress.emergencyThresholdPercent;
-      if (emergencyThreshold !== void 0) {
-        if (typeof emergencyThreshold === "number") {
-          if (emergencyThreshold < 0) {
-            errors.push({
-              key: "compress.emergencyThresholdPercent",
-              expected: 'non-negative number or "${number}%" (0\u2013100)',
-              actual: `${emergencyThreshold}`
-            });
-          }
-        } else if (typeof emergencyThreshold === "string" && emergencyThreshold.endsWith("%")) {
-          const parsed = parseFloat(emergencyThreshold.slice(0, -1));
-          if (isNaN(parsed) || parsed < 0 || parsed > 100) {
-            errors.push({
-              key: "compress.emergencyThresholdPercent",
-              expected: '"${number}%" with percentage in [0, 100]',
-              actual: JSON.stringify(emergencyThreshold)
-            });
-          }
-        } else {
-          errors.push({
-            key: "compress.emergencyThresholdPercent",
-            expected: 'number | "${number}%"',
-            actual: JSON.stringify(emergencyThreshold)
-          });
-        }
       }
       if (compress.maxVisibleSegments !== void 0 && typeof compress.maxVisibleSegments !== "number") {
         errors.push({
@@ -1580,7 +1519,6 @@ var defaultConfig = {
     maxContextLimit: "55%",
     minContextLimit: "45%",
     nudgeFrequency: 5,
-    minNudgeContextPercent: 15,
     iterationNudgeThreshold: 15,
     nudgeForce: "soft",
     protectedTools: [...COMPRESS_DEFAULT_PROTECTED_TOOLS],
@@ -1588,9 +1526,6 @@ var defaultConfig = {
     protectUserMessages: false,
     maxSummaryLengthHard: 1e4,
     minCompressRange: 5e3,
-    minNudgeGrowthRatio: 0.45,
-    minNudgeGrowthFloor: 5e3,
-    emergencyThresholdPercent: "98%",
     maxVisibleSegments: 50,
     keepEmbedMaxChars: 2e3
   },
@@ -1739,9 +1674,6 @@ function mergeCompress(base, override) {
     modelMaxLimits: override.modelMaxLimits ?? base.modelMaxLimits,
     modelMinLimits: override.modelMinLimits ?? base.modelMinLimits,
     nudgeFrequency: override.nudgeFrequency ?? base.nudgeFrequency,
-    minNudgeContextPercent: override.minNudgeContextPercent ?? base.minNudgeContextPercent,
-    nudgeGrowthTokens: override.nudgeGrowthTokens,
-    toolOutputNudgeThreshold: override.toolOutputNudgeThreshold,
     iterationNudgeThreshold: override.iterationNudgeThreshold ?? base.iterationNudgeThreshold,
     nudgeForce: override.nudgeForce ?? base.nudgeForce,
     protectedTools: [.../* @__PURE__ */ new Set([...base.protectedTools, ...override.protectedTools ?? []])],
@@ -1749,9 +1681,6 @@ function mergeCompress(base, override) {
     protectUserMessages: override.protectUserMessages ?? base.protectUserMessages,
     maxSummaryLengthHard: override.maxSummaryLengthHard ?? base.maxSummaryLengthHard,
     minCompressRange: override.minCompressRange ?? base.minCompressRange,
-    minNudgeGrowthRatio: override.minNudgeGrowthRatio ?? base.minNudgeGrowthRatio,
-    minNudgeGrowthFloor: override.minNudgeGrowthFloor ?? base.minNudgeGrowthFloor,
-    emergencyThresholdPercent: override.emergencyThresholdPercent ?? base.emergencyThresholdPercent,
     maxVisibleSegments: override.maxVisibleSegments ?? base.maxVisibleSegments,
     keepEmbedMaxChars: override.keepEmbedMaxChars ?? base.keepEmbedMaxChars
   };
@@ -3678,28 +3607,6 @@ function loadPruneMessagesState(persisted) {
   }
   return state;
 }
-function collectTurnNudgeAnchors(messages) {
-  const anchors = /* @__PURE__ */ new Set();
-  let pendingUserMessageId = null;
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const message = messages[i];
-    if (messageHasCompress(message)) {
-      break;
-    }
-    if (message.info.role === "user") {
-      if (!isIgnoredUserMessage(message)) {
-        pendingUserMessageId = message.info.id;
-      }
-      continue;
-    }
-    if (message.info.role === "assistant" && pendingUserMessageId) {
-      anchors.add(message.info.id);
-      anchors.add(pendingUserMessageId);
-      pendingUserMessageId = null;
-    }
-  }
-  return anchors;
-}
 function getActiveSummaryTokenUsage(state) {
   let total = 0;
   for (const blockId of state.prune.messages.activeBlockIds) {
@@ -3717,13 +3624,7 @@ function resetOnCompaction(state) {
   state.nudges = {
     contextLimitAnchors: /* @__PURE__ */ new Set(),
     turnNudgeAnchors: /* @__PURE__ */ new Set(),
-    iterationNudgeAnchors: /* @__PURE__ */ new Set(),
-    lastPerMessageNudgeTurn: 0,
-    lastPerMessageNudgeTokens: void 0,
-    lastNudgeShownTokens: void 0,
-    lastToolOutputNudgeTokens: void 0,
-    shouldInjectThisTurn: void 0,
-    compressBaselineSet: false
+    iterationNudgeAnchors: /* @__PURE__ */ new Set()
   };
   state.messageIds = {
     byRawId: /* @__PURE__ */ new Map(),
@@ -3914,12 +3815,7 @@ async function saveSessionState(sessionState, logger, sessionName) {
     nudges: {
       contextLimitAnchors: Array.from(sessionState.nudges.contextLimitAnchors),
       turnNudgeAnchors: Array.from(sessionState.nudges.turnNudgeAnchors),
-      iterationNudgeAnchors: Array.from(sessionState.nudges.iterationNudgeAnchors),
-      lastPerMessageNudgeTurn: sessionState.nudges.lastPerMessageNudgeTurn ?? 0,
-      lastPerMessageNudgeTokens: sessionState.nudges.lastPerMessageNudgeTokens,
-      lastNudgeShownTokens: sessionState.nudges.lastNudgeShownTokens,
-      lastToolOutputNudgeTokens: sessionState.nudges.lastToolOutputNudgeTokens,
-      compressBaselineSet: sessionState.nudges.compressBaselineSet
+      iterationNudgeAnchors: Array.from(sessionState.nudges.iterationNudgeAnchors)
     },
     stats: sessionState.stats,
     lastUpdated: (/* @__PURE__ */ new Date()).toISOString(),
@@ -4488,13 +4384,7 @@ function createSessionState() {
     nudges: {
       contextLimitAnchors: /* @__PURE__ */ new Set(),
       turnNudgeAnchors: /* @__PURE__ */ new Set(),
-      iterationNudgeAnchors: /* @__PURE__ */ new Set(),
-      lastPerMessageNudgeTurn: 0,
-      lastPerMessageNudgeTokens: void 0,
-      lastNudgeShownTokens: void 0,
-      lastToolOutputNudgeTokens: void 0,
-      shouldInjectThisTurn: void 0,
-      compressBaselineSet: false
+      iterationNudgeAnchors: /* @__PURE__ */ new Set()
     },
     stats: {
       pruneTokenCounter: 0,
@@ -4531,13 +4421,7 @@ function resetSessionState(state) {
   state.nudges = {
     contextLimitAnchors: /* @__PURE__ */ new Set(),
     turnNudgeAnchors: /* @__PURE__ */ new Set(),
-    iterationNudgeAnchors: /* @__PURE__ */ new Set(),
-    lastPerMessageNudgeTurn: 0,
-    lastPerMessageNudgeTokens: void 0,
-    lastNudgeShownTokens: void 0,
-    lastToolOutputNudgeTokens: void 0,
-    shouldInjectThisTurn: void 0,
-    compressBaselineSet: false
+    iterationNudgeAnchors: /* @__PURE__ */ new Set()
   };
   state.stats = {
     pruneTokenCounter: 0,
@@ -4567,7 +4451,6 @@ async function ensureSessionInitialized(client, state, sessionId, logger, messag
   state.isSubAgent = isSubAgent;
   state.lastCompaction = findLastCompactionTimestamp(messages);
   state.currentTurn = countTurns(state, messages);
-  state.nudges.turnNudgeAnchors = collectTurnNudgeAnchors(messages);
   const persisted = await loadSessionState(sessionId, logger);
   if (persisted === null) {
     if (config) {
@@ -4588,11 +4471,6 @@ async function ensureSessionInitialized(client, state, sessionId, logger, messag
   state.nudges.iterationNudgeAnchors = new Set(
     persisted.nudges.iterationNudgeAnchors || []
   );
-  state.nudges.lastPerMessageNudgeTurn = persisted.nudges.lastPerMessageNudgeTurn ?? 0;
-  state.nudges.lastPerMessageNudgeTokens = persisted.nudges.lastPerMessageNudgeTokens;
-  state.nudges.lastNudgeShownTokens = persisted.nudges.lastNudgeShownTokens;
-  state.nudges.lastToolOutputNudgeTokens = persisted.nudges.lastToolOutputNudgeTokens;
-  state.nudges.compressBaselineSet = persisted.nudges.compressBaselineSet ?? false;
   state.stats = {
     pruneTokenCounter: persisted.stats?.pruneTokenCounter || 0,
     totalPruneTokens: persisted.stats?.totalPruneTokens || 0
@@ -6633,32 +6511,6 @@ function isContextOverLimits(config, state, providerId, modelId, messages) {
     modelContextLimit: state.modelContextLimit
   };
 }
-function computeShouldNudge(params) {
-  const { currentTokens, overMinLimit, overMaxLimit } = params;
-  if (currentTokens === void 0) {
-    return { shouldNudge: false, tipsVariant: null };
-  }
-  if (params.lastNudgeTokens === void 0) {
-    return { shouldNudge: false, tipsVariant: null };
-  }
-  const growthSinceLastNudge = currentTokens - params.lastNudgeTokens;
-  const shouldNudge = growthSinceLastNudge >= params.nudgeGrowthTokens || overMaxLimit;
-  if (!shouldNudge) {
-    return { shouldNudge: false, tipsVariant: null };
-  }
-  const tipsVariant = overMaxLimit ? "maxLimit" : overMinLimit ? "minLimit" : "normal";
-  return { shouldNudge: true, tipsVariant };
-}
-var NUDGE_GROWTH_FLOOR = 6e3;
-var NUDGE_GROWTH_CAP = 5e4;
-var NUDGE_GROWTH_RATIO = 0.05;
-function resolveAdaptiveNudgeGrowth(modelContextLimit) {
-  if (!modelContextLimit || modelContextLimit <= 0) return NUDGE_GROWTH_FLOOR;
-  return Math.min(
-    NUDGE_GROWTH_CAP,
-    Math.max(NUDGE_GROWTH_FLOOR, Math.round(modelContextLimit * NUDGE_GROWTH_RATIO))
-  );
-}
 function addAnchor(anchorMessageIds, anchorMessageId, anchorMessageIndex, messages, interval) {
   if (anchorMessageIndex < 0) {
     return false;
@@ -6732,7 +6584,13 @@ function collectAnchoredMessages(anchorMessageIds, messages) {
   }
   return anchoredMessages;
 }
-function collectTurnNudgeAnchors2(state, config, messages) {
+function findLatestAnchoredMessage(anchorMessageIds, messages) {
+  return collectAnchoredMessages(anchorMessageIds, messages).reduce(
+    (latest, candidate) => latest === void 0 || candidate.index > latest.index ? candidate : latest,
+    void 0
+  );
+}
+function collectTurnNudgeAnchors(state, config, messages) {
   const turnNudgeAnchors = /* @__PURE__ */ new Set();
   const targetRole = config.compress.nudgeForce === "strong" ? "user" : "assistant";
   for (const message of messages) {
@@ -6773,45 +6631,48 @@ function buildContextUsageGuidance(config, currentTokens, modelContextLimit) {
 
 Context: ${formatK(currentTokens)} tokens.`;
 }
-function applyAnchoredNudges(state, config, messages, prompts, compressionPriorities, currentTokens, modelContextLimit, suffixMessage) {
-  const turnNudgeAnchors = collectTurnNudgeAnchors2(state, config, messages);
+function applyAnchoredNudges(state, config, messages, prompts, compressionPriorities, suffixMessage) {
+  const turnNudgeAnchors = collectTurnNudgeAnchors(state, config, messages);
   if (suffixMessage) {
     const nudgeParts = [];
     if (config.compress.mode === "message") {
       if (state.nudges.contextLimitAnchors.size > 0) {
-        for (const { index } of collectAnchoredMessages(
+        const anchor = findLatestAnchoredMessage(
           state.nudges.contextLimitAnchors,
           messages
-        )) {
+        );
+        if (anchor) {
           const guidance = buildMessagePriorityGuidance(
             messages,
             compressionPriorities,
-            index,
+            anchor.index,
             MESSAGE_MODE_NUDGE_PRIORITY
           );
           nudgeParts.push(appendGuidanceToDcpTag(prompts.contextLimitNudge, guidance));
         }
       }
       if (turnNudgeAnchors.size > 0) {
-        for (const { index } of collectAnchoredMessages(turnNudgeAnchors, messages)) {
+        const anchor = findLatestAnchoredMessage(turnNudgeAnchors, messages);
+        if (anchor) {
           const guidance = buildMessagePriorityGuidance(
             messages,
             compressionPriorities,
-            index,
+            anchor.index,
             MESSAGE_MODE_NUDGE_PRIORITY
           );
           nudgeParts.push(appendGuidanceToDcpTag(prompts.turnNudge, guidance));
         }
       }
       if (state.nudges.iterationNudgeAnchors.size > 0) {
-        for (const { index } of collectAnchoredMessages(
+        const anchor = findLatestAnchoredMessage(
           state.nudges.iterationNudgeAnchors,
           messages
-        )) {
+        );
+        if (anchor) {
           const guidance = buildMessagePriorityGuidance(
             messages,
             compressionPriorities,
-            index,
+            anchor.index,
             MESSAGE_MODE_NUDGE_PRIORITY
           );
           nudgeParts.push(appendGuidanceToDcpTag(prompts.iterationNudge, guidance));
@@ -7200,7 +7061,7 @@ function createSuffixMessage(messages) {
   messages.push(synthetic);
   return synthetic;
 }
-var injectCompressNudges = (state, config, logger, messages, prompts, compressionPriorities, debugNotify, preCompressTokens) => {
+var injectCompressNudges = (state, config, logger, messages, prompts, compressionPriorities, debugNotify) => {
   if (compressPermission(state, config) === "deny") {
     return;
   }
@@ -7223,40 +7084,15 @@ var injectCompressNudges = (state, config, logger, messages, prompts, compressio
   const currentTurnStart = lastUserIdx >= 0 ? lastUserIdx + 1 : 0;
   const currentTurnHasCompress = messages.slice(currentTurnStart).some((m) => m.info.role === "assistant" && messageHasCompress(m));
   if (currentTurnHasCompress) {
-    const wasNudgeTriggered = state.nudges.lastNudgeShownTokens !== void 0;
     state.nudges.contextLimitAnchors.clear();
     state.nudges.turnNudgeAnchors.clear();
     state.nudges.iterationNudgeAnchors.clear();
-    state.nudges.lastNudgeShownTokens = void 0;
-    state.nudges.lastToolOutputNudgeTokens = void 0;
-    if (wasNudgeTriggered && !state.nudges.compressBaselineSet) {
-      const baseline = state.nudges.lastPerMessageNudgeTokens;
-      const postCompress = currentTokens;
-      const preCompress = preCompressTokens;
-      if (baseline !== void 0 && postCompress !== void 0 && preCompress !== void 0 && preCompress > postCompress) {
-        const growth = preCompress - baseline;
-        const compressed = preCompress - postCompress;
-        if (growth > 0 && compressed > 0) {
-          const ratio = Math.min(1, compressed / growth);
-          const adjustment = Math.min(1, ratio * 2);
-          const newBaseline = baseline + Math.round((postCompress - baseline) * adjustment);
-          state.nudges.lastPerMessageNudgeTokens = newBaseline;
-        } else {
-          state.nudges.lastPerMessageNudgeTokens = postCompress;
-        }
-      } else {
-        state.nudges.lastPerMessageNudgeTokens = postCompress;
-      }
-      state.nudges.compressBaselineSet = true;
-    }
     saveSessionState(state, logger).catch(() => {
     });
     return;
   }
-  state.nudges.compressBaselineSet = false;
   let anchorsChanged = false;
-  let baselineReEstablished = false;
-  let baselineCorrected = false;
+  let reminderDue = false;
   if (!overMinLimit) {
     const hadTurnAnchors = state.nudges.turnNudgeAnchors.size > 0;
     const hadIterationAnchors = state.nudges.iterationNudgeAnchors.size > 0;
@@ -7278,6 +7114,7 @@ var injectCompressNudges = (state, config, logger, messages, prompts, compressio
       );
       if (added) {
         anchorsChanged = true;
+        reminderDue = true;
       }
     }
   } else {
@@ -7293,6 +7130,7 @@ var injectCompressNudges = (state, config, logger, messages, prompts, compressio
         state.nudges.turnNudgeAnchors.add(lastAssistantMessage.info.id);
         if (state.nudges.turnNudgeAnchors.size !== previousSize) {
           anchorsChanged = true;
+          reminderDue = true;
         }
       }
       const lastUserMessage = getLastUserMessage(messages);
@@ -7314,69 +7152,44 @@ var injectCompressNudges = (state, config, logger, messages, prompts, compressio
             );
             if (added) {
               anchorsChanged = true;
+              reminderDue = true;
             }
           }
         }
       }
     }
   }
-  const suffixMessage = createSuffixMessage(messages);
-  const nudgeGrowthTokens = config.compress?.nudgeGrowthTokens ?? resolveAdaptiveNudgeGrowth(modelContextLimit);
-  const growthFloor = Math.max(
-    config.compress?.minNudgeGrowthFloor ?? 5e3,
-    (config.compress?.minNudgeGrowthRatio ?? 0.45) * nudgeGrowthTokens
-  );
-  const emergencyThreshold = resolveEmergencyThreshold(config, modelContextLimit);
-  const emergencyOverride = emergencyThreshold !== void 0 && currentTokens !== void 0 && currentTokens >= emergencyThreshold;
-  if (currentTokens !== void 0 && state.nudges.lastPerMessageNudgeTokens !== void 0 && currentTokens < state.nudges.lastPerMessageNudgeTokens - nudgeGrowthTokens) {
-    state.nudges.lastPerMessageNudgeTokens = currentTokens;
-    state.nudges.lastNudgeShownTokens = void 0;
-    baselineCorrected = true;
+  const suffixMessage = reminderDue ? createSuffixMessage(messages) : null;
+  const effectiveTipsVariant = overMaxLimit ? "maxLimit" : "minLimit";
+  if (reminderDue) {
+    applyAnchoredNudges(
+      state,
+      config,
+      messages,
+      prompts,
+      compressionPriorities,
+      suffixMessage
+    );
   }
-  const hasPendingNudge = state.nudges.lastNudgeShownTokens !== void 0;
-  const effectiveThreshold = hasPendingNudge ? Math.floor(nudgeGrowthTokens / 2) : nudgeGrowthTokens;
-  const growthReference = state.nudges.lastNudgeShownTokens ?? state.nudges.lastPerMessageNudgeTokens;
-  const decision = computeShouldNudge({
-    currentTokens,
-    modelContextLimit,
-    overMinLimit,
-    overMaxLimit,
-    lastNudgeTokens: growthReference,
-    minNudgeContextPercent: config.compress?.minNudgeContextPercent ?? 15,
-    nudgeGrowthTokens: effectiveThreshold
-  });
-  const growthSinceBaseline = currentTokens !== void 0 && growthReference !== void 0 ? currentTokens - growthReference : void 0;
-  const nudgeAllowed = emergencyOverride || decision.shouldNudge && growthSinceBaseline !== void 0 && growthSinceBaseline >= growthFloor;
-  state.nudges.shouldInjectThisTurn = nudgeAllowed;
-  const effectiveTipsVariant = emergencyOverride ? "maxLimit" : decision.tipsVariant;
-  if (nudgeAllowed) {
-    applyAnchoredNudges(state, config, messages, prompts, compressionPriorities, currentTokens, modelContextLimit, suffixMessage);
-  }
-  if (state.nudges.lastPerMessageNudgeTokens === void 0 && currentTokens !== void 0) {
-    state.nudges.lastPerMessageNudgeTokens = currentTokens;
-    baselineReEstablished = true;
-  }
-  const composition = estimateContextComposition(
-    messages,
-    state,
-    config.compress.protectedTools,
-    config.protectedFilePatterns
-  );
   let tipsText = null;
-  if (nudgeAllowed) {
+  if (reminderDue) {
+    const composition = estimateContextComposition(
+      messages,
+      state,
+      config.compress.protectedTools,
+      config.protectedFilePatterns
+    );
     injectContextUsage(suffixMessage, config, currentTokens, modelContextLimit);
     if (suffixMessage && composition.total > 0) {
       const fmt = (n) => n >= 1e3 ? `${(n / 1e3).toFixed(1)}K` : String(n);
       const pct2 = (n) => n > 0 ? Math.max(1, Math.round(n / composition.total * 100)) : 0;
-      const growth = currentTokens !== void 0 && state.nudges.lastPerMessageNudgeTokens !== void 0 ? currentTokens - state.nudges.lastPerMessageNudgeTokens : 0;
-      const growthStr = growth > 0 ? ` (+${fmt(growth)} since last nudge)` : "";
       const plainTextTokens = composition.textTokens;
       const efficiencyNote = effectiveTipsVariant !== "maxLimit" ? `
 This is an efficiency nudge to compress early and keep context lean \u2014 not an overflow warning. A separate, stronger alert will appear if the context is actually full.
 
 ${COMPRESS_PHILOSOPHY}` : "";
       let breakdown = `${efficiencyNote}
-Breakdown: ${fmt(composition.toolTokens)} tool (${pct2(composition.toolTokens)}%) | ${fmt(composition.summaryTokens)} summaries (${pct2(composition.summaryTokens)}%) | ${fmt(composition.codeTokens)} code (${pct2(composition.codeTokens)}%) | ${fmt(plainTextTokens)} text (${pct2(plainTextTokens)}%)${growthStr}`;
+Breakdown: ${fmt(composition.toolTokens)} tool (${pct2(composition.toolTokens)}%) | ${fmt(composition.summaryTokens)} summaries (${pct2(composition.summaryTokens)}%) | ${fmt(composition.codeTokens)} code (${pct2(composition.codeTokens)}%) | ${fmt(plainTextTokens)} text (${pct2(plainTextTokens)}%)`;
       const compressibleTokens = composition.total - composition.protectedTokens - composition.summaryTokens;
       if (composition.protectedTokens > 0) {
         breakdown += `
@@ -7407,7 +7220,6 @@ ${HOW_TO_COMPRESS_RULES}`;
     if (effectiveTipsVariant === "maxLimit") {
       tipsText = '\n\n\u26A0\uFE0F Context limit reached \u2014 compress now. Prioritize consumed tool outputs.\n\n{ "topic": "...", "content": [{ "startId": "<ID>", "endId": "<ID>", "summary": "..." }] }\n\nOnly use IDs from visible messages above. Compress older work first.';
     }
-    state.nudges.lastNudgeShownTokens = currentTokens;
     if (config.compress.mode !== "message") {
       const visibleMessageIds = new Set(
         messages.map((message) => message.info.id)
@@ -7442,21 +7254,11 @@ ${HOW_TO_COMPRESS_RULES}`;
       }
     }
   }
-  if (anchorsChanged || nudgeAllowed || baselineReEstablished || baselineCorrected) {
+  if (anchorsChanged) {
     saveSessionState(state, logger).catch(() => {
     });
   }
 };
-function resolveEmergencyThreshold(config, modelContextLimit) {
-  const threshold = config.compress?.emergencyThresholdPercent;
-  if (threshold === void 0 || modelContextLimit === void 0) return void 0;
-  if (typeof threshold === "number") return threshold;
-  if (!threshold.endsWith("%")) return void 0;
-  const parsedPercent = parseFloat(threshold.slice(0, -1));
-  if (isNaN(parsedPercent)) return void 0;
-  const clampedPercent = Math.max(0, Math.min(100, Math.round(parsedPercent)));
-  return Math.round(clampedPercent / 100 * modelContextLimit);
-}
 function injectContextUsage(target, config, currentTokens, modelContextLimit) {
   if (!target) return;
   const rawUsage = buildContextUsageGuidance(config, currentTokens, modelContextLimit);
@@ -8703,19 +8505,17 @@ WHEN NOT TO COMPRESS
 
 ${HOW_TO_COMPRESS_RULES}
 
-PERIODIC CONTEXT STATUS
+THRESHOLD REMINDERS
 
-Periodically, as context grows, the system appends a short status line in a synthetic suffix message. It looks like:
+When a configured min/max context threshold and its turn, iteration, or frequency cadence are reached, the system may append a synthetic suffix with current context usage and compression guidance. Below the minimum threshold, ACP does not emit these dynamic reminders.
 
-[ACP] Context: 47.3K tokens. Visible: m00001\u2013m00929, m00944\u2013m00950 (810 msgs). 3 active blocks. \`acp_status\` for details.
-
-This line is INFORMATION, not an instruction. Seeing it does not mean you should compress. Compress only when one of the WHEN TO COMPRESS conditions actually holds. Between these lines, context is not under additional pressure \u2014 you do not need to seek things to compress.
+A context status line is INFORMATION, not an instruction. Seeing it does not mean you should compress. Compress only when one of the WHEN TO COMPRESS conditions actually holds.
 
 If you are unsure which \`mNNNNN\` refs are still compressible, or which blocks have already consumed which ranges, call \`acp_status\` first. It returns the visible context breakdown (tool/code/text/summary tokens with largest items) and the compressed block list (block IDs, sizes, message-ID ranges each covers).
 
 CONTEXT BREAKDOWN
 
-When context usage passes a threshold, the system appends a breakdown showing where your context tokens are spent:
+When a threshold reminder is due, the system appends a breakdown showing where your context tokens are spent:
 
 Breakdown: 12.3K tool (40%) | 3.1K summaries (10%) | 8.5K code (28%) | 6.5K text (22%)
 
@@ -10558,7 +10358,6 @@ function createChatMessageTransformHandler(client, state, logger, config, prompt
       saveSessionState(state, logger).catch(() => {
       });
     }
-    const prePruneTokens = getCurrentTokenUsage(state, output.messages);
     prune(state, logger, config, output.messages);
     stripStaleCompressCalls(output.messages);
     assignMessageRefs(state, output.messages);
@@ -10588,8 +10387,7 @@ ${text}`,
           logger
         ).catch(() => {
         });
-      } : void 0,
-      prePruneTokens
+      } : void 0
     );
     injectMessageIds(state, config, output.messages, compressionPriorities);
     applyPendingManualTrigger(state, output.messages, logger);

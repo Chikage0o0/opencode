@@ -16,7 +16,6 @@ export declare function countTurns(state: SessionState, messages: WithParts[]): 
 export declare function loadPruneMap(obj?: Record<string, number>): Map<string, number>;
 export declare function createPruneMessagesState(): PruneMessagesState;
 export declare function loadPruneMessagesState(persisted?: PersistedPruneMessagesState): PruneMessagesState;
-export declare function collectTurnNudgeAnchors(messages: WithParts[]): Set<string>;
 export declare function getActiveSummaryTokenUsage(state: SessionState): number;
 export declare function resetOnCompaction(state: SessionState): void;
 export {};

@@ -199,70 +199,6 @@ export function isContextOverLimits(
     }
 }
 
-export type TipsVariant = "maxLimit" | "minLimit" | "normal"
-
-export interface NudgeDecision {
-    shouldNudge: boolean
-    tipsVariant: TipsVariant | null
-}
-
-/**
- * Per-message Tips decision (pure — extracted for unit testing).
- *
- * Cadence is growth-only: first observed turn establishes a baseline (caller
- * records `currentTokens` into `lastPerMessageNudgeTokens` and we return
- * false); subsequent turns nudge when growth >= nudgeGrowthTokens or when
- * overMaxLimit forces it. The legacy 15% floor (minNudgeContextPercent) is
- * intentionally ignored — see devlog 2026-07-05_visible-range-guidance.
- */
-export function computeShouldNudge(params: {
-    currentTokens: number | undefined
-    modelContextLimit: number | undefined
-    overMinLimit: boolean
-    overMaxLimit: boolean
-    lastNudgeTokens: number | undefined
-    /** @deprecated Kept for backward compat; ignored. Cadence is growth-only now. */
-    minNudgeContextPercent: number
-    nudgeGrowthTokens: number
-}): NudgeDecision {
-    const { currentTokens, overMinLimit, overMaxLimit } = params
-
-    if (currentTokens === undefined) {
-        return { shouldNudge: false, tipsVariant: null }
-    }
-
-    // First observed turn: caller records currentTokens as the growth baseline.
-    if (params.lastNudgeTokens === undefined) {
-        return { shouldNudge: false, tipsVariant: null }
-    }
-
-    const growthSinceLastNudge = currentTokens - params.lastNudgeTokens
-    const shouldNudge = growthSinceLastNudge >= params.nudgeGrowthTokens || overMaxLimit
-
-    if (!shouldNudge) {
-        return { shouldNudge: false, tipsVariant: null }
-    }
-
-    const tipsVariant: TipsVariant = overMaxLimit
-        ? "maxLimit"
-        : overMinLimit
-          ? "minLimit"
-          : "normal"
-    return { shouldNudge: true, tipsVariant }
-}
-
-const NUDGE_GROWTH_FLOOR = 6000
-const NUDGE_GROWTH_CAP = 50000
-const NUDGE_GROWTH_RATIO = 0.05
-
-export function resolveAdaptiveNudgeGrowth(modelContextLimit: number | undefined): number {
-    if (!modelContextLimit || modelContextLimit <= 0) return NUDGE_GROWTH_FLOOR
-    return Math.min(
-        NUDGE_GROWTH_CAP,
-        Math.max(NUDGE_GROWTH_FLOOR, Math.round(modelContextLimit * NUDGE_GROWTH_RATIO)),
-    )
-}
-
 export function addAnchor(
     anchorMessageIds: Set<string>,
     anchorMessageId: string,
@@ -369,6 +305,19 @@ function collectAnchoredMessages(
     return anchoredMessages
 }
 
+function findLatestAnchoredMessage(
+    anchorMessageIds: Set<string>,
+    messages: WithParts[],
+): { message: WithParts; index: number } | undefined {
+    return collectAnchoredMessages(anchorMessageIds, messages).reduce<
+        { message: WithParts; index: number } | undefined
+    >(
+        (latest, candidate) =>
+            latest === undefined || candidate.index > latest.index ? candidate : latest,
+        undefined,
+    )
+}
+
 function collectTurnNudgeAnchors(
     state: SessionState,
     config: PluginConfig,
@@ -462,8 +411,6 @@ export function applyAnchoredNudges(
     messages: WithParts[],
     prompts: RuntimePrompts,
     compressionPriorities?: CompressionPriorityMap,
-    currentTokens?: number,
-    modelContextLimit?: number,
     suffixMessage?: WithParts | null,
 ): void {
     const turnNudgeAnchors = collectTurnNudgeAnchors(state, config, messages)
@@ -473,39 +420,42 @@ export function applyAnchoredNudges(
 
         if (config.compress.mode === "message") {
             if (state.nudges.contextLimitAnchors.size > 0) {
-                for (const { index } of collectAnchoredMessages(
+                const anchor = findLatestAnchoredMessage(
                     state.nudges.contextLimitAnchors,
                     messages,
-                )) {
+                )
+                if (anchor) {
                     const guidance = buildMessagePriorityGuidance(
                         messages,
                         compressionPriorities,
-                        index,
+                        anchor.index,
                         MESSAGE_MODE_NUDGE_PRIORITY,
                     )
                     nudgeParts.push(appendGuidanceToDcpTag(prompts.contextLimitNudge, guidance))
                 }
             }
             if (turnNudgeAnchors.size > 0) {
-                for (const { index } of collectAnchoredMessages(turnNudgeAnchors, messages)) {
+                const anchor = findLatestAnchoredMessage(turnNudgeAnchors, messages)
+                if (anchor) {
                     const guidance = buildMessagePriorityGuidance(
                         messages,
                         compressionPriorities,
-                        index,
+                        anchor.index,
                         MESSAGE_MODE_NUDGE_PRIORITY,
                     )
                     nudgeParts.push(appendGuidanceToDcpTag(prompts.turnNudge, guidance))
                 }
             }
             if (state.nudges.iterationNudgeAnchors.size > 0) {
-                for (const { index } of collectAnchoredMessages(
+                const anchor = findLatestAnchoredMessage(
                     state.nudges.iterationNudgeAnchors,
                     messages,
-                )) {
+                )
+                if (anchor) {
                     const guidance = buildMessagePriorityGuidance(
                         messages,
                         compressionPriorities,
-                        index,
+                        anchor.index,
                         MESSAGE_MODE_NUDGE_PRIORITY,
                     )
                     nudgeParts.push(appendGuidanceToDcpTag(prompts.iterationNudge, guidance))

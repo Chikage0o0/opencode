@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/ranxianglei/opencode-acp/v1.12.6/dcp.schema.json",
+  "$schema": "./vendor/opencode-acp/dcp.schema.json",
 
   // ═══ 基础开关 ═════════════════════════════════════════════════════
   // 启用 ACP。

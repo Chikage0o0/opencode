@@ -27,38 +27,13 @@ export declare function isContextOverLimits(config: PluginConfig, state: Session
     currentTokens: number;
     modelContextLimit: number | undefined;
 };
-export type TipsVariant = "maxLimit" | "minLimit" | "normal";
-export interface NudgeDecision {
-    shouldNudge: boolean;
-    tipsVariant: TipsVariant | null;
-}
-/**
- * Per-message Tips decision (pure — extracted for unit testing).
- *
- * Cadence is growth-only: first observed turn establishes a baseline (caller
- * records `currentTokens` into `lastPerMessageNudgeTokens` and we return
- * false); subsequent turns nudge when growth >= nudgeGrowthTokens or when
- * overMaxLimit forces it. The legacy 15% floor (minNudgeContextPercent) is
- * intentionally ignored — see devlog 2026-07-05_visible-range-guidance.
- */
-export declare function computeShouldNudge(params: {
-    currentTokens: number | undefined;
-    modelContextLimit: number | undefined;
-    overMinLimit: boolean;
-    overMaxLimit: boolean;
-    lastNudgeTokens: number | undefined;
-    /** @deprecated Kept for backward compat; ignored. Cadence is growth-only now. */
-    minNudgeContextPercent: number;
-    nudgeGrowthTokens: number;
-}): NudgeDecision;
-export declare function resolveAdaptiveNudgeGrowth(modelContextLimit: number | undefined): number;
 export declare function addAnchor(anchorMessageIds: Set<string>, anchorMessageId: string, anchorMessageIndex: number, messages: WithParts[], interval: number): boolean;
 /**
  * Build tiered context usage guidance based on actual config thresholds.
  * Shared by inject.ts (suffix message) and utils.ts (anchored nudges).
  */
 export declare function buildContextUsageGuidance(config: PluginConfig, currentTokens?: number, modelContextLimit?: number): string;
-export declare function applyAnchoredNudges(state: SessionState, config: PluginConfig, messages: WithParts[], prompts: RuntimePrompts, compressionPriorities?: CompressionPriorityMap, currentTokens?: number, modelContextLimit?: number, suffixMessage?: WithParts | null): void;
+export declare function applyAnchoredNudges(state: SessionState, config: PluginConfig, messages: WithParts[], prompts: RuntimePrompts, compressionPriorities?: CompressionPriorityMap, suffixMessage?: WithParts | null): void;
 export interface ContextComposition {
     toolTokens: number;
     codeTokens: number;

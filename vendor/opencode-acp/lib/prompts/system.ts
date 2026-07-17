@@ -57,19 +57,17 @@ WHEN NOT TO COMPRESS
 
 ${HOW_TO_COMPRESS_RULES}
 
-PERIODIC CONTEXT STATUS
+THRESHOLD REMINDERS
 
-Periodically, as context grows, the system appends a short status line in a synthetic suffix message. It looks like:
+When a configured min/max context threshold and its turn, iteration, or frequency cadence are reached, the system may append a synthetic suffix with current context usage and compression guidance. Below the minimum threshold, ACP does not emit these dynamic reminders.
 
-[ACP] Context: 47.3K tokens. Visible: m00001–m00929, m00944–m00950 (810 msgs). 3 active blocks. \`acp_status\` for details.
-
-This line is INFORMATION, not an instruction. Seeing it does not mean you should compress. Compress only when one of the WHEN TO COMPRESS conditions actually holds. Between these lines, context is not under additional pressure — you do not need to seek things to compress.
+A context status line is INFORMATION, not an instruction. Seeing it does not mean you should compress. Compress only when one of the WHEN TO COMPRESS conditions actually holds.
 
 If you are unsure which \`mNNNNN\` refs are still compressible, or which blocks have already consumed which ranges, call \`acp_status\` first. It returns the visible context breakdown (tool/code/text/summary tokens with largest items) and the compressed block list (block IDs, sizes, message-ID ranges each covers).
 
 CONTEXT BREAKDOWN
 
-When context usage passes a threshold, the system appends a breakdown showing where your context tokens are spent:
+When a threshold reminder is due, the system appends a breakdown showing where your context tokens are spent:
 
 Breakdown: 12.3K tool (40%) | 3.1K summaries (10%) | 8.5K code (28%) | 6.5K text (22%)
 

@@ -3,8 +3,8 @@
 This directory is derived from `ranxianglei/opencode-acp` tag `v1.12.6`, commit
 `f1a33d9f4ce55af808eb4e050717c914ed16084b`.
 
-The local integration adds only persistence lifecycle hardening needed by concurrent OpenCode
-parent and background sessions:
+The local integration adds persistence lifecycle hardening needed by concurrent OpenCode parent
+and background sessions:
 
 - serialize state writes by final session file path while keeping different sessions concurrent;
 - capture JSON at call time so queued snapshots cannot observe later state mutation;
@@ -16,6 +16,15 @@ parent and background sessions:
 - expose a plugin `dispose` hook that drains only the active session's pending writes before
   shutdown;
 - require `@opencode-ai/plugin >=1.16.0`, the first line that exposes the `dispose` hook used here.
+
+It also removes growth-based compression nudges:
+
+- emit dynamic compression reminders only when a `minContextLimit` turn/iteration anchor or a
+  `maxContextLimit` frequency anchor becomes due;
+- remove token-growth baselines, adaptive growth thresholds, growth-floor and emergency-override
+  behavior, including their persisted state;
+- remove the corresponding growth-only configuration keys and schema entries;
+- retain the permanent system prompt and the configured min/max threshold reminders.
 
 Cross-session in-memory isolation remains in the parent repository's
 `lib/acp-session-isolation.ts`. Upgrade by diffing these changes against a new upstream release,

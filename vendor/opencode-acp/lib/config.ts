@@ -24,9 +24,6 @@ export interface CompressConfig {
     modelMaxLimits?: Record<string, number | `${number}%`>
     modelMinLimits?: Record<string, number | `${number}%`>
     nudgeFrequency: number
-    minNudgeContextPercent: number
-    nudgeGrowthTokens?: number
-    toolOutputNudgeThreshold?: number
     iterationNudgeThreshold: number
     nudgeForce: "strong" | "soft"
     protectedTools: string[]
@@ -34,9 +31,6 @@ export interface CompressConfig {
     protectUserMessages: boolean
     maxSummaryLengthHard: number
     minCompressRange: number
-    minNudgeGrowthRatio: number
-    minNudgeGrowthFloor: number
-    emergencyThresholdPercent: number | `${number}%`
     maxVisibleSegments: number
     keepEmbedMaxChars: number
 }
@@ -197,7 +191,6 @@ const defaultConfig: PluginConfig = {
         maxContextLimit: "55%",
         minContextLimit: "45%",
         nudgeFrequency: 5,
-        minNudgeContextPercent: 15,
         iterationNudgeThreshold: 15,
         nudgeForce: "soft",
         protectedTools: [...COMPRESS_DEFAULT_PROTECTED_TOOLS],
@@ -205,9 +198,6 @@ const defaultConfig: PluginConfig = {
         protectUserMessages: false,
         maxSummaryLengthHard: 10000,
         minCompressRange: 5000,
-        minNudgeGrowthRatio: 0.45,
-        minNudgeGrowthFloor: 5000,
-        emergencyThresholdPercent: "98%",
         maxVisibleSegments: 50,
         keepEmbedMaxChars: 2000,
     },
@@ -411,9 +401,6 @@ function mergeCompress(
         modelMaxLimits: override.modelMaxLimits ?? base.modelMaxLimits,
         modelMinLimits: override.modelMinLimits ?? base.modelMinLimits,
         nudgeFrequency: override.nudgeFrequency ?? base.nudgeFrequency,
-        minNudgeContextPercent: override.minNudgeContextPercent ?? base.minNudgeContextPercent,
-        nudgeGrowthTokens: override.nudgeGrowthTokens,
-        toolOutputNudgeThreshold: override.toolOutputNudgeThreshold,
         iterationNudgeThreshold: override.iterationNudgeThreshold ?? base.iterationNudgeThreshold,
         nudgeForce: override.nudgeForce ?? base.nudgeForce,
         protectedTools: [...new Set([...base.protectedTools, ...(override.protectedTools ?? [])])],
@@ -421,9 +408,6 @@ function mergeCompress(
         protectUserMessages: override.protectUserMessages ?? base.protectUserMessages,
         maxSummaryLengthHard: override.maxSummaryLengthHard ?? base.maxSummaryLengthHard,
         minCompressRange: override.minCompressRange ?? base.minCompressRange,
-        minNudgeGrowthRatio: override.minNudgeGrowthRatio ?? base.minNudgeGrowthRatio,
-        minNudgeGrowthFloor: override.minNudgeGrowthFloor ?? base.minNudgeGrowthFloor,
-        emergencyThresholdPercent: override.emergencyThresholdPercent ?? base.emergencyThresholdPercent,
         maxVisibleSegments: override.maxVisibleSegments ?? base.maxVisibleSegments,
         keepEmbedMaxChars: override.keepEmbedMaxChars ?? base.keepEmbedMaxChars,
     }

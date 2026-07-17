@@ -25,11 +25,6 @@ export interface PersistedNudges {
     contextLimitAnchors: string[];
     turnNudgeAnchors?: string[];
     iterationNudgeAnchors?: string[];
-    lastPerMessageNudgeTurn?: number;
-    lastPerMessageNudgeTokens?: number;
-    lastNudgeShownTokens?: number;
-    lastToolOutputNudgeTokens?: number;
-    compressBaselineSet?: boolean;
 }
 export interface PersistedMessageIds {
     byRawId: Record<string, string>;

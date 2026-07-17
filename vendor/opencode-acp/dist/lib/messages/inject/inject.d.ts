@@ -3,7 +3,7 @@ import type { Logger } from "../../logger";
 import type { PluginConfig } from "../../config";
 import type { RuntimePrompts } from "../../prompts/store";
 import type { CompressionPriorityMap } from "../priority";
-export declare const injectCompressNudges: (state: SessionState, config: PluginConfig, logger: Logger, messages: WithParts[], prompts: RuntimePrompts, compressionPriorities?: CompressionPriorityMap, debugNotify?: (text: string) => void, preCompressTokens?: number) => void;
+export declare const injectCompressNudges: (state: SessionState, config: PluginConfig, logger: Logger, messages: WithParts[], prompts: RuntimePrompts, compressionPriorities?: CompressionPriorityMap, debugNotify?: (text: string) => void) => void;
 export interface VisibleSegment {
     startRef: string;
     endRef: string;

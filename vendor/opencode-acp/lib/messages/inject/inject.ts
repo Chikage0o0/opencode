@@ -26,7 +26,6 @@ import {
     applyAnchoredNudges,
     buildCompressibleRanges,
     buildContextUsageGuidance,
-    computeShouldNudge,
     countMessagesAfterIndex,
     estimateContextComposition,
     findLastNonIgnoredMessage,
@@ -35,7 +34,6 @@ import {
     getNudgeFrequency,
     getModelInfo,
     isContextOverLimits,
-    resolveAdaptiveNudgeGrowth,
 } from "./utils"
 import { buildCompressedBlockGuidance } from "../../prompts/extensions/nudge"
 import { HOW_TO_COMPRESS_RULES, COMPRESS_PHILOSOPHY } from "../../prompts/compression-rules"
@@ -49,9 +47,8 @@ const ACP_SUFFIX_SEED = "acp-dynamic-guidance"
 
 /**
  * Create a synthetic user message at the END of the messages array.
- * All per-turn dynamic ACP content (context usage, visible IDs, nudges, etc.)
- * is injected into this suffix message instead of historical user messages,
- * preserving OpenAI Responses prefix cache stability.
+ * Threshold-triggered reminders are injected into this suffix instead of
+ * historical messages, preserving OpenAI Responses prefix cache stability.
  */
 function createSuffixMessage(messages: WithParts[]): WithParts | null {
     if (messages.length === 0) return null
@@ -70,7 +67,6 @@ export const injectCompressNudges = (
     prompts: RuntimePrompts,
     compressionPriorities?: CompressionPriorityMap,
     debugNotify?: (text: string) => void,
-    preCompressTokens?: number,
 ): void => {
     if (compressPermission(state, config) === "deny") {
         return
@@ -102,60 +98,15 @@ export const injectCompressNudges = (
         .some((m) => m.info.role === "assistant" && messageHasCompress(m))
 
     if (currentTurnHasCompress) {
-        const wasNudgeTriggered = state.nudges.lastNudgeShownTokens !== undefined
-
         state.nudges.contextLimitAnchors.clear()
         state.nudges.turnNudgeAnchors.clear()
         state.nudges.iterationNudgeAnchors.clear()
-        state.nudges.lastNudgeShownTokens = undefined
-        state.nudges.lastToolOutputNudgeTokens = undefined
-
-        // Proportional baseline adjustment: if nudge-triggered compress, adjust
-        // baseline by how much was actually compressed. >50% of growth compressed
-        // → full baseline update. 20-30% → partial update. This prevents both
-        // baseline leak (small compress → full reset → growth forgotten) and
-        // over-compression (model gets re-nudged too soon after a small compress).
-        //
-        // Voluntary compress (no nudge shown) keeps the original baseline entirely.
-        if (wasNudgeTriggered && !state.nudges.compressBaselineSet) {
-            const baseline = state.nudges.lastPerMessageNudgeTokens
-            const postCompress = currentTokens
-            // preCompressTokens is captured in hooks.ts BEFORE prune() runs
-            const preCompress = preCompressTokens
-
-            if (
-                baseline !== undefined &&
-                postCompress !== undefined &&
-                preCompress !== undefined &&
-                preCompress > postCompress
-            ) {
-                const growth = preCompress - baseline
-                const compressed = preCompress - postCompress
-                if (growth > 0 && compressed > 0) {
-                    const ratio = Math.min(1, compressed / growth)
-                    const adjustment = Math.min(1, ratio * 2) // 50%→1.0, 25%→0.5, 10%→0.2
-                    const newBaseline =
-                        baseline + Math.round((postCompress - baseline) * adjustment)
-                    state.nudges.lastPerMessageNudgeTokens = newBaseline
-                } else {
-                    state.nudges.lastPerMessageNudgeTokens = postCompress
-                }
-            } else {
-                state.nudges.lastPerMessageNudgeTokens = postCompress
-            }
-            state.nudges.compressBaselineSet = true
-        }
-
         saveSessionState(state, logger).catch(() => {})
         return
     }
 
-    // New turn (no compress) — release the lock
-    state.nudges.compressBaselineSet = false
-
     let anchorsChanged = false
-    let baselineReEstablished = false
-    let baselineCorrected = false
+    let reminderDue = false
 
     if (!overMinLimit) {
         const hadTurnAnchors = state.nudges.turnNudgeAnchors.size > 0
@@ -180,6 +131,7 @@ export const injectCompressNudges = (
             )
             if (added) {
                 anchorsChanged = true
+                reminderDue = true
             }
         }
     } else {
@@ -196,6 +148,7 @@ export const injectCompressNudges = (
                 state.nudges.turnNudgeAnchors.add(lastAssistantMessage.info.id)
                 if (state.nudges.turnNudgeAnchors.size !== previousSize) {
                     anchorsChanged = true
+                    reminderDue = true
                 }
             }
 
@@ -223,6 +176,7 @@ export const injectCompressNudges = (
 
                         if (added) {
                             anchorsChanged = true
+                            reminderDue = true
                         }
                     }
                 }
@@ -230,112 +184,42 @@ export const injectCompressNudges = (
         }
     }
 
-    const suffixMessage = createSuffixMessage(messages)
+    const suffixMessage = reminderDue ? createSuffixMessage(messages) : null
+    const effectiveTipsVariant = overMaxLimit ? "maxLimit" : "minLimit"
 
-
-    const nudgeGrowthTokens =
-        config.compress?.nudgeGrowthTokens ?? resolveAdaptiveNudgeGrowth(modelContextLimit)
-
-    // ── Growth floor gate (anti-thrashing) ──────────────────────────────
-    // Nudge output is suppressed unless context grew by at least growthFloor
-    // tokens since the last nudge baseline. Prevents re-nudging every turn
-    // after a small compress or when anchors accumulate with negligible growth.
-    //
-    //   growthFloor = max(minNudgeGrowthFloor, minNudgeGrowthRatio × nudgeGrowthTokens)
-    //     1M model:   max(5000, 0.45×50000) = 22500
-    //     100K model: max(5000, 0.45×6000)  = 5000
-    //
-    // Only bypassed at emergencyThresholdPercent (default 98%) — near-overflow
-    // always fires regardless of growth.
-    const growthFloor = Math.max(
-        config.compress?.minNudgeGrowthFloor ?? 5000,
-        (config.compress?.minNudgeGrowthRatio ?? 0.45) * nudgeGrowthTokens,
-    )
-    const emergencyThreshold = resolveEmergencyThreshold(config, modelContextLimit)
-    const emergencyOverride =
-        emergencyThreshold !== undefined &&
-        currentTokens !== undefined &&
-        currentTokens >= emergencyThreshold
-
-    if (
-        currentTokens !== undefined &&
-        state.nudges.lastPerMessageNudgeTokens !== undefined &&
-        currentTokens < state.nudges.lastPerMessageNudgeTokens - nudgeGrowthTokens
-    ) {
-        state.nudges.lastPerMessageNudgeTokens = currentTokens
-        state.nudges.lastNudgeShownTokens = undefined
-        baselineCorrected = true
+    if (reminderDue) {
+        applyAnchoredNudges(
+            state,
+            config,
+            messages,
+            prompts,
+            compressionPriorities,
+            suffixMessage,
+        )
     }
-
-    const hasPendingNudge = state.nudges.lastNudgeShownTokens !== undefined
-    const effectiveThreshold = hasPendingNudge
-        ? Math.floor(nudgeGrowthTokens / 2)
-        : nudgeGrowthTokens
-    const growthReference =
-        state.nudges.lastNudgeShownTokens ?? state.nudges.lastPerMessageNudgeTokens
-
-    const decision = computeShouldNudge({
-        currentTokens,
-        modelContextLimit,
-        overMinLimit,
-        overMaxLimit,
-        lastNudgeTokens: growthReference,
-        minNudgeContextPercent: config.compress?.minNudgeContextPercent ?? 15,
-        nudgeGrowthTokens: effectiveThreshold,
-    })
-
-    const growthSinceBaseline =
-        currentTokens !== undefined && growthReference !== undefined
-            ? currentTokens - growthReference
-            : undefined
-    const nudgeAllowed =
-        emergencyOverride ||
-        (decision.shouldNudge &&
-            growthSinceBaseline !== undefined &&
-            growthSinceBaseline >= growthFloor)
-
-    state.nudges.shouldInjectThisTurn = nudgeAllowed
-
-    const effectiveTipsVariant = emergencyOverride ? "maxLimit" : decision.tipsVariant
-
-    if (nudgeAllowed) {
-        applyAnchoredNudges(state, config, messages, prompts, compressionPriorities, currentTokens, modelContextLimit, suffixMessage)
-    }
-
-    if (state.nudges.lastPerMessageNudgeTokens === undefined && currentTokens !== undefined) {
-        state.nudges.lastPerMessageNudgeTokens = currentTokens
-        baselineReEstablished = true
-    }
-
-    const composition = estimateContextComposition(
-        messages,
-        state,
-        config.compress.protectedTools,
-        config.protectedFilePatterns,
-    )
 
     let tipsText: string | null = null
 
-    if (nudgeAllowed) {
+    if (reminderDue) {
+        const composition = estimateContextComposition(
+            messages,
+            state,
+            config.compress.protectedTools,
+            config.protectedFilePatterns,
+        )
         injectContextUsage(suffixMessage, config, currentTokens, modelContextLimit)
 
         if (suffixMessage && composition.total > 0) {
             const fmt = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n))
             const pct = (n: number) =>
                 n > 0 ? Math.max(1, Math.round((n / composition.total) * 100)) : 0
-            const growth =
-                currentTokens !== undefined && state.nudges.lastPerMessageNudgeTokens !== undefined
-                    ? currentTokens - state.nudges.lastPerMessageNudgeTokens
-                    : 0
-            const growthStr = growth > 0 ? ` (+${fmt(growth)} since last nudge)` : ""
-
             const plainTextTokens = composition.textTokens
-            // Soft nudges (growth/min-limit) are efficiency prompts, not overflow
+            // Lower-threshold reminders are efficiency prompts, not overflow
             // warnings — a separate, stronger alert fires at maxLimit (below).
             const efficiencyNote = effectiveTipsVariant !== "maxLimit"
                 ? `\nThis is an efficiency nudge to compress early and keep context lean — not an overflow warning. A separate, stronger alert will appear if the context is actually full.\n\n${COMPRESS_PHILOSOPHY}`
                 : ""
-            let breakdown = `${efficiencyNote}\nBreakdown: ${fmt(composition.toolTokens)} tool (${pct(composition.toolTokens)}%) | ${fmt(composition.summaryTokens)} summaries (${pct(composition.summaryTokens)}%) | ${fmt(composition.codeTokens)} code (${pct(composition.codeTokens)}%) | ${fmt(plainTextTokens)} text (${pct(plainTextTokens)}%)${growthStr}`
+            let breakdown = `${efficiencyNote}\nBreakdown: ${fmt(composition.toolTokens)} tool (${pct(composition.toolTokens)}%) | ${fmt(composition.summaryTokens)} summaries (${pct(composition.summaryTokens)}%) | ${fmt(composition.codeTokens)} code (${pct(composition.codeTokens)}%) | ${fmt(plainTextTokens)} text (${pct(plainTextTokens)}%)`
 
             const compressibleTokens =
                 composition.total - composition.protectedTokens - composition.summaryTokens
@@ -361,14 +245,11 @@ export const injectCompressNudges = (
             appendToLastTextPart(suffixMessage, breakdown)
         }
 
-        // maxLimit strong alert + lastNudgeShownTokens + block aging guidance
+        // maxLimit strong alert + block aging guidance
         if (effectiveTipsVariant === "maxLimit") {
             tipsText =
                 '\n\n⚠️ Context limit reached — compress now. Prioritize consumed tool outputs.\n\n{ "topic": "...", "content": [{ "startId": "<ID>", "endId": "<ID>", "summary": "..." }] }\n\nOnly use IDs from visible messages above. Compress older work first.'
         }
-        // Intentionally do NOT update lastPerMessageNudgeTokens here — nudges
-        // repeat every turn until the model actually compresses.
-        state.nudges.lastNudgeShownTokens = currentTokens
         if (config.compress.mode !== "message") {
             const visibleMessageIds = new Set<string>(
                 messages.map((message) => message.info.id),
@@ -412,27 +293,9 @@ export const injectCompressNudges = (
         }
     }
 
-    // [FIX #60] Save on nudge too: a growth-triggered nudge updates the in-memory
-    // baseline (above) but anchorsChanged stays false when anchor sets are
-    // saturated, so the on-disk baseline went stale and the nudge refired every
-    // turn after restart.
-    if (anchorsChanged || nudgeAllowed || baselineReEstablished || baselineCorrected) {
+    if (anchorsChanged) {
         saveSessionState(state, logger).catch(() => {})
     }
-}
-
-function resolveEmergencyThreshold(
-    config: PluginConfig,
-    modelContextLimit: number | undefined,
-): number | undefined {
-    const threshold = config.compress?.emergencyThresholdPercent
-    if (threshold === undefined || modelContextLimit === undefined) return undefined
-    if (typeof threshold === "number") return threshold
-    if (!threshold.endsWith("%")) return undefined
-    const parsedPercent = parseFloat(threshold.slice(0, -1))
-    if (isNaN(parsedPercent)) return undefined
-    const clampedPercent = Math.max(0, Math.min(100, Math.round(parsedPercent)))
-    return Math.round((clampedPercent / 100) * modelContextLimit)
 }
 
 function injectContextUsage(

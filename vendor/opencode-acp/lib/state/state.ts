@@ -12,7 +12,6 @@ import {
     createPruneMessagesState,
     loadPruneMessagesState,
     loadPruneMap,
-    collectTurnNudgeAnchors,
 } from "./utils"
 import { getLastUserMessage } from "../messages/query"
 import { parseMessageRef, formatMessageRef } from "../message-ids"
@@ -82,12 +81,6 @@ export function createSessionState(): SessionState {
             contextLimitAnchors: new Set<string>(),
             turnNudgeAnchors: new Set<string>(),
             iterationNudgeAnchors: new Set<string>(),
-            lastPerMessageNudgeTurn: 0,
-            lastPerMessageNudgeTokens: undefined,
-            lastNudgeShownTokens: undefined,
-            lastToolOutputNudgeTokens: undefined,
-            shouldInjectThisTurn: undefined,
-            compressBaselineSet: false,
         },
         stats: {
             pruneTokenCounter: 0,
@@ -126,12 +119,6 @@ export function resetSessionState(state: SessionState): void {
         contextLimitAnchors: new Set<string>(),
         turnNudgeAnchors: new Set<string>(),
         iterationNudgeAnchors: new Set<string>(),
-        lastPerMessageNudgeTurn: 0,
-        lastPerMessageNudgeTokens: undefined,
-        lastNudgeShownTokens: undefined,
-        lastToolOutputNudgeTokens: undefined,
-        shouldInjectThisTurn: undefined,
-        compressBaselineSet: false,
     }
     state.stats = {
         pruneTokenCounter: 0,
@@ -173,7 +160,6 @@ export async function ensureSessionInitialized(
 
     state.lastCompaction = findLastCompactionTimestamp(messages)
     state.currentTurn = countTurns(state, messages)
-    state.nudges.turnNudgeAnchors = collectTurnNudgeAnchors(messages)
 
     const persisted = await loadSessionState(sessionId, logger)
     if (persisted === null) {
@@ -199,11 +185,6 @@ export async function ensureSessionInitialized(
     state.nudges.iterationNudgeAnchors = new Set<string>(
         persisted.nudges.iterationNudgeAnchors || [],
     )
-    state.nudges.lastPerMessageNudgeTurn = persisted.nudges.lastPerMessageNudgeTurn ?? 0
-    state.nudges.lastPerMessageNudgeTokens = persisted.nudges.lastPerMessageNudgeTokens
-    state.nudges.lastNudgeShownTokens = persisted.nudges.lastNudgeShownTokens
-    state.nudges.lastToolOutputNudgeTokens = persisted.nudges.lastToolOutputNudgeTokens
-    state.nudges.compressBaselineSet = persisted.nudges.compressBaselineSet ?? false
     state.stats = {
         pruneTokenCounter: persisted.stats?.pruneTokenCounter || 0,
         totalPruneTokens: persisted.stats?.totalPruneTokens || 0,

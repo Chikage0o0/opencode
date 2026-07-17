@@ -25,7 +25,8 @@
     "x-local-patches": [
         "Per-session write ordering, atomic replacement, and terminal-failure draining",
         "Single-flight storage initialization and race-safe legacy state migration",
-        "Dispose-time draining scoped to the active session"
+        "Dispose-time draining scoped to the active session",
+        "Threshold-only compression reminders without growth-based nudges"
     ],
     "keywords": [
         "opencode",
