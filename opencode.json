@@ -78,7 +78,6 @@
         "acp_context_recap": "allow",
         "skill": {
           "*": "deny",
-          "code-review": "allow",
           "codebase-design": "allow",
           "diagnosing-bugs": "allow",
           "web-perf": "allow"
@@ -90,8 +89,8 @@
     "librarian": {
       "description": "External documentation and library research specialist for official docs, examples, and upstream internals",
       "mode": "subagent",
-      "model": "xai/grok-4.5",
-      "variant": "low",
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "default",
       "prompt": "{file:./prompts/agents/librarian.md}",
       "permission": {
         "*": "deny",
@@ -121,8 +120,8 @@
     "explorer": {
       "description": "Fast read-only codebase search and pattern matching specialist",
       "mode": "subagent",
-      "model": "xai/grok-4.5",
-      "variant": "low",
+      "model": "zhipuai-coding-plan/glm-5.2",
+      "variant": "default",
       "prompt": "{file:./prompts/agents/explorer.md}",
       "permission": {
         "*": "deny",
