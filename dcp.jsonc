@@ -1,8 +1,8 @@
 {
-  "$schema": "./vendor/opencode-acp/dcp.schema.json",
+  "$schema": "https://raw.githubusercontent.com/Chikage0o0/opencode-dynamic-context-pruning/e34d627f14945e5c69b9f9e658329800421ab03c/dcp.schema.json",
 
   // ═══ 基础开关 ═════════════════════════════════════════════════════
-  // 启用 ACP。
+  // 启用 DCP。
   "enabled": true,
 
   // 运行版本已在 opencode.json 固定；关闭插件自行更新，保证配置可复现。
@@ -38,7 +38,7 @@
     // 自动允许压缩。若要每次确认，改为 "ask"。
     "permission": "allow",
 
-    // ACP 自身已有 minimal 通知；这里关闭详细压缩块展示，降低干扰。
+    // DCP 自身已有 minimal 通知；这里关闭详细压缩块展示，降低干扰。
     "showCompression": false,
 
     // 将活跃摘要 token 纳入软上限缓冲，避免摘要本身过早触发下一轮提醒。
@@ -81,7 +81,7 @@
 
   // ═══ 实验功能 ═════════════════════════════════════════════════════
   "experimental": {
-    // 允许 ACP 在所有 subagent session 中注入提示并处理上下文。
+    // 允许 DCP 在所有 subagent session 中注入提示并处理上下文。
     "allowSubAgents": true,
 
     // 未维护自定义 prompt override，先关闭，避免隐式创建/覆盖提示词文件。

@@ -48,12 +48,7 @@
         "websearch": "deny",
         "websearch_*": "deny",
         "cancel_task": "allow",
-        "compress": "allow",
-        "decompress": "allow",
-        "prune": "allow",
-        "search_context": "allow",
-        "acp_status": "allow",
-        "acp_context_recap": "allow"
+        "compress": "allow"
       }
     },
     "oracle": {
@@ -71,11 +66,6 @@
         "lsp": "allow",
         "question": "deny",
         "compress": "allow",
-        "decompress": "allow",
-        "prune": "allow",
-        "search_context": "allow",
-        "acp_status": "allow",
-        "acp_context_recap": "allow",
         "skill": {
           "*": "deny",
           "codebase-design": "allow",
@@ -102,11 +92,6 @@
         "webfetch": "allow",
         "websearch": "allow",
         "compress": "allow",
-        "decompress": "allow",
-        "prune": "allow",
-        "search_context": "allow",
-        "acp_status": "allow",
-        "acp_context_recap": "allow",
         "skill": {
           "*": "deny",
           "research": "allow"
@@ -132,11 +117,6 @@
         "lsp": "allow",
         "question": "deny",
         "compress": "allow",
-        "decompress": "allow",
-        "prune": "allow",
-        "search_context": "allow",
-        "acp_status": "allow",
-        "acp_context_recap": "allow",
         "skill": "deny",
         "codegraph_*": "allow"
       }
@@ -158,11 +138,6 @@
         "lsp": "allow",
         "question": "deny",
         "compress": "allow",
-        "decompress": "allow",
-        "prune": "allow",
-        "search_context": "allow",
-        "acp_status": "allow",
-        "acp_context_recap": "allow",
         "skill": {
           "*": "deny",
           "make-interfaces-feel-better": "allow",
@@ -191,11 +166,6 @@
         "lsp": "allow",
         "question": "deny",
         "compress": "allow",
-        "decompress": "allow",
-        "prune": "allow",
-        "search_context": "allow",
-        "acp_status": "allow",
-        "acp_context_recap": "allow",
         "skill": {
           "*": "deny",
           "tdd": "allow",
@@ -212,18 +182,13 @@
       "options": {},
       "permission": {
         "question": "deny",
-        "compress": "allow",
-        "decompress": "allow",
-        "prune": "allow",
-        "search_context": "allow",
-        "acp_status": "allow",
-        "acp_context_recap": "allow"
+        "compress": "allow"
       }
     },
-    "adversarial-author": {
-      "model": "zhipuai-coding-plan/glm-5.2",
-      "variant": "high",
-    },
+      "adversarial-author": {
+        "model": "zhipuai-coding-plan/glm-5.2",
+        "variant": "high",
+      },
     "adversarial-reviewer": {
       "model": "openai/gpt-5.6-sol",
       "variant": "xhigh"
@@ -248,15 +213,11 @@
   "permission": {
     "*": "allow",
     "cancel_task": "deny",
-    "compress": "allow",
-    "decompress": "allow",
-    "prune": "allow",
-    "search_context": "allow",
-    "acp_status": "allow",
-    "acp_context_recap": "allow"
+    "compress": "allow"
   },
   "plugin": [
-    "opencode-direnv"
+    "opencode-direnv",
+    "@chikage0o0/opencode-dcp@3.1.14"
   ],
   "mcp": {
     "codegraph": {

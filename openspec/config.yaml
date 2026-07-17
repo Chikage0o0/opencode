@@ -7,11 +7,17 @@ schema: intent-driven
 
 rules:
   proposal:
-    - Must use grill-me skill
+    - Must use grilling skill
     - Must use glossary skill
+    - Must be written by the main agent
   design:
     - Must use c4-diagrams skill
+    - Must be written by the main agent
   adr:
     - Must use architectural-decision-records skill
-  spec:
+    - Must be written by the main agent
+  specs:
     - Must use gherkin-authoring skill
+    - Must be written by the main agent
+  tasks:
+    - Must be written by the main agent

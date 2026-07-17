@@ -249,7 +249,6 @@ describe("background jobs plugin", () => {
     )
     expect(result).toContain("state: cancelled")
   })
-https://github.com/ranxianglei/opencode-acp
   test("isolates identical tool call IDs across concurrent parent sessions", async () => {
     const board = new BackgroundJobBoard()
     const hooks = await createBackgroundJobsPlugin({ board })({

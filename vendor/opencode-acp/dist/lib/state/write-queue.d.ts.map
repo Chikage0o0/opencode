@@ -1,1 +1,0 @@
-{"version":3,"file":"write-queue.d.ts","sourceRoot":"","sources":["../../../lib/state/write-queue.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,eAAe;IAC5B,GAAG,CAAC,CAAC,EAAE,GAAG,EAAE,MAAM,EAAE,SAAS,EAAE,MAAM,OAAO,CAAC,CAAC,CAAC,GAAG,OAAO,CAAC,CAAC,CAAC,CAAA;IAC5D,KAAK,CAAC,GAAG,CAAC,EAAE,MAAM,GAAG,OAAO,CAAC,IAAI,CAAC,CAAA;CACrC;AAED;;;;;GAKG;AACH,wBAAgB,qBAAqB,IAAI,eAAe,CAqDvD"}
