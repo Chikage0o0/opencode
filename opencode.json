@@ -60,5 +60,6 @@
   "tool_output": {
     "max_lines": 800,
     "max_bytes": 24000
-  }
+  },
+  "lsp": true
 }

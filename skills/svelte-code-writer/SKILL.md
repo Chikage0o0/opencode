@@ -9,6 +9,8 @@ description: 'Use when creating, editing, reviewing, or analysing Svelte 5 compo
 
 You have access to `@sveltejs/mcp` CLI for Svelte-specific assistance. Use these commands via `npx`:
 
+`@sveltejs/mcp` is the exact package name; keep it unchanged even when the project uses another npm scope. `svelte-autofixer` is its subcommand.
+
 ### List Documentation Sections
 
 ```bash
