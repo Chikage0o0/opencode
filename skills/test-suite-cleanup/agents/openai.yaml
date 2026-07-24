@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Suite Cleanup"
+  short_description: "Coordinate safe, repository-wide test cleanup"
+  default_prompt: "Use $test-suite-cleanup to audit and clean this project test suite safely."

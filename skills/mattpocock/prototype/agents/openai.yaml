@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prototype"
+  short_description: "Test one design question with disposable code"
+  default_prompt: "Use $prototype to build a bounded prototype that answers this design question."

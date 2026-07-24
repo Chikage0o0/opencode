@@ -34,7 +34,7 @@
 | `oracle`       | `openai/gpt-5.6-sol` / `high`   | 架构、复杂调试和严格审查         |
 | `librarian`    | `openai/gpt-5.6-luna` / `medium` | 低成本文档和外部资料检索        |
 | `explorer`     | `openai/gpt-5.6-luna` / `medium` | 低成本代码库检索                |
-| `designer`     | `openai/gpt-5.6-luna` / `high`  | 高频 UI/UX 设计与实现            |
+| `designer`     | `zhipuai-coding-plan/glm-5.2` / `high` | 高频 UI/UX 设计与实现            |
 | `fixer`        | `openai/gpt-5.6-luna` / `high`  | 高频、有边界的实现任务           |
 | `council`      | `openai/gpt-5.6-sol` / `high`   | 多模型结果综合与裁决             |
 
@@ -42,12 +42,12 @@ Council 仅建议手动用于高价值分歧决策。默认并行比较 `sol/max
 
 ## Skills 与 MCP 分配
 
-- `orchestrator`：`codemap`、`clonedeps`、`deepwork`、`verification-planning`、`reflect`、`worktrees`、配置维护与 OpenSpec 同步；MCP 仅 `codegraph`。
-- `oracle`：代码审查、架构设计、诊断、简化、冲突分析和 Web 性能；MCP 为 `codegraph`、`chrome-devtools`。
+- `orchestrator`：允许本地 Matt 工作流和 `test-suite-cleanup`；屏蔽 OMO Slim 自带工作流及专家执行 Skill；MCP 仅 `codegraph`。
+- `oracle`：代码审查、架构设计、测试反模式审计和 Web 性能；测试审计使用 `test-anti-patterns` 与 `test-analysis-extensions`；MCP 为 `codegraph`、`chrome-devtools`、`websearch`。
 - `librarian`：无本地实现 Skill；MCP 为 `websearch`、`context7`、`gh_grep`。
 - `explorer`：无 Skill；MCP 仅 `codegraph`。
 - `designer`：前端设计、Svelte、shadcn-svelte、Web 性能；MCP 为 `codegraph`、`chrome-devtools`。
-- `fixer`：TDD、诊断、冲突处理、Svelte 与 shadcn-svelte；MCP 仅 `codegraph`。
+- `fixer`：TDD、冲突处理、限定范围的测试质量修复、Svelte 与 shadcn-svelte；MCP 为 `codegraph`、`context7`。
 - `council`：代码审查与架构设计；不挂载外部 MCP。
 
 ## OpenSpec 与 Deepwork
